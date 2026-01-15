@@ -114,7 +114,7 @@ Persist locally:
 
 ## GitHub Pages notes
 
-- Vite `base` set to `/<repo-name>/`
+- Vite `base` set to `/wow-achievement-helper/`
 - Hash router avoids 404 on refresh
 
 ---

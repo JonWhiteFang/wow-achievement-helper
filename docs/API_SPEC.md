@@ -2,8 +2,8 @@
 
 ## Overview
 
-All endpoints are served by the Cloudflare Worker at a single base URL (e.g. `https://api.example.workers.dev`).
-Frontend is hosted on GitHub Pages (e.g. `https://<user>.github.io/wow-achievement-helper`).
+All endpoints are served by the Cloudflare Worker at `https://wow-achievement-helper-api.jono2411.workers.dev`.
+Frontend is hosted on GitHub Pages at `https://jonwhitefang.github.io/wow-achievement-helper`.
 
 EU-only: All Blizzard calls MUST use EU region endpoints/namespaces.
 
