@@ -123,3 +123,16 @@ export async function mergeCharacters(characters: { realm: string; name: string 
   }
   return res.json();
 }
+
+export type HelpPayload = {
+  achievementId: number;
+  strategy: Array<{ title: string; steps: string[] }>;
+  comments: Array<{ author: string; text: string; score: number | null; date: string | null }>;
+  sources: Array<{ name: string; url: string }>;
+};
+
+export async function fetchHelp(achievementId: number, top = 10): Promise<HelpPayload> {
+  const res = await fetch(`${API_BASE}/api/help/achievement/${achievementId}?top=${top}`, { credentials: "include" });
+  if (!res.ok) throw new Error("Failed to fetch help");
+  return res.json();
+}
