@@ -211,7 +211,7 @@ Follow the phases defined in `docs/IMPLEMENTATION_PLAN.md`. Mark tasks as comple
 
 - [x] **Phase 0 — Project Bootstrap:** monorepo structure, tooling, CI, Cloudflare setup
 - [x] **Phase 1 — Blizzard Game Data Catalogue:** Worker endpoints + frontend tree/list/drawer
-- [ ] **Phase 2 — Guest Character Lookup Overlay:** character lookup endpoint + UI overlay
+- [x] **Phase 2 — Guest Character Lookup Overlay:** character lookup endpoint + UI overlay
 - [ ] **Phase 3 — Battle.net Login:** OAuth flow + `/api/me/characters`
 - [ ] **Phase 4 — Account-Wide Merge:** merge endpoint + merge UI
 - [ ] **Phase 5 — Help Panel:** provider adapter system + strategy/community tabs
