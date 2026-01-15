@@ -21,36 +21,66 @@ export type Achievement = {
 type BlizzardCategory = {
   id: number;
   name: string;
-  subcategories?: BlizzardCategory[];
+  subcategories?: { id: number; name: string }[];
+};
+
+type BlizzardCategoryDetail = {
+  id: number;
+  name: string;
   achievements?: { id: number; name: string }[];
+  subcategories?: { id: number; name: string }[];
 };
 
 export async function fetchCategories(env: Env): Promise<{ categories: Category[]; achievements: { id: number; name: string; categoryId: number }[] }> {
   const token = await getClientToken(env);
-  const res = await fetch(
+  
+  // Fetch category index
+  const indexRes = await fetch(
     `${env.BLIZZARD_API_HOST}/data/wow/achievement-category/index?namespace=static-eu&locale=en_GB`,
     { headers: { Authorization: `Bearer ${token}` } }
   );
-
-  if (!res.ok) throw new Error(`Categories fetch failed: ${res.status}`);
-
-  const data = (await res.json()) as { categories: BlizzardCategory[]; root_categories: BlizzardCategory[] };
+  if (!indexRes.ok) throw new Error(`Categories fetch failed: ${indexRes.status}`);
+  
+  const indexData = (await indexRes.json()) as { categories: BlizzardCategory[]; root_categories?: BlizzardCategory[] };
+  const rootCategories = indexData.root_categories || indexData.categories || [];
+  
   const achievements: { id: number; name: string; categoryId: number }[] = [];
+  const categories: Category[] = [];
 
-  function mapCategory(cat: BlizzardCategory): Category {
-    if (cat.achievements) {
-      for (const a of cat.achievements) {
+  // Fetch details for each root category to get achievements
+  async function fetchCategoryDetail(catId: number): Promise<BlizzardCategoryDetail | null> {
+    const res = await fetch(
+      `${env.BLIZZARD_API_HOST}/data/wow/achievement-category/${catId}?namespace=static-eu&locale=en_GB`,
+      { headers: { Authorization: `Bearer ${token}` } }
+    );
+    if (!res.ok) return null;
+    return res.json();
+  }
+
+  async function processCategory(cat: BlizzardCategory): Promise<Category> {
+    const detail = await fetchCategoryDetail(cat.id);
+    
+    if (detail?.achievements) {
+      for (const a of detail.achievements) {
         achievements.push({ id: a.id, name: a.name, categoryId: cat.id });
       }
     }
-    return {
-      id: cat.id,
-      name: cat.name,
-      children: (cat.subcategories || []).map(mapCategory),
-    };
+
+    const children: Category[] = [];
+    if (detail?.subcategories) {
+      for (const sub of detail.subcategories) {
+        children.push(await processCategory({ id: sub.id, name: sub.name }));
+      }
+    }
+
+    return { id: cat.id, name: cat.name, children };
   }
 
-  const categories = (data.root_categories || data.categories || []).map(mapCategory);
+  // Process root categories (limit concurrency)
+  for (const cat of rootCategories) {
+    categories.push(await processCategory(cat));
+  }
+
   return { categories, achievements };
 }
 
