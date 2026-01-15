@@ -54,21 +54,20 @@ export type ApiError = {
 };
 
 export async function fetchCategories(): Promise<CategoriesResponse> {
-  const res = await fetch(`${API_BASE}/api/categories`, { credentials: "include" });
+  const res = await fetch(`${API_BASE}/api/categories`);
   if (!res.ok) throw new Error("Failed to fetch categories");
   return res.json();
 }
 
 export async function fetchAchievement(id: number): Promise<Achievement> {
-  const res = await fetch(`${API_BASE}/api/achievement/${id}`, { credentials: "include" });
+  const res = await fetch(`${API_BASE}/api/achievement/${id}`);
   if (!res.ok) throw new Error("Failed to fetch achievement");
   return res.json();
 }
 
 export async function fetchCharacterAchievements(realm: string, name: string): Promise<CharacterProgress> {
   const res = await fetch(
-    `${API_BASE}/api/character/${encodeURIComponent(realm)}/${encodeURIComponent(name)}/achievements`,
-    { credentials: "include" }
+    `${API_BASE}/api/character/${encodeURIComponent(realm)}/${encodeURIComponent(name)}/achievements`
   );
   if (!res.ok) {
     const data = (await res.json().catch(() => ({}))) as ApiError;
@@ -132,7 +131,7 @@ export type HelpPayload = {
 };
 
 export async function fetchHelp(achievementId: number, top = 10): Promise<HelpPayload> {
-  const res = await fetch(`${API_BASE}/api/help/achievement/${achievementId}?top=${top}`, { credentials: "include" });
+  const res = await fetch(`${API_BASE}/api/help/achievement/${achievementId}?top=${top}`);
   if (!res.ok) throw new Error("Failed to fetch help");
   return res.json();
 }

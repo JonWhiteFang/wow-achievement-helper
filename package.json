@@ -8,7 +8,10 @@
     "build:web": "npm run build -w apps/web",
     "build:worker": "npm run build -w workers/api",
     "lint": "eslint .",
-    "typecheck": "tsc --build"
+    "typecheck": "npm run typecheck:web && npm run typecheck:worker",
+    "typecheck:web": "tsc -p apps/web/tsconfig.json --noEmit",
+    "typecheck:worker": "tsc -p workers/api/tsconfig.json --noEmit",
+    "test": "npm run test -w workers/api"
   },
   "devDependencies": {
     "@typescript-eslint/eslint-plugin": "^8.0.0",
