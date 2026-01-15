@@ -118,7 +118,7 @@ A modern, Blizzard-adjacent dark UI with gold accents and subtle “panel” sur
 
 ---
 
-## Phase 2 — UI redesign (Azeroth Dark scheme) (P0/P1)
+## Phase 2 — UI redesign (Azeroth Dark scheme) (P0/P1) ✅
 
 ### 2.1 Replace inline styles with a small design system
 **Tasks**
