@@ -36,6 +36,18 @@ export type CharacterProgress = {
   fetchedAt: string;
 };
 
+export type AuthStatus = {
+  loggedIn: boolean;
+  battletag?: string | null;
+};
+
+export type WowCharacter = {
+  realm: string;
+  name: string;
+  level: number;
+  id: string;
+};
+
 export type ApiError = {
   error: string;
   message: string;
@@ -63,4 +75,28 @@ export async function fetchCharacterAchievements(realm: string, name: string): P
     throw new Error(data.message || `Failed to fetch character (${res.status})`);
   }
   return res.json();
+}
+
+export function getLoginUrl(): string {
+  return `${API_BASE}/auth/login`;
+}
+
+export async function fetchAuthStatus(): Promise<AuthStatus> {
+  const res = await fetch(`${API_BASE}/auth/me`, { credentials: "include" });
+  if (!res.ok) return { loggedIn: false };
+  return res.json();
+}
+
+export async function logout(): Promise<void> {
+  await fetch(`${API_BASE}/auth/logout`, { method: "POST", credentials: "include" });
+}
+
+export async function fetchMyCharacters(): Promise<WowCharacter[]> {
+  const res = await fetch(`${API_BASE}/api/me/characters`, { credentials: "include" });
+  if (!res.ok) {
+    const data = (await res.json().catch(() => ({}))) as ApiError;
+    throw new Error(data.message || "Failed to fetch characters");
+  }
+  const json = (await res.json()) as { characters: WowCharacter[] };
+  return json.characters;
 }
