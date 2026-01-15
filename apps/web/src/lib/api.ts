@@ -100,3 +100,26 @@ export async function fetchMyCharacters(): Promise<WowCharacter[]> {
   const json = (await res.json()) as { characters: WowCharacter[] };
   return json.characters;
 }
+
+export type MergeResult = {
+  merged: {
+    completed: number[];
+    progress: Record<number, { completedCriteria: number; totalCriteria: number }>;
+  };
+  sources: { realm: string; name: string }[];
+  fetchedAt: string;
+};
+
+export async function mergeCharacters(characters: { realm: string; name: string }[]): Promise<MergeResult> {
+  const res = await fetch(`${API_BASE}/api/me/merge`, {
+    method: "POST",
+    credentials: "include",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ characters }),
+  });
+  if (!res.ok) {
+    const data = (await res.json().catch(() => ({}))) as ApiError;
+    throw new Error(data.message || "Failed to merge characters");
+  }
+  return res.json();
+}
