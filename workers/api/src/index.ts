@@ -1,6 +1,6 @@
 import type { Env } from "./env";
 import { fetchCategories, fetchAchievement } from "./blizzard/gameData";
-import { getManifest } from "./blizzard/manifest";
+import { getManifest, buildManifestIncremental } from "./blizzard/manifest";
 import { fetchCharacterAchievements } from "./blizzard/character";
 import { fetchUserCharacters } from "./blizzard/profile";
 import { handleLogin, handleCallback, handleMe, handleLogout } from "./authHandlers";
@@ -94,9 +94,28 @@ export default {
       if (path === "/api/manifest") {
         try {
           const manifest = await getManifest(env);
+          if (!manifest) {
+            return err("NOT_READY", "Manifest is being built, please try again later", 503);
+          }
           return json(manifest, 200, CACHE_1H);
         } catch (e) {
           return err("BLIZZARD_ERROR", (e as Error).message, 502);
+        }
+      }
+
+      // Admin endpoint to trigger manifest build (call multiple times until done)
+      if (path === "/api/admin/build-manifest" && req.method === "POST") {
+        try {
+          const reset = url.searchParams.get("reset") === "true";
+          if (reset) {
+            await env.SESSIONS.delete("manifest:build-state");
+            await env.SESSIONS.delete("manifest:v1");
+            return json({ reset: true });
+          }
+          const result = await buildManifestIncremental(env);
+          return json({ done: result.done, progress: result.progress });
+        } catch (e) {
+          return err("BUILD_ERROR", (e as Error).message, 500);
         }
       }
 
@@ -183,5 +202,11 @@ export default {
     });
     log(req, response.status, start);
     return response;
+  },
+
+  async scheduled(_event: ScheduledEvent, env: Env, _ctx: ExecutionContext): Promise<void> {
+    // Run single iteration of manifest build
+    const result = await buildManifestIncremental(env);
+    console.log(`Manifest build: ${result.progress}`);
   },
 };

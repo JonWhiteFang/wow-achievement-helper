@@ -6,6 +6,9 @@ kv_namespaces = [
   { binding = "SESSIONS", id = "eb68186585154ec4812cba5fb2195f04" }
 ]
 
+[triggers]
+crons = ["0 3 * * *"]  # Daily at 3am UTC
+
 [vars]
 APP_ORIGIN = "https://jonwhitefang.github.io/wow-achievement-helper"
 BATTLE_NET_REGION = "eu"

@@ -15,99 +15,132 @@ export type Manifest = {
   builtAt: string;
 };
 
+type BuildState = {
+  phase: "index" | "categories" | "done";
+  queue: number[];
+  achievements: AchievementSummary[];
+  // Store flat category data, rebuild tree at end
+  categoryData: Record<number, { id: number; name: string; parentId: number | null; childIds: number[] }>;
+  rootIds: number[];
+};
+
 type BlizzardCategoryDetail = {
   id: number;
   name: string;
   achievements?: { id: number; name: string; points: number }[];
   subcategories?: { id: number; name: string }[];
+  parent_category?: { id: number };
 };
 
-const MANIFEST_KV_KEY = "manifest:v1";
+const MANIFEST_KEY = "manifest:v1";
+const BUILD_STATE_KEY = "manifest:build-state";
 const MANIFEST_TTL = 60 * 60 * 24; // 24h
+const BATCH_SIZE = 40;
 
-export async function getManifest(env: Env): Promise<Manifest> {
-  // Try KV cache first
-  const cached = await env.SESSIONS.get(MANIFEST_KV_KEY);
-  if (cached) {
-    return JSON.parse(cached);
-  }
-
-  // Build fresh manifest
-  const manifest = await buildManifest(env);
-
-  // Store in KV
-  await env.SESSIONS.put(MANIFEST_KV_KEY, JSON.stringify(manifest), { expirationTtl: MANIFEST_TTL });
-
-  return manifest;
+export async function getManifest(env: Env): Promise<Manifest | null> {
+  const cached = await env.SESSIONS.get(MANIFEST_KEY);
+  if (cached) return JSON.parse(cached);
+  return null;
 }
 
-async function buildManifest(env: Env): Promise<Manifest> {
+export async function buildManifestIncremental(env: Env): Promise<{ done: boolean; progress: string }> {
   const token = await getClientToken(env);
-  const achievements: AchievementSummary[] = [];
-  const categoryQueue: { id: number; name: string; parent: Category | null }[] = [];
-  const rootCategories: Category[] = [];
-
-  // Fetch category index
-  const indexRes = await fetch(
-    `${env.BLIZZARD_API_HOST}/data/wow/achievement-category/index?namespace=static-eu&locale=en_GB`,
-    { headers: { Authorization: `Bearer ${token}` } }
-  );
-  if (!indexRes.ok) throw new Error(`Categories index failed: ${indexRes.status}`);
-
-  const indexData = (await indexRes.json()) as { categories?: { id: number; name: string }[]; root_categories?: { id: number; name: string }[] };
-  const roots = indexData.root_categories || indexData.categories || [];
-
-  // Initialize queue with root categories
-  for (const r of roots) {
-    const cat: Category = { id: r.id, name: r.name, children: [] };
-    rootCategories.push(cat);
-    categoryQueue.push({ id: r.id, name: r.name, parent: cat });
+  
+  let state: BuildState;
+  const stateJson = await env.SESSIONS.get(BUILD_STATE_KEY);
+  
+  if (stateJson) {
+    state = JSON.parse(stateJson);
+  } else {
+    state = { phase: "index", queue: [], achievements: [], categoryData: {}, rootIds: [] };
   }
 
-  // Process queue in batches (BFS with concurrency limit)
-  const BATCH_SIZE = 6;
-  while (categoryQueue.length > 0) {
-    const batch = categoryQueue.splice(0, BATCH_SIZE);
-    const results = await Promise.all(
-      batch.map(async (item) => {
-        const res = await fetch(
-          `${env.BLIZZARD_API_HOST}/data/wow/achievement-category/${item.id}?namespace=static-eu&locale=en_GB`,
-          { headers: { Authorization: `Bearer ${token}` } }
-        );
-        if (!res.ok) return { item, detail: null };
-        const detail = (await res.json()) as BlizzardCategoryDetail;
-        return { item, detail };
-      })
+  // Phase 1: Fetch category index
+  if (state.phase === "index") {
+    const res = await fetch(
+      `${env.BLIZZARD_API_HOST}/data/wow/achievement-category/index?namespace=static-eu&locale=en_GB`,
+      { headers: { Authorization: `Bearer ${token}` } }
     );
+    if (!res.ok) throw new Error(`Index fetch failed: ${res.status}`);
+    
+    const data = (await res.json()) as { root_categories?: { id: number; name: string }[]; categories?: { id: number; name: string }[] };
+    const roots = data.root_categories || data.categories || [];
+    
+    for (const r of roots) {
+      state.rootIds.push(r.id);
+      state.categoryData[r.id] = { id: r.id, name: r.name, parentId: null, childIds: [] };
+      state.queue.push(r.id);
+    }
+    
+    state.phase = "categories";
+    await env.SESSIONS.put(BUILD_STATE_KEY, JSON.stringify(state), { expirationTtl: 3600 });
+    return { done: false, progress: `Indexed ${roots.length} root categories` };
+  }
 
-    for (const { item, detail } of results) {
-      if (!detail) continue;
+  // Phase 2: Fetch category details in batches
+  if (state.phase === "categories") {
+    if (state.queue.length === 0) {
+      state.phase = "done";
+    } else {
+      const batch = state.queue.splice(0, BATCH_SIZE);
+      const results = await Promise.all(
+        batch.map(async (id) => {
+          const res = await fetch(
+            `${env.BLIZZARD_API_HOST}/data/wow/achievement-category/${id}?namespace=static-eu&locale=en_GB`,
+            { headers: { Authorization: `Bearer ${token}` } }
+          );
+          if (!res.ok) return null;
+          return (await res.json()) as BlizzardCategoryDetail;
+        })
+      );
 
-      // Collect achievements
-      if (detail.achievements) {
-        for (const a of detail.achievements) {
-          achievements.push({ id: a.id, name: a.name, points: a.points || 0, categoryId: item.id });
+      for (const detail of results) {
+        if (!detail) continue;
+
+        // Collect achievements
+        if (detail.achievements) {
+          for (const a of detail.achievements) {
+            state.achievements.push({ id: a.id, name: a.name, points: a.points || 0, categoryId: detail.id });
+          }
+        }
+
+        // Add subcategories
+        if (detail.subcategories) {
+          for (const sub of detail.subcategories) {
+            state.categoryData[sub.id] = { id: sub.id, name: sub.name, parentId: detail.id, childIds: [] };
+            state.categoryData[detail.id].childIds.push(sub.id);
+            state.queue.push(sub.id);
+          }
         }
       }
 
-      // Find the category node to attach children
-      const parentNode = item.parent;
-      if (!parentNode) continue;
-
-      // Add subcategories
-      if (detail.subcategories) {
-        for (const sub of detail.subcategories) {
-          const childCat: Category = { id: sub.id, name: sub.name, children: [] };
-          parentNode.children.push(childCat);
-          categoryQueue.push({ id: sub.id, name: sub.name, parent: childCat });
-        }
-      }
+      await env.SESSIONS.put(BUILD_STATE_KEY, JSON.stringify(state), { expirationTtl: 3600 });
+      return { done: false, progress: `Processed ${batch.length} categories, ${state.queue.length} remaining, ${state.achievements.length} achievements` };
     }
   }
 
-  return {
-    categories: rootCategories,
-    achievements,
-    builtAt: new Date().toISOString(),
-  };
+  // Phase 3: Finalize - rebuild tree from flat data
+  if (state.phase === "done") {
+    const buildTree = (id: number): Category | null => {
+      const data = state.categoryData[id];
+      if (!data) return null;
+      const children = data.childIds.map(buildTree).filter((c): c is Category => c !== null);
+      return { id: data.id, name: data.name, children };
+    };
+
+    const categories = state.rootIds.map(buildTree).filter((c): c is Category => c !== null);
+    
+    const manifest: Manifest = {
+      categories,
+      achievements: state.achievements,
+      builtAt: new Date().toISOString(),
+    };
+    
+    await env.SESSIONS.put(MANIFEST_KEY, JSON.stringify(manifest), { expirationTtl: MANIFEST_TTL });
+    await env.SESSIONS.delete(BUILD_STATE_KEY);
+    
+    return { done: true, progress: `Complete: ${categories.length} categories, ${state.achievements.length} achievements` };
+  }
+
+  return { done: false, progress: "Unknown state" };
 }
