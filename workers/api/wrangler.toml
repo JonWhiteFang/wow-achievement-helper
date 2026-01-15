@@ -1,0 +1,20 @@
+name = "wow-achievement-helper-api"
+main = "src/index.ts"
+compatibility_date = "2025-01-01"
+
+kv_namespaces = [
+  { binding = "SESSIONS", id = "<kv-id>" }
+]
+
+[vars]
+APP_ORIGIN = "https://jpawhite.github.io/wow-achievement-helper"
+BATTLE_NET_REGION = "eu"
+BATTLE_NET_OAUTH_AUTHORIZE = "https://eu.battle.net/oauth/authorize"
+BATTLE_NET_OAUTH_TOKEN = "https://eu.battle.net/oauth/token"
+BLIZZARD_API_HOST = "https://eu.api.blizzard.com"
+PROFILE_API_HOST = "https://eu.api.blizzard.com"
+
+# Secrets (set via `wrangler secret put`):
+# BNET_CLIENT_ID
+# BNET_CLIENT_SECRET
+# SESSION_SIGNING_KEY

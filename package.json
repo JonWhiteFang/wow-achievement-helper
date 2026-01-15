@@ -1,0 +1,20 @@
+{
+  "name": "wow-achievement-helper",
+  "private": true,
+  "workspaces": ["apps/*", "workers/*"],
+  "scripts": {
+    "dev:web": "npm run dev -w apps/web",
+    "dev:worker": "npm run dev -w workers/api",
+    "build:web": "npm run build -w apps/web",
+    "build:worker": "npm run build -w workers/api",
+    "lint": "eslint .",
+    "typecheck": "tsc --build"
+  },
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^8.0.0",
+    "@typescript-eslint/parser": "^8.0.0",
+    "eslint": "^9.0.0",
+    "prettier": "^3.0.0",
+    "typescript": "^5.5.0"
+  }
+}
