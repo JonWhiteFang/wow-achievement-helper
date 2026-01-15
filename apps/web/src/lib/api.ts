@@ -9,6 +9,7 @@ export type Category = {
 export type AchievementSummary = {
   id: number;
   name: string;
+  points?: number;
   categoryId: number;
 };
 
@@ -27,6 +28,12 @@ export type CategoriesResponse = {
   categories: Category[];
   achievements: AchievementSummary[];
   generatedAt: string;
+};
+
+export type ManifestResponse = {
+  categories: Category[];
+  achievements: AchievementSummary[];
+  builtAt: string;
 };
 
 export type CharacterProgress = {
@@ -56,6 +63,12 @@ export type ApiError = {
 export async function fetchCategories(): Promise<CategoriesResponse> {
   const res = await fetch(`${API_BASE}/api/categories`);
   if (!res.ok) throw new Error("Failed to fetch categories");
+  return res.json();
+}
+
+export async function fetchManifest(): Promise<ManifestResponse> {
+  const res = await fetch(`${API_BASE}/api/manifest`);
+  if (!res.ok) throw new Error("Failed to fetch manifest");
   return res.json();
 }
 

@@ -1,5 +1,6 @@
 import type { Env } from "./env";
 import { fetchCategories, fetchAchievement } from "./blizzard/gameData";
+import { getManifest } from "./blizzard/manifest";
 import { fetchCharacterAchievements } from "./blizzard/character";
 import { fetchUserCharacters } from "./blizzard/profile";
 import { handleLogin, handleCallback, handleMe, handleLogout } from "./authHandlers";
@@ -61,6 +62,7 @@ function addCorsHeaders(res: Response, env: Env, allowed: boolean): Response {
 }
 
 const CACHE_24H = 86400;
+const CACHE_1H = 3600;
 const CACHE_5M = 300;
 const CACHE_12H = 43200;
 
@@ -87,6 +89,15 @@ export default {
       }
       if (path === "/auth/logout" && req.method === "POST") {
         return handleLogout(req, env);
+      }
+
+      if (path === "/api/manifest") {
+        try {
+          const manifest = await getManifest(env);
+          return json(manifest, 200, CACHE_1H);
+        } catch (e) {
+          return err("BLIZZARD_ERROR", (e as Error).message, 502);
+        }
       }
 
       if (path === "/api/categories") {

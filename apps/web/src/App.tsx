@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { fetchCategories, fetchCharacterAchievements, fetchAuthStatus, mergeCharacters, type Category, type AchievementSummary, type CharacterProgress, type AuthStatus, type MergeResult } from "./lib/api";
+import { fetchManifest, fetchCharacterAchievements, fetchAuthStatus, mergeCharacters, type Category, type AchievementSummary, type CharacterProgress, type AuthStatus, type MergeResult } from "./lib/api";
 import { getSavedCharacter, saveCharacter, clearSavedCharacter, getMergeSelection, saveMergeSelection, clearMergeSelection } from "./lib/storage";
 import { useSearch } from "./lib/search";
 import { CategoryTree } from "./components/CategoryTree";
@@ -32,7 +32,7 @@ export default function App() {
   const [mergeSelection, setMergeSelection] = useState<{ realm: string; name: string }[]>([]);
 
   useEffect(() => {
-    fetchCategories()
+    fetchManifest()
       .then((data) => {
         setCategories(data.categories);
         setAchievements(data.achievements);
