@@ -40,7 +40,7 @@ A modern, Blizzard-adjacent dark UI with gold accents and subtle “panel” sur
 
 ---
 
-## Phase 0 — Fix correctness + developer ergonomics (P0)
+## Phase 0 — Fix correctness + developer ergonomics (P0) ✅
 
 ### 0.1 Fix Worker type import path + tighten typecheck
 **Why:** `workers/api/src/auth/session.ts` imports `Env` via `./env` (should be `../env`). This can break `tsc` and editor tooling.
@@ -73,7 +73,7 @@ A modern, Blizzard-adjacent dark UI with gold accents and subtle “panel” sur
 
 ---
 
-## Phase 1 — Make browsing feel like the game (Full category tree + manifest) (P0)
+## Phase 1 — Make browsing feel like the game (Full category tree + manifest) (P0) ✅
 
 ### 1.1 Worker: Build a full category tree + achievement index
 **Current gap:** `fetchCategories()` only builds root categories and doesn’t fetch subcategories, so the “in‑game tree” is incomplete.
