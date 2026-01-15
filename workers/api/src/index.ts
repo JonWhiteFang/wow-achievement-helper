@@ -5,6 +5,7 @@ import { fetchUserCharacters } from "./blizzard/profile";
 import { handleLogin, handleCallback, handleMe, handleLogout } from "./authHandlers";
 import { getSessionIdFromCookie, getSession } from "./auth/session";
 import { mergeCharacterAchievements, type MergeRequest } from "./merge";
+import { fetchHelp } from "./help";
 
 function json(data: unknown, status = 200, cacheSeconds = 0): Response {
   const headers: Record<string, string> = { "Content-Type": "application/json" };
@@ -55,6 +56,7 @@ function addCorsHeaders(res: Response, env: Env, allowed: boolean): Response {
 
 const CACHE_24H = 86400;
 const CACHE_5M = 300;
+const CACHE_12H = 43200;
 
 export default {
   async fetch(req: Request, env: Env): Promise<Response> {
@@ -96,6 +98,17 @@ export default {
           return json(achievement, 200, CACHE_24H);
         } catch (e) {
           return err("BLIZZARD_ERROR", (e as Error).message, 502);
+        }
+      }
+
+      const helpMatch = path.match(/^\/api\/help\/achievement\/(\d+)$/);
+      if (helpMatch) {
+        const top = parseInt(url.searchParams.get("top") || "10", 10);
+        try {
+          const help = await fetchHelp(parseInt(helpMatch[1], 10), Math.min(top, 20));
+          return json(help, 200, CACHE_12H);
+        } catch (e) {
+          return err("UPSTREAM_ERROR", (e as Error).message, 502);
         }
       }
 
