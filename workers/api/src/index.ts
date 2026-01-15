@@ -1,6 +1,7 @@
 import type { Env } from "./env";
 import { fetchCategories, fetchAchievement } from "./blizzard/gameData";
 import { fetchCharacterAchievements } from "./blizzard/character";
+import { handleLogin, handleCallback, handleMe, handleLogout } from "./authHandlers";
 
 function json(data: unknown, status = 200, cacheSeconds = 0): Response {
   const headers: Record<string, string> = { "Content-Type": "application/json" };
@@ -60,6 +61,20 @@ export default {
 
       if (path === "/healthz") {
         return json({ ok: true });
+      }
+
+      // Auth routes (no CORS needed for redirects, but /auth/me and /auth/logout need it)
+      if (path === "/auth/login") {
+        return handleLogin(req, env);
+      }
+      if (path === "/auth/callback") {
+        return handleCallback(req, env);
+      }
+      if (path === "/auth/me") {
+        return handleMe(req, env);
+      }
+      if (path === "/auth/logout" && req.method === "POST") {
+        return handleLogout(req, env);
       }
 
       if (path === "/api/categories") {
