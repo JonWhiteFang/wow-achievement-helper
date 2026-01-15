@@ -1,10 +1,12 @@
 import { useEffect, useState } from "react";
-import { fetchCategories, fetchCharacterAchievements, type Category, type AchievementSummary, type CharacterProgress } from "./lib/api";
+import { fetchCategories, fetchCharacterAchievements, fetchAuthStatus, type Category, type AchievementSummary, type CharacterProgress, type AuthStatus } from "./lib/api";
 import { getSavedCharacter, saveCharacter, clearSavedCharacter } from "./lib/storage";
 import { CategoryTree } from "./components/CategoryTree";
 import { AchievementList } from "./components/AchievementList";
 import { AchievementDrawer } from "./components/AchievementDrawer";
 import { CharacterLookup } from "./components/CharacterLookup";
+import { AuthButton } from "./components/AuthButton";
+import { CharacterSelector } from "./components/CharacterSelector";
 
 export default function App() {
   const [categories, setCategories] = useState<Category[]>([]);
@@ -20,6 +22,9 @@ export default function App() {
   const [charError, setCharError] = useState<string | null>(null);
   const [filter, setFilter] = useState<"all" | "completed" | "incomplete">("all");
 
+  const [auth, setAuth] = useState<AuthStatus>({ loggedIn: false });
+  const [showCharSelector, setShowCharSelector] = useState(false);
+
   useEffect(() => {
     fetchCategories()
       .then((data) => {
@@ -28,6 +33,8 @@ export default function App() {
       })
       .catch((e) => setError(e.message))
       .finally(() => setLoading(false));
+
+    fetchAuthStatus().then(setAuth);
 
     const saved = getSavedCharacter();
     if (saved) {
@@ -56,6 +63,10 @@ export default function App() {
     setFilter("all");
   };
 
+  const handleLogout = () => {
+    setAuth({ loggedIn: false });
+  };
+
   const filteredAchievements = selectedCategory
     ? achievements.filter((a) => a.categoryId === selectedCategory)
     : achievements;
@@ -82,6 +93,11 @@ export default function App() {
           currentCharacter={charProgress?.character || null}
           onClear={handleClearCharacter}
         />
+        {auth.loggedIn && (
+          <button onClick={() => setShowCharSelector(true)} style={{ padding: "6px 12px" }}>
+            My Characters
+          </button>
+        )}
         {charProgress && (
           <select value={filter} onChange={(e) => setFilter(e.target.value as typeof filter)} style={{ padding: "6px" }}>
             <option value="all">All</option>
@@ -94,6 +110,9 @@ export default function App() {
             Refresh
           </button>
         )}
+        <div style={{ marginLeft: "auto" }}>
+          <AuthButton loggedIn={auth.loggedIn} battletag={auth.battletag} onLogout={handleLogout} />
+        </div>
       </header>
       {charError && <div style={{ padding: "8px 16px", background: "#ffebee", color: "#c62828" }}>{charError}</div>}
       <div style={{ display: "flex", flex: 1, overflow: "hidden" }}>
@@ -116,6 +135,9 @@ export default function App() {
           </aside>
         )}
       </div>
+      {showCharSelector && (
+        <CharacterSelector onSelect={loadCharacter} onClose={() => setShowCharSelector(false)} />
+      )}
     </div>
   );
 }
