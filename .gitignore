@@ -1,5 +1,27 @@
+# Dependencies
 node_modules/
+
+# Build outputs
 dist/
 .wrangler/
+
+# Logs
 *.log
+npm-debug.log*
+
+# Environment (local overrides)
+.env.local
+.env.*.local
+
+# OS
 .DS_Store
+Thumbs.db
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Test coverage
+coverage/
