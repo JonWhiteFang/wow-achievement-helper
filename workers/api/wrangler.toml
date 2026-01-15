@@ -7,7 +7,7 @@ kv_namespaces = [
 ]
 
 [vars]
-APP_ORIGIN = "https://jpawhite.github.io/wow-achievement-helper"
+APP_ORIGIN = "https://jonwhitefang.github.io/wow-achievement-helper"
 BATTLE_NET_REGION = "eu"
 BATTLE_NET_OAUTH_AUTHORIZE = "https://eu.battle.net/oauth/authorize"
 BATTLE_NET_OAUTH_TOKEN = "https://eu.battle.net/oauth/token"
