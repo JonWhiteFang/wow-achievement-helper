@@ -4,6 +4,7 @@ import { fetchCharacterAchievements } from "./blizzard/character";
 import { fetchUserCharacters } from "./blizzard/profile";
 import { handleLogin, handleCallback, handleMe, handleLogout } from "./authHandlers";
 import { getSessionIdFromCookie, getSession } from "./auth/session";
+import { mergeCharacterAchievements, type MergeRequest } from "./merge";
 
 function json(data: unknown, status = 200, cacheSeconds = 0): Response {
   const headers: Record<string, string> = { "Content-Type": "application/json" };
@@ -120,6 +121,24 @@ export default {
         try {
           const characters = await fetchUserCharacters(env, session.accessToken);
           return json({ characters });
+        } catch (e: unknown) {
+          const error = e as { code?: string; message?: string; status?: number };
+          if (error.code && error.status) {
+            return err(error.code, error.message || "Unknown error", error.status);
+          }
+          return err("UPSTREAM_ERROR", (e as Error).message, 502);
+        }
+      }
+
+      if (path === "/api/me/merge" && req.method === "POST") {
+        const sessionId = getSessionIdFromCookie(req);
+        if (!sessionId) return err("UNAUTHENTICATED", "Not logged in", 401);
+        const session = await getSession(env, sessionId);
+        if (!session) return err("UNAUTHENTICATED", "Session expired", 401);
+        try {
+          const body = (await req.json()) as MergeRequest;
+          const result = await mergeCharacterAchievements(env, body.characters);
+          return json(result);
         } catch (e: unknown) {
           const error = e as { code?: string; message?: string; status?: number };
           if (error.code && error.status) {
