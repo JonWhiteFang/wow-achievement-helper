@@ -45,42 +45,51 @@ export async function fetchCategories(env: Env): Promise<{ categories: Category[
   const rootCategories = indexData.root_categories || indexData.categories || [];
   
   const achievements: { id: number; name: string; categoryId: number }[] = [];
-  const categories: Category[] = [];
 
-  // Fetch details for each root category to get achievements
-  async function fetchCategoryDetail(catId: number): Promise<BlizzardCategoryDetail | null> {
-    const res = await fetch(
-      `${env.BLIZZARD_API_HOST}/data/wow/achievement-category/${catId}?namespace=static-eu&locale=en_GB`,
-      { headers: { Authorization: `Bearer ${token}` } }
-    );
-    if (!res.ok) return null;
-    return res.json();
+  // Collect all category IDs to fetch
+  const allCategoryIds: number[] = [];
+  for (const cat of rootCategories) {
+    allCategoryIds.push(cat.id);
   }
 
-  async function processCategory(cat: BlizzardCategory): Promise<Category> {
-    const detail = await fetchCategoryDetail(cat.id);
+  // Fetch category details in parallel batches
+  const BATCH_SIZE = 5;
+  const categoryDetails = new Map<number, BlizzardCategoryDetail>();
+  
+  for (let i = 0; i < allCategoryIds.length; i += BATCH_SIZE) {
+    const batch = allCategoryIds.slice(i, i + BATCH_SIZE);
+    const results = await Promise.all(
+      batch.map(async (id) => {
+        const res = await fetch(
+          `${env.BLIZZARD_API_HOST}/data/wow/achievement-category/${id}?namespace=static-eu&locale=en_GB`,
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+        if (!res.ok) return null;
+        const detail = (await res.json()) as BlizzardCategoryDetail;
+        return { id, detail };
+      })
+    );
+    for (const r of results) {
+      if (r) categoryDetails.set(r.id, r.detail);
+    }
+  }
+
+  // Build category tree and collect achievements
+  function buildCategory(catId: number, name: string): Category {
+    const detail = categoryDetails.get(catId);
     
     if (detail?.achievements) {
       for (const a of detail.achievements) {
-        achievements.push({ id: a.id, name: a.name, categoryId: cat.id });
+        achievements.push({ id: a.id, name: a.name, categoryId: catId });
       }
     }
 
-    const children: Category[] = [];
-    if (detail?.subcategories) {
-      for (const sub of detail.subcategories) {
-        children.push(await processCategory({ id: sub.id, name: sub.name }));
-      }
-    }
-
-    return { id: cat.id, name: cat.name, children };
+    // Note: We only fetch root categories to avoid too many subrequests
+    // Subcategories would require additional fetches
+    return { id: catId, name, children: [] };
   }
 
-  // Process root categories (limit concurrency)
-  for (const cat of rootCategories) {
-    categories.push(await processCategory(cat));
-  }
-
+  const categories = rootCategories.map((cat) => buildCategory(cat.id, cat.name));
   return { categories, achievements };
 }
 
