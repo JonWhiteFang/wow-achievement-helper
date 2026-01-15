@@ -3,7 +3,7 @@ main = "src/index.ts"
 compatibility_date = "2025-01-01"
 
 kv_namespaces = [
-  { binding = "SESSIONS", id = "<kv-id>" }
+  { binding = "SESSIONS", id = "eb68186585154ec4812cba5fb2195f04" }
 ]
 
 [vars]
