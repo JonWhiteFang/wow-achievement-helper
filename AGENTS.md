@@ -210,7 +210,7 @@ Prefer hash routing for GitHub Pages stability:
 Follow the phases defined in `docs/IMPLEMENTATION_PLAN.md`. Mark tasks as complete (`[x]`) once done.
 
 - [x] **Phase 0 — Project Bootstrap:** monorepo structure, tooling, CI, Cloudflare setup
-- [ ] **Phase 1 — Blizzard Game Data Catalogue:** Worker endpoints + frontend tree/list/drawer
+- [x] **Phase 1 — Blizzard Game Data Catalogue:** Worker endpoints + frontend tree/list/drawer
 - [ ] **Phase 2 — Guest Character Lookup Overlay:** character lookup endpoint + UI overlay
 - [ ] **Phase 3 — Battle.net Login:** OAuth flow + `/api/me/characters`
 - [ ] **Phase 4 — Account-Wide Merge:** merge endpoint + merge UI
