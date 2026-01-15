@@ -2,34 +2,39 @@
 
 ## Frontend: GitHub Pages
 
-- Use GitHub Actions Pages workflow:
-  - build `apps/web`
-  - upload artifact
-  - deploy
+- GitHub Actions workflow: `.github/workflows/pages.yml`
+- Triggers on push to `main`
+- Builds `apps/web` and deploys to Pages
 
-Vite:
-- set `base: "/<repo-name>/"`
+Vite config:
+- `base: "/wow-achievement-helper/"`
 
-Router:
-- prefer hash router for simplicity.
+Live URL:
+- https://jonwhitefang.github.io/wow-achievement-helper/
 
 ## Worker: Cloudflare
 
-- Create KV namespace for sessions
-- Set secrets:
-  - `BNET_CLIENT_ID`
-  - `BNET_CLIENT_SECRET`
-  - `SESSION_SIGNING_KEY`
+GitHub Actions workflow: `.github/workflows/worker.yml`
+- Triggers on push to `workers/api/**` or manual dispatch
+- Requires `CLOUDFLARE_API_TOKEN` secret in GitHub
 
-Deploy:
-- `wrangler deploy`
+KV namespace:
+- `SESSIONS` (binding configured in `wrangler.toml`)
+
+Secrets (set via `wrangler secret put`):
+- `BNET_CLIENT_ID`
+- `BNET_CLIENT_SECRET`
+- `SESSION_SIGNING_KEY`
+
+Live URL:
+- https://wow-achievement-helper-api.jono2411.workers.dev/
 
 ## CORS
 
 Worker var:
-- `APP_ORIGIN=https://<user>.github.io/<repo-name>`
+- `APP_ORIGIN=https://jonwhitefang.github.io/wow-achievement-helper`
 
 ## OAuth Redirect URI
 
 Set in Blizzard developer portal:
-- `https://<worker-domain>/auth/callback`
+- `https://wow-achievement-helper-api.jono2411.workers.dev/auth/callback`

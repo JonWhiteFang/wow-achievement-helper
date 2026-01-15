@@ -52,14 +52,14 @@ workers/api/
 ```toml
 name = "wow-achievement-helper-api"
 main = "src/index.ts"
-compatibility_date = "2025-12-01"
+compatibility_date = "2025-01-01"
 
 kv_namespaces = [
   { binding = "SESSIONS", id = "<kv-id>" }
 ]
 
 [vars]
-APP_ORIGIN = "https://<user>.github.io/wow-achievement-helper"
+APP_ORIGIN = "https://jonwhitefang.github.io/wow-achievement-helper"
 BATTLE_NET_REGION = "eu"
 BATTLE_NET_OAUTH_AUTHORIZE = "https://eu.battle.net/oauth/authorize"
 BATTLE_NET_OAUTH_TOKEN = "https://eu.battle.net/oauth/token"

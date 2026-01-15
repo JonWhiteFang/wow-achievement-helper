@@ -121,4 +121,8 @@ Persist locally:
 
 ## Environment
 
-`VITE_API_BASE` points at Worker.
+Environment files:
+- `.env.development`: `VITE_API_BASE=http://localhost:8787`
+- `.env.production`: `VITE_API_BASE=https://wow-achievement-helper-api.jono2411.workers.dev`
+
+Type definitions in `src/vite-env.d.ts`.
