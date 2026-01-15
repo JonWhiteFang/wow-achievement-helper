@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { fetchCategories, fetchCharacterAchievements, fetchAuthStatus, mergeCharacters, type Category, type AchievementSummary, type CharacterProgress, type AuthStatus, type MergeResult } from "./lib/api";
 import { getSavedCharacter, saveCharacter, clearSavedCharacter, getMergeSelection, saveMergeSelection, clearMergeSelection } from "./lib/storage";
+import { useSearch } from "./lib/search";
 import { CategoryTree } from "./components/CategoryTree";
 import { AchievementList } from "./components/AchievementList";
 import { AchievementDrawer } from "./components/AchievementDrawer";
@@ -98,9 +99,11 @@ export default function App() {
     setAuth({ loggedIn: false });
   };
 
-  const filteredAchievements = selectedCategory
+  const categoryFiltered = selectedCategory
     ? achievements.filter((a) => a.categoryId === selectedCategory)
     : achievements;
+
+  const searchResults = useSearch(categoryFiltered, searchQuery);
 
   const activeData = viewMode === "merged" && mergeResult ? mergeResult.merged : charProgress;
   const completedIds = activeData ? new Set(activeData.completed) : undefined;
@@ -164,9 +167,8 @@ export default function App() {
         </aside>
         <main style={{ flex: 1, overflow: "hidden" }}>
           <AchievementList
-            achievements={filteredAchievements}
+            achievements={searchResults}
             onSelect={setSelectedAchievement}
-            searchQuery={searchQuery}
             completedIds={completedIds}
             progress={progress}
             filter={filter}
