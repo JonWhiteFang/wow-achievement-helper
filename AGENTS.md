@@ -214,7 +214,7 @@ Follow the phases defined in `docs/IMPLEMENTATION_PLAN.md`. Mark tasks as comple
 - [x] **Phase 2 — Guest Character Lookup Overlay:** character lookup endpoint + UI overlay
 - [x] **Phase 3 — Battle.net Login:** OAuth flow + `/api/me/characters`
 - [x] **Phase 4 — Account-Wide Merge:** merge endpoint + merge UI
-- [ ] **Phase 5 — Help Panel:** provider adapter system + strategy/community tabs
+- [x] **Phase 5 — Help Panel:** provider adapter system + strategy/community tabs
 - [ ] **Phase 6 — Polish, Performance, Quality:** fuzzy search, smart lists, virtualization, observability
 
 If asked to "build everything," follow this order and land incremental PRs.
