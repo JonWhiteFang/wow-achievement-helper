@@ -67,9 +67,15 @@ export async function fetchCategories(): Promise<CategoriesResponse> {
 }
 
 export async function fetchManifest(): Promise<ManifestResponse> {
+  // Try manifest first, fall back to categories
   const res = await fetch(`${API_BASE}/api/manifest`);
-  if (!res.ok) throw new Error("Failed to fetch manifest");
-  return res.json();
+  if (res.ok) return res.json();
+  
+  // Fallback to categories endpoint
+  const fallback = await fetch(`${API_BASE}/api/categories`);
+  if (!fallback.ok) throw new Error("Failed to fetch achievements");
+  const data = await fallback.json() as CategoriesResponse;
+  return { categories: data.categories, achievements: data.achievements, builtAt: data.generatedAt };
 }
 
 export async function fetchAchievement(id: number): Promise<Achievement> {
