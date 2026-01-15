@@ -8,11 +8,7 @@ type Props = {
 
 export function AuthButton({ loggedIn, battletag, onLogout }: Props) {
   if (!loggedIn) {
-    return (
-      <a href={getLoginUrl()} style={{ padding: "6px 12px", background: "#0074e0", color: "white", borderRadius: "4px", textDecoration: "none", fontSize: "14px" }}>
-        Sign in with Battle.net
-      </a>
-    );
+    return <a href={getLoginUrl()} className="btn btn-primary">Sign in with Battle.net</a>;
   }
 
   const handleLogout = async () => {
@@ -21,11 +17,9 @@ export function AuthButton({ loggedIn, battletag, onLogout }: Props) {
   };
 
   return (
-    <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-      <span style={{ fontSize: "14px" }}>{battletag || "Logged in"}</span>
-      <button onClick={handleLogout} style={{ padding: "4px 8px", fontSize: "12px" }}>
-        Logout
-      </button>
+    <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+      <span style={{ color: "var(--muted)", fontSize: 14 }}>{battletag || "Logged in"}</span>
+      <button className="btn btn-ghost" onClick={handleLogout} style={{ fontSize: 12 }}>Logout</button>
     </div>
   );
 }

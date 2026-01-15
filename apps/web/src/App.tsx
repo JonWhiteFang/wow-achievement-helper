@@ -10,6 +10,7 @@ import { AuthButton } from "./components/AuthButton";
 import { CharacterSelector } from "./components/CharacterSelector";
 
 type ViewMode = "single" | "merged";
+type SortMode = "name" | "points" | "completion";
 
 export default function App() {
   const [categories, setCategories] = useState<Category[]>([]);
@@ -19,6 +20,7 @@ export default function App() {
   const [searchQuery, setSearchQuery] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [showCategories, setShowCategories] = useState(true);
 
   const [charProgress, setCharProgress] = useState<CharacterProgress | null>(null);
   const [mergeResult, setMergeResult] = useState<MergeResult | null>(null);
@@ -26,6 +28,7 @@ export default function App() {
   const [charLoading, setCharLoading] = useState(false);
   const [charError, setCharError] = useState<string | null>(null);
   const [filter, setFilter] = useState<"all" | "completed" | "incomplete">("all");
+  const [sort, setSort] = useState<SortMode>("name");
 
   const [auth, setAuth] = useState<AuthStatus>({ loggedIn: false });
   const [showCharSelector, setShowCharSelector] = useState(false);
@@ -43,14 +46,10 @@ export default function App() {
     fetchAuthStatus().then(setAuth);
 
     const saved = getSavedCharacter();
-    if (saved) {
-      loadCharacter(saved.realm, saved.name);
-    }
+    if (saved) loadCharacter(saved.realm, saved.name);
 
     const savedMerge = getMergeSelection();
-    if (savedMerge.length > 0) {
-      setMergeSelection(savedMerge);
-    }
+    if (savedMerge.length > 0) setMergeSelection(savedMerge);
   }, []);
 
   const loadCharacter = async (realm: string, name: string) => {
@@ -95,33 +94,30 @@ export default function App() {
     setViewMode("single");
   };
 
-  const handleLogout = () => {
-    setAuth({ loggedIn: false });
-  };
-
   const categoryFiltered = selectedCategory
     ? achievements.filter((a) => a.categoryId === selectedCategory)
     : achievements;
 
   const searchResults = useSearch(categoryFiltered, searchQuery);
-
   const activeData = viewMode === "merged" && mergeResult ? mergeResult.merged : charProgress;
   const completedIds = activeData ? new Set(activeData.completed) : undefined;
   const progress = activeData?.progress;
 
-  if (loading) return <div style={{ padding: "32px" }}>Loading achievements...</div>;
-  if (error) return <div style={{ padding: "32px", color: "red" }}>Error: {error}</div>;
+  if (loading) return <div style={{ padding: 32, color: "var(--muted)" }}>Loading achievements...</div>;
+  if (error) return <div style={{ padding: 32, color: "var(--danger)" }}>Error: {error}</div>;
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", height: "100vh", fontFamily: "system-ui" }}>
-      <header style={{ padding: "12px 16px", borderBottom: "1px solid #ddd", display: "flex", gap: "16px", alignItems: "center", flexWrap: "wrap" }}>
-        <h1 style={{ margin: 0, fontSize: "18px" }}>WoW Achievement Helper</h1>
+    <div style={{ display: "flex", flexDirection: "column", height: "100vh" }}>
+      <header style={{ padding: "12px 16px", background: "var(--panel)", borderBottom: "1px solid var(--border)", display: "flex", gap: 12, alignItems: "center", flexWrap: "wrap" }}>
+        <button className="btn btn-ghost" onClick={() => setShowCategories(!showCategories)} title="Toggle categories">☰</button>
+        <h1 style={{ margin: 0, fontSize: 18, color: "var(--accent)" }}>WoW Achievement Helper</h1>
         <input
           type="search"
           placeholder="Search achievements..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          style={{ padding: "6px 12px", border: "1px solid #ccc", borderRadius: "4px", width: "200px" }}
+          className="input"
+          style={{ width: 200 }}
         />
         <CharacterLookup
           onLookup={loadCharacter}
@@ -129,57 +125,65 @@ export default function App() {
           currentCharacter={viewMode === "single" ? charProgress?.character || null : null}
           onClear={handleClearCharacter}
         />
-        {auth.loggedIn && (
-          <button onClick={() => setShowCharSelector(true)} style={{ padding: "6px 12px" }}>
-            My Characters
-          </button>
-        )}
+        {auth.loggedIn && <button className="btn" onClick={() => setShowCharSelector(true)}>My Characters</button>}
         {viewMode === "merged" && mergeResult && (
-          <span style={{ fontSize: "14px", color: "#666" }}>
-            Merged ({mergeResult.sources.length} chars)
-          </span>
+          <span className="badge badge-success">Merged ({mergeResult.sources.length})</span>
         )}
         {(charProgress || mergeResult) && (
-          <select value={filter} onChange={(e) => setFilter(e.target.value as typeof filter)} style={{ padding: "6px" }}>
-            <option value="all">All</option>
-            <option value="completed">Completed</option>
-            <option value="incomplete">Incomplete</option>
-          </select>
+          <>
+            <select className="select" value={filter} onChange={(e) => setFilter(e.target.value as typeof filter)}>
+              <option value="all">All</option>
+              <option value="completed">Completed</option>
+              <option value="incomplete">Incomplete</option>
+            </select>
+            <select className="select" value={sort} onChange={(e) => setSort(e.target.value as SortMode)}>
+              <option value="name">Sort: Name</option>
+              <option value="points">Sort: Points</option>
+              <option value="completion">Sort: Completion</option>
+            </select>
+          </>
         )}
         {charProgress && viewMode === "single" && (
-          <button onClick={() => loadCharacter(charProgress.character.realm, charProgress.character.name)} disabled={charLoading} style={{ padding: "6px 12px" }}>
-            Refresh
-          </button>
+          <button className="btn" onClick={() => loadCharacter(charProgress.character.realm, charProgress.character.name)} disabled={charLoading}>Refresh</button>
         )}
         {mergeResult && viewMode === "merged" && (
-          <button onClick={() => loadMerge(mergeSelection)} disabled={charLoading} style={{ padding: "6px 12px" }}>
-            Refresh
-          </button>
+          <button className="btn" onClick={() => loadMerge(mergeSelection)} disabled={charLoading}>Refresh</button>
         )}
         <div style={{ marginLeft: "auto" }}>
-          <AuthButton loggedIn={auth.loggedIn} battletag={auth.battletag} onLogout={handleLogout} />
+          <AuthButton loggedIn={auth.loggedIn} battletag={auth.battletag} onLogout={() => setAuth({ loggedIn: false })} />
         </div>
       </header>
-      {charError && <div style={{ padding: "8px 16px", background: "#ffebee", color: "#c62828" }}>{charError}</div>}
+
+      {charError && <div style={{ padding: "8px 16px", background: "rgba(248,81,73,0.15)", color: "var(--danger)" }}>{charError}</div>}
+
       <div style={{ display: "flex", flex: 1, overflow: "hidden" }}>
-        <aside style={{ width: "220px", borderRight: "1px solid #ddd", overflow: "auto" }}>
-          <CategoryTree categories={categories} selectedId={selectedCategory} onSelect={setSelectedCategory} />
-        </aside>
-        <main style={{ flex: 1, overflow: "hidden" }}>
-          <AchievementList
-            achievements={searchResults}
-            onSelect={setSelectedAchievement}
-            completedIds={completedIds}
-            progress={progress}
-            filter={filter}
-          />
+        {showCategories && (
+          <aside style={{ width: 240, background: "var(--panel)", borderRight: "1px solid var(--border)", overflow: "auto" }}>
+            <CategoryTree categories={categories} selectedId={selectedCategory} onSelect={setSelectedCategory} />
+          </aside>
+        )}
+        <main style={{ flex: 1, overflow: "hidden", display: "flex", flexDirection: "column" }}>
+          <div style={{ padding: "8px 16px", borderBottom: "1px solid var(--border)", color: "var(--muted)", fontSize: 13 }}>
+            {searchResults.length} achievements {selectedCategory && "in category"}
+          </div>
+          <div style={{ flex: 1, overflow: "hidden" }}>
+            <AchievementList
+              achievements={searchResults}
+              onSelect={setSelectedAchievement}
+              completedIds={completedIds}
+              progress={progress}
+              filter={filter}
+              sort={sort}
+            />
+          </div>
         </main>
         {selectedAchievement && (
-          <aside style={{ width: "350px" }}>
+          <aside style={{ width: 380, background: "var(--panel)", borderLeft: "1px solid var(--border)", overflow: "auto" }}>
             <AchievementDrawer achievementId={selectedAchievement} onClose={() => setSelectedAchievement(null)} />
           </aside>
         )}
       </div>
+
       {showCharSelector && (
         <CharacterSelector
           onSelect={loadCharacter}
