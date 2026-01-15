@@ -1,5 +1,6 @@
 import type { Env } from "./env";
 import { fetchCategories, fetchAchievement } from "./blizzard/gameData";
+import { fetchCharacterAchievements } from "./blizzard/character";
 
 function json(data: unknown, status = 200, cacheSeconds = 0): Response {
   const headers: Record<string, string> = { "Content-Type": "application/json" };
@@ -49,6 +50,7 @@ function addCorsHeaders(res: Response, env: Env, allowed: boolean): Response {
 }
 
 const CACHE_24H = 86400;
+const CACHE_5M = 300;
 
 export default {
   async fetch(req: Request, env: Env): Promise<Response> {
@@ -76,6 +78,20 @@ export default {
           return json(achievement, 200, CACHE_24H);
         } catch (e) {
           return err("BLIZZARD_ERROR", (e as Error).message, 502);
+        }
+      }
+
+      const charMatch = path.match(/^\/api\/character\/([^/]+)\/([^/]+)\/achievements$/);
+      if (charMatch) {
+        try {
+          const data = await fetchCharacterAchievements(env, decodeURIComponent(charMatch[1]), decodeURIComponent(charMatch[2]));
+          return json(data, 200, CACHE_5M);
+        } catch (e: unknown) {
+          const error = e as { code?: string; message?: string; status?: number };
+          if (error.code && error.status) {
+            return err(error.code, error.message || "Unknown error", error.status);
+          }
+          return err("UPSTREAM_ERROR", (e as Error).message, 502);
         }
       }
 
