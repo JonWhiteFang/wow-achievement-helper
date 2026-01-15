@@ -15,14 +15,16 @@ function err(code: string, message: string, status: number): Response {
 
 function withCors(req: Request, env: Env, handler: () => Response | Promise<Response>): Response | Promise<Response> {
   const origin = req.headers.get("Origin");
-  const allowed = origin === env.APP_ORIGIN;
+  // APP_ORIGIN includes path, but Origin header is just the origin
+  const allowedOrigin = new URL(env.APP_ORIGIN).origin;
+  const allowed = origin === allowedOrigin;
 
   if (req.method === "OPTIONS") {
     return new Response(null, {
       status: 204,
       headers: allowed
         ? {
-            "Access-Control-Allow-Origin": env.APP_ORIGIN,
+            "Access-Control-Allow-Origin": allowedOrigin,
             "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
             "Access-Control-Allow-Headers": "Content-Type",
             "Access-Control-Allow-Credentials": "true",
@@ -39,8 +41,9 @@ function withCors(req: Request, env: Env, handler: () => Response | Promise<Resp
 
 function addCorsHeaders(res: Response, env: Env, allowed: boolean): Response {
   if (!allowed) return res;
+  const allowedOrigin = new URL(env.APP_ORIGIN).origin;
   const headers = new Headers(res.headers);
-  headers.set("Access-Control-Allow-Origin", env.APP_ORIGIN);
+  headers.set("Access-Control-Allow-Origin", allowedOrigin);
   headers.set("Access-Control-Allow-Credentials", "true");
   return new Response(res.body, { status: res.status, headers });
 }
