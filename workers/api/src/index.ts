@@ -1,7 +1,9 @@
 import type { Env } from "./env";
 import { fetchCategories, fetchAchievement } from "./blizzard/gameData";
 import { fetchCharacterAchievements } from "./blizzard/character";
+import { fetchUserCharacters } from "./blizzard/profile";
 import { handleLogin, handleCallback, handleMe, handleLogout } from "./authHandlers";
+import { getSessionIdFromCookie, getSession } from "./auth/session";
 
 function json(data: unknown, status = 200, cacheSeconds = 0): Response {
   const headers: Record<string, string> = { "Content-Type": "application/json" };
@@ -101,6 +103,23 @@ export default {
         try {
           const data = await fetchCharacterAchievements(env, decodeURIComponent(charMatch[1]), decodeURIComponent(charMatch[2]));
           return json(data, 200, CACHE_5M);
+        } catch (e: unknown) {
+          const error = e as { code?: string; message?: string; status?: number };
+          if (error.code && error.status) {
+            return err(error.code, error.message || "Unknown error", error.status);
+          }
+          return err("UPSTREAM_ERROR", (e as Error).message, 502);
+        }
+      }
+
+      if (path === "/api/me/characters") {
+        const sessionId = getSessionIdFromCookie(req);
+        if (!sessionId) return err("UNAUTHENTICATED", "Not logged in", 401);
+        const session = await getSession(env, sessionId);
+        if (!session) return err("UNAUTHENTICATED", "Session expired", 401);
+        try {
+          const characters = await fetchUserCharacters(env, session.accessToken);
+          return json({ characters });
         } catch (e: unknown) {
           const error = e as { code?: string; message?: string; status?: number };
           if (error.code && error.status) {
