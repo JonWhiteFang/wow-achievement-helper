@@ -7,6 +7,12 @@ import { getSessionIdFromCookie, getSession } from "./auth/session";
 import { mergeCharacterAchievements, type MergeRequest } from "./merge";
 import { fetchHelp } from "./help";
 
+function log(req: Request, status: number, start: number): void {
+  const duration = Date.now() - start;
+  const url = new URL(req.url);
+  console.log(`${req.method} ${url.pathname} ${status} ${duration}ms`);
+}
+
 function json(data: unknown, status = 200, cacheSeconds = 0): Response {
   const headers: Record<string, string> = { "Content-Type": "application/json" };
   if (cacheSeconds > 0) {
@@ -60,7 +66,8 @@ const CACHE_12H = 43200;
 
 export default {
   async fetch(req: Request, env: Env): Promise<Response> {
-    return withCors(req, env, async () => {
+    const start = Date.now();
+    const response = await withCors(req, env, async () => {
       const url = new URL(req.url);
       const path = url.pathname;
 
@@ -163,5 +170,7 @@ export default {
 
       return err("NOT_FOUND", "Route not found", 404);
     });
+    log(req, response.status, start);
+    return response;
   },
 };
