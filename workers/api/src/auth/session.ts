@@ -70,5 +70,5 @@ export function getSessionIdFromCookie(req: Request): string | null {
 }
 
 export function sessionCookie(sessionId: string, maxAge: number): string {
-  return `session_id=${sessionId}; HttpOnly; Secure; SameSite=Lax; Path=/; Max-Age=${maxAge}`;
+  return `session_id=${sessionId}; HttpOnly; Secure; SameSite=None; Path=/; Max-Age=${maxAge}`;
 }
