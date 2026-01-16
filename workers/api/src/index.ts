@@ -1,5 +1,5 @@
 import type { Env } from "./env";
-import { fetchCategories, fetchAchievement } from "./blizzard/gameData";
+import { fetchCategories, fetchAchievement, fetchRealms } from "./blizzard/gameData";
 import { getManifest, buildManifestIncremental } from "./blizzard/manifest";
 import { fetchCharacterAchievements } from "./blizzard/character";
 import { fetchUserCharacters } from "./blizzard/profile";
@@ -120,6 +120,15 @@ const worker = {
           return json({ done: result.done, progress: result.progress });
         } catch (e) {
           return err("BUILD_ERROR", (e as Error).message, 500);
+        }
+      }
+
+      if (path === "/api/realms") {
+        try {
+          const realms = await fetchRealms(env);
+          return json({ realms }, 200, CACHE_1H);
+        } catch (e) {
+          return err("BLIZZARD_ERROR", (e as Error).message, 502);
         }
       }
 

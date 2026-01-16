@@ -154,6 +154,15 @@ export type HelpPayload = {
   sources: Array<{ name: string; url: string }>;
 };
 
+export type Realm = { name: string; slug: string };
+
+export async function fetchRealms(): Promise<Realm[]> {
+  const res = await fetch(`${API_BASE}/api/realms`);
+  if (!res.ok) throw new Error("Failed to fetch realms");
+  const data = (await res.json()) as { realms: Realm[] };
+  return data.realms;
+}
+
 export async function fetchHelp(achievementId: number, top = 10): Promise<HelpPayload> {
   const res = await fetch(`${API_BASE}/api/help/achievement/${achievementId}?top=${top}`);
   if (!res.ok) throw new Error("Failed to fetch help");

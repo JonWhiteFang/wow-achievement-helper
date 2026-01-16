@@ -93,6 +93,30 @@ export async function fetchCategories(env: Env): Promise<{ categories: Category[
   return { categories, achievements };
 }
 
+export type Realm = { name: string; slug: string };
+
+const REALMS_CACHE_KEY = "realms:eu";
+const REALMS_CACHE_TTL = 86400; // 24h
+
+export async function fetchRealms(env: Env): Promise<Realm[]> {
+  // Check KV cache first
+  const cached = await env.SESSIONS.get(REALMS_CACHE_KEY);
+  if (cached) return JSON.parse(cached) as Realm[];
+
+  const token = await getClientToken(env);
+  const res = await fetch(
+    `${env.BLIZZARD_API_HOST}/data/wow/realm/index?namespace=dynamic-eu&locale=en_GB`,
+    { headers: { Authorization: `Bearer ${token}` } }
+  );
+  if (!res.ok) throw new Error(`Realms fetch failed: ${res.status}`);
+
+  const data = (await res.json()) as { realms: { name: string; slug: string }[] };
+  const realms = data.realms.map((r) => ({ name: r.name, slug: r.slug })).sort((a, b) => a.name.localeCompare(b.name));
+
+  await env.SESSIONS.put(REALMS_CACHE_KEY, JSON.stringify(realms), { expirationTtl: REALMS_CACHE_TTL });
+  return realms;
+}
+
 export async function fetchAchievement(env: Env, id: number): Promise<Achievement> {
   const token = await getClientToken(env);
   const res = await fetch(

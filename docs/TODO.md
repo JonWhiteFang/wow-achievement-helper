@@ -6,16 +6,7 @@ Remaining tasks and improvements not yet implemented.
 
 ## High Priority (UX Issues)
 
-### 1. Realm selector should be a dropdown
-**Current:** Free-text input for realm name (easy to mistype)
-**Desired:** Dropdown with all EU realms fetched from Blizzard API
-
-**Implementation:**
-- Add `/api/realms` endpoint to worker that fetches from Blizzard's realm index
-- Cache realm list in KV (rarely changes)
-- Replace realm `<input>` in `CharacterLookup.tsx` with `<select>`
-
-**Files:** `workers/api/src/index.ts`, `apps/web/src/components/CharacterLookup.tsx`
+*No high priority items remaining*
 
 ---
 
@@ -275,6 +266,7 @@ Currently only manifest uses React Query. Character lookups and help fetches sti
 
 ## Completed ✅
 
+- [x] Realm selector dropdown (fetches EU realms from Blizzard API, cached in KV)
 - [x] Battle.net sign-in indicator (shows battletag when logged in)
 - [x] Character selector for logged-in users ("My Characters" button)
 - [x] Deep links with React Router
