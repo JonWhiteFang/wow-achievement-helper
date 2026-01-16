@@ -1,14 +1,22 @@
-import { useState } from "react";
-import type { Category } from "../lib/api";
+import { useState, useMemo } from "react";
+import type { Category, AchievementSummary } from "../lib/api";
+import { computeCategoryStats } from "../lib/categoryStats";
 
 type Props = {
   categories: Category[];
   selectedId: number | null;
   onSelect: (id: number | null) => void;
+  achievements?: AchievementSummary[];
+  completedIds?: Set<number>;
 };
 
-export function CategoryTree({ categories, selectedId, onSelect }: Props) {
+export function CategoryTree({ categories, selectedId, onSelect, achievements, completedIds }: Props) {
   const [expanded, setExpanded] = useState<Set<number>>(new Set());
+
+  const stats = useMemo(
+    () => (achievements ? computeCategoryStats(categories, achievements, completedIds) : null),
+    [categories, achievements, completedIds]
+  );
 
   const toggle = (id: number) => {
     const next = new Set(expanded);
@@ -21,13 +29,13 @@ export function CategoryTree({ categories, selectedId, onSelect }: Props) {
     const hasChildren = cat.children.length > 0;
     const isExpanded = expanded.has(cat.id);
     const isSelected = selectedId === cat.id;
+    const catStats = stats?.get(cat.id);
+    const pct = catStats && catStats.total > 0 ? Math.round((catStats.completed / catStats.total) * 100) : 0;
 
     return (
       <div key={cat.id}>
         <div
           style={{
-            display: "flex",
-            alignItems: "center",
             padding: "6px 8px",
             paddingLeft: 8 + depth * 16,
             background: isSelected ? "var(--panel-2)" : "transparent",
@@ -35,22 +43,36 @@ export function CategoryTree({ categories, selectedId, onSelect }: Props) {
             cursor: "pointer",
           }}
         >
-          {hasChildren ? (
-            <button
-              onClick={() => toggle(cat.id)}
-              style={{ background: "none", border: "none", color: "var(--muted)", cursor: "pointer", padding: 0, marginRight: 4, width: 16 }}
+          <div style={{ display: "flex", alignItems: "center" }}>
+            {hasChildren ? (
+              <button
+                onClick={() => toggle(cat.id)}
+                style={{ background: "none", border: "none", color: "var(--muted)", cursor: "pointer", padding: 0, marginRight: 4, width: 16 }}
+              >
+                {isExpanded ? "▼" : "▶"}
+              </button>
+            ) : (
+              <span style={{ width: 20 }} />
+            )}
+            <span
+              onClick={() => onSelect(cat.id)}
+              style={{ flex: 1, color: isSelected ? "var(--accent)" : "var(--text)" }}
             >
-              {isExpanded ? "▼" : "▶"}
-            </button>
-          ) : (
-            <span style={{ width: 20 }} />
+              {cat.name}
+            </span>
+          </div>
+          {catStats && completedIds && catStats.total > 0 && (
+            <div style={{ marginLeft: hasChildren ? 20 : 20, marginTop: 2 }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                <div style={{ flex: 1, height: 3, background: "var(--panel-2)", borderRadius: 2 }}>
+                  <div style={{ width: `${pct}%`, height: "100%", background: pct === 100 ? "var(--success)" : "var(--warning)", borderRadius: 2 }} />
+                </div>
+                <span style={{ fontSize: 10, color: "var(--muted)", whiteSpace: "nowrap" }}>
+                  {catStats.completed}/{catStats.total} ({pct}%)
+                </span>
+              </div>
+            </div>
           )}
-          <span
-            onClick={() => onSelect(cat.id)}
-            style={{ flex: 1, color: isSelected ? "var(--accent)" : "var(--text)" }}
-          >
-            {cat.name}
-          </span>
         </div>
         {hasChildren && isExpanded && cat.children.map((c) => renderCategory(c, depth + 1))}
       </div>

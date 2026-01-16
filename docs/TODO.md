@@ -12,17 +12,6 @@ Remaining tasks and improvements not yet implemented.
 
 ## Medium Priority (Polish)
 
-### 3. Category completion bars
-**Current:** Categories show count only
-**Desired:** Visual progress bars on category tree nodes
-
-**Implementation:**
-- Calculate % complete per category
-- Add small progress bar to CategoryTree nodes
-- Update on character progress load
-
----
-
 ### 4. "Recently completed" list
 **Current:** No way to see recent completions
 **Desired:** Show last 10-20 completed achievements
@@ -184,6 +173,7 @@ Currently only manifest uses React Query. Character lookups and help fetches sti
 
 ## Completed ✅
 
+- [x] Category completion bars (recursive progress with bar + count + percentage)
 - [x] Points display in header and section (earned/total)
 - [x] "Near complete" filter (80%+ progress achievements)
 - [x] Achievement icons from Blizzard CDN (list + drawer, with placeholder fallback). **Note:** Requires manifest rebuild after deploy via `/api/admin/build-manifest?reset=true`

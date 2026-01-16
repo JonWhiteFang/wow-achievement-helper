@@ -213,7 +213,7 @@ function AppContent() {
           </div>
         </div>
       )}
-      <CategoryTree categories={categories} selectedId={selectedCategory} onSelect={handleCategorySelect} />
+      <CategoryTree categories={categories} selectedId={selectedCategory} onSelect={handleCategorySelect} achievements={achievements} completedIds={completedIds} />
     </>
   );
 
