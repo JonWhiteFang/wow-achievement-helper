@@ -8,6 +8,7 @@ export type AchievementSummary = {
   points: number;
   categoryId: number;
   icon?: string;
+  isAccountWide?: boolean;
 };
 
 export type Manifest = {
@@ -127,7 +128,7 @@ export async function buildManifestIncremental(env: Env): Promise<{ done: boolea
       state.phase = "done";
     } else {
       const batch = state.mediaQueue.splice(0, MEDIA_BATCH_SIZE);
-      const achievementMap = new Map<number, { icon?: string; points?: number }>();
+      const achievementMap = new Map<number, { icon?: string; points?: number; isAccountWide?: boolean }>();
       
       const results = await Promise.all(
         batch.map(async (id) => {
@@ -137,26 +138,29 @@ export async function buildManifestIncremental(env: Env): Promise<{ done: boolea
           ]);
           let icon: string | undefined;
           let points: number | undefined;
+          let isAccountWide: boolean | undefined;
           if (mediaRes.ok) {
             const data = (await mediaRes.json()) as BlizzardMediaResponse;
             icon = data.assets?.find((a) => a.key === "icon")?.value;
           }
           if (detailRes.ok) {
-            const data = (await detailRes.json()) as { points?: number };
+            const data = (await detailRes.json()) as { points?: number; is_account_wide?: boolean };
             points = data.points;
+            isAccountWide = data.is_account_wide;
           }
-          return { id, icon, points };
+          return { id, icon, points, isAccountWide };
         })
       );
 
       for (const r of results) {
-        if (r.icon || r.points !== undefined) achievementMap.set(r.id, { icon: r.icon, points: r.points });
+        if (r.icon || r.points !== undefined || r.isAccountWide !== undefined) achievementMap.set(r.id, { icon: r.icon, points: r.points, isAccountWide: r.isAccountWide });
       }
 
       for (const a of state.achievements) {
         const data = achievementMap.get(a.id);
         if (data?.icon) a.icon = data.icon;
         if (data?.points !== undefined) a.points = data.points;
+        if (data?.isAccountWide !== undefined) a.isAccountWide = data.isAccountWide;
       }
 
       await env.SESSIONS.put(BUILD_STATE_KEY, JSON.stringify(state), { expirationTtl: 3600 });

@@ -13,6 +13,7 @@ type Props = {
   filter?: "all" | "completed" | "incomplete" | "near";
   sort?: "name" | "points" | "completion";
   showDates?: boolean;
+  accountWideOnly?: boolean;
 };
 
 const ROW_HEIGHT = 44;
@@ -27,7 +28,7 @@ function AchievementIcon({ src, size = 20 }: { src?: string; size?: number }) {
   return <img src={src} alt="" loading="lazy" style={{ ...style, objectFit: "cover" }} onError={() => setFailed(true)} />;
 }
 
-export function AchievementList({ achievements, onSelect, completedIds, progress, filter = "all", sort = "name", showDates }: Props) {
+export function AchievementList({ achievements, onSelect, completedIds, progress, filter = "all", sort = "name", showDates, accountWideOnly }: Props) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [height, setHeight] = useState(400);
 
@@ -41,6 +42,9 @@ export function AchievementList({ achievements, onSelect, completedIds, progress
   }, []);
 
   let filtered = achievements;
+  if (accountWideOnly) {
+    filtered = filtered.filter((a) => a.isAccountWide);
+  }
   if (completedIds && filter !== "all") {
     if (filter === "completed") {
       filtered = filtered.filter((a) => completedIds.has(a.id));

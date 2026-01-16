@@ -12,17 +12,6 @@ Remaining tasks and improvements not yet implemented.
 
 ## Medium Priority (Polish)
 
-### 6. "Account-wide only" toggle
-**Current:** Shows all achievements
-**Desired:** Filter to show only account-wide achievements
-
-**Implementation:**
-- Use `isAccountWide` field from achievement data
-- Add toggle in filter bar
-- Useful for alt players focusing on account progress
-
----
-
 ### 7. Meta achievement highlighting
 **Current:** Meta achievements look like regular achievements
 **Desired:** Visual distinction + show sub-achievement progress inline
@@ -151,6 +140,7 @@ Currently only manifest uses React Query. Character lookups and help fetches sti
 
 ## Completed ✅
 
+- [x] "Account-wide only" toggle (filter to show only account-wide achievements)
 - [x] Expansion filter (dropdown to filter by Classic, TBC, Wrath, etc.)
 - [x] "Recently completed" list (last 20 achievements with completion dates in sidebar)
 - [x] Category completion bars (recursive progress with bar + count + percentage)

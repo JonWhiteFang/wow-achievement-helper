@@ -12,6 +12,7 @@ export type AchievementSummary = {
   points?: number;
   categoryId: number;
   icon?: string;
+  isAccountWide?: boolean;
 };
 
 export type Achievement = {

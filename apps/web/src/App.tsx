@@ -47,6 +47,7 @@ function AppContent() {
   const [filter, setFilter] = useState<"all" | "completed" | "incomplete" | "near">("all");
   const [sort, setSort] = useState<SortMode>("name");
   const [expansion, setExpansion] = useState<Expansion | "all">("all");
+  const [accountWideOnly, setAccountWideOnly] = useState(false);
 
   const [auth, setAuth] = useState<AuthStatus>({ loggedIn: false });
   const [sessionExpired, setSessionExpired] = useState(false);
@@ -290,6 +291,10 @@ function AppContent() {
           <option value="all">All Xpacs</option>
           {EXPANSIONS.map((e) => <option key={e} value={e}>{EXPANSION_LABELS[e]}</option>)}
         </select>
+        <label style={{ display: "flex", alignItems: "center", gap: 4, fontSize: 12, cursor: "pointer" }}>
+          <input type="checkbox" checked={accountWideOnly} onChange={(e) => setAccountWideOnly(e.target.checked)} />
+          {isMobile ? "Acct" : "Account-wide"}
+        </label>
         <div style={{ marginLeft: "auto" }}>
           <AuthButton loggedIn={auth.loggedIn} battletag={auth.battletag} onLogout={() => setAuth({ loggedIn: false })} />
         </div>
@@ -361,6 +366,7 @@ function AppContent() {
               filter={filter}
               sort={sort}
               showDates={selectedCategory === RECENT_CATEGORY_ID}
+              accountWideOnly={accountWideOnly}
             />
           </div>
         </main>
