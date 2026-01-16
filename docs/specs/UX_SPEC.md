@@ -6,7 +6,6 @@
   - faster search
   - better filters
   - richer help panel
-  - pinned workspace + notes (planned)
 - Instant navigation:
   - render from cached catalogue first
   - overlay completion/progress when it arrives
@@ -34,8 +33,8 @@ Elements:
 
 - EU-only indicator
 - Character lookup:
-  - Realm (text input, TODO: dropdown)
-  - Character name
+  - Realm selector dropdown (fetches from `/api/realms`)
+  - Character name input
 - CTA: "Sign in with Battle.net"
 - Recent characters (local)
 
@@ -48,39 +47,49 @@ Elements:
 - Character selector (guest: current char; logged-in: merged or single)
 - Global search input (fuzzy search via Fuse.js)
 - Filter pills:
-  - Completed / Incomplete / All
+  - All / Completed / Incomplete / Near Complete (80%+)
+- Sort dropdown:
+  - Name / Points / Completion
+- Expansion filter dropdown:
+  - All / Classic / TBC / Wrath / Cata / MoP / WoD / Legion / BfA / Shadowlands / Dragonflight / War Within
+- Points display: "X / Y pts" (earned / total for current view)
 - Battletag display (when logged in)
 - "My Characters" button (when logged in)
 
 **Left panel: Category Tree**
 
-- Expand/collapse with chevrons
+- Expand/collapse with chevrons (▶/▼)
 - Breadcrumb display (selected path)
-- Recent categories (last 5, localStorage)
-- Shows counts (e.g., incomplete in category)
+- Recent categories section (last 5, localStorage)
+- "Recently Completed" virtual category (last 20 achievements by completion date)
+- Category completion bars showing:
+  - Progress bar (visual)
+  - Count: "X / Y"
+  - Percentage: "(Z%)"
 
 **Center panel: Achievement List**
 
 - Virtualized list (react-window) for performance
-- Each row:
-  - completion indicator (✓ or progress)
-  - achievement name
-  - points
-  - progress bar if incomplete
+- Each row shows:
+  - Achievement icon (from Blizzard CDN, with placeholder fallback)
+  - Completion indicator (✓ green, progress bar amber, empty gray)
+  - Achievement name
+  - Points badge
+  - Progress bar if incomplete with criteria progress
 
 **Right drawer: Achievement Detail**
 
 Tabbed:
 
-- Overview (description, reward, points, category breadcrumb)
-- Criteria (checklist with progress)
+- Overview (description, reward, points, category breadcrumb, icon)
+- Criteria (checklist with progress indicators)
 - Strategy (curated steps from providers)
 - Community (top comments from Wowhead)
 
 Actions:
 
 - Refresh (re-fetch progress/help content)
-- "Open on Wowhead" link (always)
+- "Open on Wowhead" link (always present)
 
 ### 3) Logged-in Character Selector Modal
 
@@ -95,30 +104,66 @@ Actions:
 ## Key Interactions
 
 - Search:
-  - fuzzy search over local index (Fuse.js)
-  - filtering is instant client-side
+  - Fuzzy search over local index (Fuse.js)
+  - Filtering is instant client-side
+  - Debounced input (500ms)
 - Category selection:
-  - updates list to achievements under that category (and descendants)
-  - updates breadcrumb
+  - Updates list to achievements under that category (and descendants)
+  - Updates breadcrumb
+  - Adds to recent categories
 - Achievement click:
-  - opens right drawer
-  - fetches `/api/achievement/:id` if not cached
-  - fetches `/api/help/achievement/:id?top=10`
+  - Opens right drawer
+  - Fetches `/api/achievement/:id` if not cached
+  - Fetches `/api/help/achievement/:id?top=10`
 - Deep linking:
   - `/#/achievement/:id` opens drawer directly
   - `/#/category/:id` selects category
+  - `?character=realm/name` loads character progress
+
+## Filters and Sorting
+
+**Filter options:**
+- All: Show all achievements
+- Completed: Show only completed achievements
+- Incomplete: Show only incomplete achievements
+- Near Complete: Show achievements with 80%+ criteria progress
+
+**Sort options:**
+- Name: Alphabetical A-Z
+- Points: Highest points first
+- Completion: Completed first, then by progress percentage
+
+**Expansion filter:**
+- Maps categories to expansions based on category hierarchy
+- Client-side filtering using `buildCategoryExpansionMap`
+
+## Points Display
+
+- Header shows: "X / Y pts" for current filtered view
+- X = sum of points for completed achievements
+- Y = sum of points for all achievements in view
+- Updates dynamically with filters
+
+## Recently Completed
+
+- Virtual category in left panel
+- Shows last 20 achievements completed (by timestamp)
+- Only visible when character progress is loaded
+- Sorted by completion date (newest first)
+- Shows completion date in list
+
+## Achievement Icons
+
+- Loaded from Blizzard CDN: `https://render.worldofwarcraft.com/eu/icons/56/{icon}.jpg`
+- Placeholder shown on load failure
+- Icons included in manifest data
 
 ## Client-side Storage
 
 Local-only (localStorage):
-- saved characters (guest)
-- merge selection (logged-in)
-- recent categories
-- recent searches
-
-Planned (see TODO.md):
-- pinned achievements
-- notes per achievement
+- Saved characters (guest)
+- Merge selection (logged-in)
+- Recent categories (last 5)
 
 ## Error States
 
@@ -131,11 +176,13 @@ All views handle:
 
 ## Responsive Design
 
-Current:
-- 3-pane layout on desktop
-- Basic mobile support
+**Desktop (>768px):**
+- 3-pane layout: category tree | achievement list | detail drawer
+- All panels visible simultaneously
 
-Planned (see TODO.md):
-- Category panel: slide-in drawer on mobile
-- Achievement drawer: full-screen overlay on mobile
-- Header stacking on narrow screens
+**Mobile (≤768px):**
+- Category panel: slide-in drawer (toggle button in header)
+- Achievement list: full width
+- Achievement drawer: full-screen overlay with close button
+- Header elements stack/collapse as needed
+- Touch-friendly tap targets

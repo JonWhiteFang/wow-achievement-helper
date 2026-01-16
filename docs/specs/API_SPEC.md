@@ -32,7 +32,7 @@ Starts OAuth login (Authorization Code + PKCE).
 Behavior:
 
 - Generates `state`, `code_verifier`, `code_challenge`
-- Stores state + code_verifier temporarily (KV or encrypted cookie)
+- Stores state + code_verifier temporarily (KV)
 - Redirects user to Battle.net authorization URL
 
 Response:
@@ -49,7 +49,7 @@ Behavior:
 - Exchanges code -> tokens (server-side)
 - Creates a session in KV
 - Sets `Set-Cookie: session_id=...; HttpOnly; Secure; SameSite=Lax; Path=/`
-- Redirects back to frontend (e.g. `/app`)
+- Redirects back to frontend
 
 Response:
 
@@ -74,6 +74,12 @@ Response 200 (not logged in):
 { "loggedIn": false }
 ```
 
+Response 200 (session expired):
+
+```json
+{ "loggedIn": false, "sessionExpired": true }
+```
+
 ### `POST /auth/logout`
 
 Clears session cookie and removes KV entry.
@@ -90,7 +96,7 @@ Response 200:
 
 ### `GET /api/manifest`
 
-Returns the full achievement catalogue in a single request: nested category tree + all achievement summaries.
+Returns the full achievement catalogue: nested category tree + all achievement summaries.
 
 This is the **preferred endpoint** for initial data loading. Built incrementally via scheduled worker and cached in KV.
 
@@ -111,7 +117,7 @@ Response 200:
     }
   ],
   "achievements": [
-    { "id": 12345, "name": "Achievement Name", "points": 10, "categoryId": 92 }
+    { "id": 12345, "name": "Achievement Name", "points": 10, "categoryId": 92, "icon": "achievement_icon" }
   ],
   "builtAt": "2026-01-14T00:00:00Z"
 }
@@ -132,19 +138,13 @@ Legacy endpoint. Returns the category tree (proxies manifest data).
 
 Caching:
 
-- 24h+ (stale-while-revalidate)
+- Response: 24h + SWR
 
-Response 200 (example shape):
+Response 200:
 
 ```json
 {
-  "categories": [
-    {
-      "id": 92,
-      "name": "General",
-      "children": [{ "id": 96, "name": "Quests", "children": [] }]
-    }
-  ],
+  "categories": [...],
   "achievements": [...],
   "generatedAt": "2026-01-14T00:00:00Z"
 }
@@ -156,9 +156,9 @@ Returns achievement definition and criteria.
 
 Caching:
 
-- 24h+
+- Response: 24h + SWR
 
-Response 200 (example):
+Response 200:
 
 ```json
 {
@@ -167,10 +167,30 @@ Response 200 (example):
   "description": "Do the thing",
   "points": 10,
   "isAccountWide": true,
-  "reward": { "title": null, "item": null },
+  "reward": { "title": null, "item": { "id": 123, "name": "Item Name" } },
   "categoryId": 92,
   "criteria": [
     { "id": 1, "description": "Kill X", "amount": 1 }
+  ],
+  "icon": "achievement_icon"
+}
+```
+
+### `GET /api/realms`
+
+Returns list of EU realms for the realm selector dropdown.
+
+Caching:
+
+- Response: 1h + SWR
+
+Response 200:
+
+```json
+{
+  "realms": [
+    { "name": "Argent Dawn", "slug": "argent-dawn" },
+    { "name": "Silvermoon", "slug": "silvermoon" }
   ]
 }
 ```
@@ -185,9 +205,12 @@ Public character achievement state.
 
 Notes:
 
-- This can fail if the character hides achievements via privacy settings.
-- Use a short cache (1–5m).
-- Realm normalization and slug rules must match Blizzard expectations.
+- Fails if character hides achievements via privacy settings.
+- Realm should be the slug (lowercase, hyphenated).
+
+Caching:
+
+- Response: 5m + SWR
 
 Response 200:
 
@@ -195,6 +218,7 @@ Response 200:
 {
   "character": { "realm": "silvermoon", "name": "Someguy" },
   "completed": [12345, 67890],
+  "completedAt": { "12345": 1704067200, "67890": 1704153600 },
   "progress": {
     "12346": { "completedCriteria": 2, "totalCriteria": 5 }
   },
@@ -237,7 +261,7 @@ Response 200:
 Response 401:
 
 ```json
-{ "error": "UNAUTHENTICATED" }
+{ "error": "UNAUTHENTICATED", "message": "Not logged in" }
 ```
 
 ---
@@ -261,9 +285,10 @@ Request body:
 
 Behavior:
 
-- Fetches each character’s achievements
+- Fetches each character's achievements (with concurrency control)
 - Merges into a unified account-wide view:
   - Completed: union of completed IDs
+  - CompletedAt: earliest completion timestamp per achievement
   - Progress: best-known progress by achievement
 
 Response 200:
@@ -272,6 +297,7 @@ Response 200:
 {
   "merged": {
     "completed": [12345, 67890],
+    "completedAt": { "12345": 1704067200 },
     "progress": {
       "12346": { "completedCriteria": 3, "totalCriteria": 5 }
     }
@@ -290,11 +316,11 @@ Response 200:
 
 ### `GET /api/help/achievement/:id?top=10`
 
-Returns normalized help content.
+Returns normalized help content from providers.
 
 Caching:
 
-- 6–24h
+- Response: 12h
 
 Response 200:
 
@@ -304,10 +330,7 @@ Response 200:
   "strategy": [
     {
       "title": "Route / Setup",
-      "steps": [
-        "Step 1...",
-        "Step 2..."
-      ]
+      "steps": ["Step 1...", "Step 2..."]
     }
   ],
   "comments": [
@@ -324,38 +347,6 @@ Response 200:
 }
 ```
 
-Fallback behavior:
-
-- If no providers yield structured content, return:
-  - empty `strategy/comments`
-  - sources includes link-only Wowhead deep link
-
----
-
-## Error Conventions
-
-All non-2xx responses MUST follow:
-
-```json
-{
-  "error": "SOME_CODE",
-  "message": "Human readable",
-  "details": { "optional": true }
-}
-```
-
-Common error codes:
-
-- `UNAUTHENTICATED`
-- `NOT_PUBLIC`
-- `NOT_FOUND`
-- `NOT_READY`
-- `RATE_LIMITED`
-- `UPSTREAM_ERROR`
-- `BLIZZARD_ERROR`
-- `BUILD_ERROR`
-- `INVALID_INPUT`
-
 ---
 
 ## Admin Endpoints
@@ -371,17 +362,60 @@ Query params:
 Response 200:
 
 ```json
-{
-  "done": false,
-  "progress": "Building category 15 of 120"
-}
+{ "done": false, "progress": "Building category 15 of 120" }
 ```
 
 Response 200 (complete):
 
 ```json
+{ "done": true, "progress": "Complete" }
+```
+
+Response 200 (reset):
+
+```json
+{ "reset": true }
+```
+
+---
+
+## Error Conventions
+
+All non-2xx responses follow:
+
+```json
 {
-  "done": true,
-  "progress": "Complete"
+  "error": "SOME_CODE",
+  "message": "Human readable",
+  "details": { "optional": true }
 }
 ```
+
+Common error codes:
+
+| Code | HTTP Status | Description |
+|------|-------------|-------------|
+| `UNAUTHENTICATED` | 401 | Missing or invalid session |
+| `SESSION_EXPIRED` | 401 | Session has expired |
+| `NOT_PUBLIC` | 403 | Character achievements are private |
+| `NOT_FOUND` | 404 | Resource not found |
+| `NOT_READY` | 503 | Manifest still building |
+| `RATE_LIMITED` | 429 | Too many requests |
+| `UPSTREAM_ERROR` | 502 | Blizzard API error |
+| `BLIZZARD_ERROR` | 502 | Blizzard API error |
+| `BUILD_ERROR` | 500 | Manifest build failed |
+| `INVALID_INPUT` | 400 | Invalid request parameters |
+
+---
+
+## Caching Summary
+
+| Endpoint | Response Cache | Notes |
+|----------|---------------|-------|
+| `/api/manifest` | 1h + SWR | KV: 24h |
+| `/api/categories` | 24h + SWR | Legacy |
+| `/api/achievement/:id` | 24h + SWR | |
+| `/api/realms` | 1h + SWR | |
+| `/api/character/.../achievements` | 5m + SWR | |
+| `/api/help/achievement/:id` | 12h | |
+| `/api/me/*` | No cache | Auth required |

@@ -7,10 +7,10 @@ Build a World of Warcraft (Retail, EU-only) achievement helper website that:
 - Lets users browse achievements in a logical, in-game-like category tree
 - Supports fast global search + modern filters
 - Lets users view achievement details (criteria/progress/reward)
-- Shows a help panel with strategy + community tips (curated first, Wowhead fallback)
+- Shows a help panel with strategy + community tips
 - Supports both:
   - Guest public character lookup
-  - Battle.net login (Authorization Code + PKCE) for better account-wide accuracy
+  - Battle.net login for account-wide merge view
 
 Hosting:
 
@@ -19,7 +19,7 @@ Hosting:
 
 Non-goals:
 
-- No multi-language (assume English only)
+- No multi-language (English only)
 - No server-side storage of user content (pins/notes remain client-side only)
 
 ## Current Status
@@ -27,6 +27,39 @@ Non-goals:
 ✅ **All core features implemented** — see `IMPLEMENTATION_PLAN.md`
 
 Remaining polish items tracked in `TODO.md`.
+
+## Features
+
+### Core
+- ✅ Browse achievements by category (deep nested tree)
+- ✅ Fuzzy search achievements (Fuse.js)
+- ✅ View achievement details (criteria, rewards, description)
+- ✅ Guest character lookup with progress overlay
+- ✅ Battle.net login with OAuth
+- ✅ Account-wide merge across multiple characters
+- ✅ Strategy tips and community comments
+
+### Filtering & Sorting
+- ✅ Filter: All / Completed / Incomplete / Near Complete (80%+)
+- ✅ Sort: Name / Points / Completion
+- ✅ Expansion filter dropdown
+
+### UI Enhancements
+- ✅ Realm selector dropdown (fetches EU realms)
+- ✅ Points display (earned / total)
+- ✅ Recently completed achievements list
+- ✅ Category completion bars with progress
+- ✅ Achievement icons from Blizzard CDN
+- ✅ Breadcrumb navigation
+- ✅ Recent categories
+- ✅ Mobile responsive layout
+
+### Technical
+- ✅ List virtualization (react-window)
+- ✅ React Query for caching
+- ✅ Deep linking with React Router
+- ✅ Session expiry handling
+- ✅ Playwright smoke tests
 
 ## Key Product Constraints
 
@@ -55,20 +88,18 @@ Frontend:
 - Fuse.js for fuzzy search
 - react-window for list virtualization
 - React Router (hash routing)
-- Client-side storage: localStorage for pins, notes, saved characters
+- Client-side storage: localStorage
 
 Backend:
 
 - Cloudflare Worker (TypeScript)
 - KV for session storage and manifest caching
 - Scheduled worker for manifest building
-- Strong caching for Game Data and strategy/community responses
-- CORS enabled for GitHub Pages origin
 
 Data sources:
 
 - Blizzard Game Data API (achievement catalogue & categories)
-- Blizzard Profile API (character achievements; user character list via `/profile/user/wow`)
+- Blizzard Profile API (character achievements; user character list)
 - Curated strategy files + Wowhead (fallback)
 
 ## Repo Layout

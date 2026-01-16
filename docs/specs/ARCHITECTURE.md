@@ -2,20 +2,35 @@
 
 ## High-Level Architecture
 
-**GitHub Pages (Static SPA)**
-
-- Renders the UI
-- Calls backend for Blizzard data and help content
-- Stores user pins/notes locally (no server persistence)
-
-**Cloudflare Worker (API Proxy + OAuth + Aggregation)**
-
-- Performs server-side OAuth exchanges (keeps client secrets out of the browser)
-- Calls Blizzard APIs (EU-only)
-- Aggregates help content (strategy + community tips) from providers
-- Applies caching + normalization
-- Sets session cookies (HTTPOnly)
-- Runs scheduled tasks (manifest building)
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                     GitHub Pages (Static SPA)                    │
+│  React + Vite + TypeScript                                       │
+│  - Renders UI                                                    │
+│  - Calls backend for Blizzard data and help content              │
+│  - Stores user data locally (no server persistence)              │
+└─────────────────────────────────────────────────────────────────┘
+                              │
+                              │ HTTPS (credentials: include)
+                              ▼
+┌─────────────────────────────────────────────────────────────────┐
+│              Cloudflare Worker (API Proxy + OAuth)               │
+│  - Server-side OAuth exchanges (secrets stay server-side)        │
+│  - Calls Blizzard APIs (EU-only)                                 │
+│  - Aggregates help content from providers                        │
+│  - Applies caching + normalization                               │
+│  - Sets session cookies (HTTPOnly)                               │
+│  - Runs scheduled tasks (manifest building)                      │
+└─────────────────────────────────────────────────────────────────┘
+                              │
+                              ▼
+┌─────────────────────────────────────────────────────────────────┐
+│                    Cloudflare KV Storage                         │
+│  - Session storage (keyed by session_id)                         │
+│  - Manifest cache                                                │
+│  - Build state for incremental manifest                          │
+└─────────────────────────────────────────────────────────────────┘
+```
 
 ## Token Modes
 
@@ -23,13 +38,13 @@
 
 Use for:
 
-- Blizzard Game Data API calls (categories and achievement definitions)
+- Blizzard Game Data API calls (categories, achievements, realms)
 
 Worker responsibilities:
 
 - Fetch token from EU OAuth token endpoint (client_credentials)
-- Cache until expiry (in-memory + optionally KV)
-- Apply rate-limiting guardrails and caching
+- Cache until expiry (in-memory)
+- Apply caching to responses
 
 ### 2) User OAuth Token (Authorization Code + PKCE)
 
@@ -44,13 +59,13 @@ Worker responsibilities:
 - Receive callback with `code`
 - Exchange code for tokens server-side (using client secret)
 - Create server-side session (KV) and set HTTPOnly cookie
-- Refresh tokens if supported/needed; otherwise re-auth
+- Refresh tokens if needed; otherwise re-auth
 
 ## Data Flow
 
 ### Guest Mode
 
-1) User enters (realm, character name)
+1) User selects realm from dropdown and enters character name
 2) Frontend calls `/api/character/:realm/:name/achievements`
 3) Frontend overlays completion/progress over cached achievement catalogue
 
@@ -74,24 +89,28 @@ Worker responsibilities:
 
 ### Manifest (full catalogue)
 
-- Built incrementally via scheduled worker or admin endpoint
-- Stored in KV with 24h TTL
+- Built incrementally via scheduled worker
+- Stored in KV with key `manifest:v1` (24h TTL)
 - Response cache: 1h + SWR
-- Single request loads entire category tree + achievement index
+- Single request loads entire category tree + achievement index + icons
 
-### Blizzard Game Data (slow-changing)
+### Blizzard Game Data
 
-- Cache aggressively (24h–7d)
-- Use stale-while-revalidate for responsiveness
+| Data | Response Cache | Notes |
+|------|---------------|-------|
+| Manifest | 1h + SWR | KV: 24h |
+| Categories | 24h + SWR | Legacy endpoint |
+| Achievement details | 24h + SWR | |
+| Realms | 1h + SWR | For realm selector |
 
 ### Blizzard Profile (character achievements)
 
-- Cache short (5m)
+- Response cache: 5m + SWR
 - Provide "Refresh" button in UI for user-triggered refetch
 
 ### Help Providers (strategy/community)
 
-- Cache per achievement (12h)
+- Response cache: 12h
 - Provide "Refresh help" button
 - Always include source deep links
 
@@ -101,33 +120,50 @@ The Worker exports a `scheduled` handler that runs periodically (configured via 
 
 - Runs one iteration of incremental manifest build
 - Builds category tree and achievement index in batches to avoid timeout
-- Progress stored in KV between invocations
+- Progress stored in KV (`manifest:build-state`) between invocations
+- Logs progress: `Manifest build: {progress}`
 
 ## Security Model
 
 - No client secrets in frontend
 - Worker uses:
   - HTTPOnly session cookie
-  - KV session store (tokens + expiry)
+  - KV session store (tokens + expiry + battletag)
 - Strict CORS to allow only GitHub Pages origin
-- Sanitize all third-party content; do not render untrusted HTML without sanitization
-- Limit logged-in scopes to minimum required
+- Sanitize all third-party content; do not render untrusted HTML
+- Limit logged-in scopes to minimum required (`wow.profile`)
 
 ## Frontend Architecture
 
 ### State Management
 
-- React Query for server state (manifest, help content)
-- Local state for UI (selected category, drawer open/close)
-- localStorage for persistence (saved characters, merge selections, recent categories)
+- React Query for server state (manifest)
+- Local state for UI (selected category, drawer open/close, filters)
+- localStorage for persistence:
+  - Saved characters
+  - Merge selections
+  - Recent categories
 
 ### Routing
 
 - React Router with hash routing for GitHub Pages compatibility
-- Routes: `/#/`, `/#/achievement/:id`, `/#/category/:id`
+- Routes:
+  - `/#/` — Home
+  - `/#/category/:categoryId` — Category selected
+  - `/#/category/:categoryId/achievement/:achievementId` — Achievement drawer open
+  - `/#/achievement/:achievementId` — Achievement drawer (no category)
+- Query params:
+  - `?character=realm/name` — Load character progress
 
 ### Performance
 
 - List virtualization with react-window
 - Fuzzy search with Fuse.js (client-side, no server round-trips)
 - Manifest loaded once, cached via React Query
+- Achievement icons lazy-loaded with placeholder fallback
+
+### Client-side Filtering
+
+- Expansion filter: Maps categories to expansions using `buildCategoryExpansionMap`
+- All filtering (completed/incomplete/near/expansion) happens client-side
+- Points calculation done client-side from loaded data

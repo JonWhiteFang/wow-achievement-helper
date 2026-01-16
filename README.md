@@ -6,10 +6,13 @@ A World of Warcraft achievement browser and tracker for EU Retail.
 
 - ✅ Browse achievement catalogue by category (deep nested tree)
 - ✅ Fuzzy search achievements
+- ✅ Filter by completion status, expansion, near-complete
 - ✅ View completion status for any public character
 - ✅ Login with Battle.net to see your own characters
 - ✅ Merge view across multiple characters for account-wide progress
 - ✅ Strategy tips and community comments
+- ✅ Points tracking and category progress bars
+- ✅ Mobile responsive layout
 
 ## Tech Stack
 
@@ -35,17 +38,35 @@ npm run test
 npm run typecheck
 ```
 
+See [Local Development Guide](docs/guides/LOCAL_DEVELOPMENT.md) for detailed setup instructions.
+
 ## Links
 
 - **Live site:** https://jonwhitefang.github.io/wow-achievement-helper/
 - **API:** https://wow-achievement-helper-api.jono2411.workers.dev/
 
-## Docs
+## Documentation
 
-See `/docs` for architecture, API spec, and implementation plan:
+### Getting Started
+- [Local Development](docs/guides/LOCAL_DEVELOPMENT.md) — Setup guide
+- [Troubleshooting](docs/guides/TROUBLESHOOTING.md) — Common issues
 
-- `API_SPEC.md` — endpoint shapes and error conventions
-- `ARCHITECTURE.md` — flows, caching, security model
-- `UX_SPEC.md` — UI behaviors and layout
-- `IMPLEMENTATION_PLAN.md` — milestones (all complete)
-- `TODO.md` — remaining polish items
+### Reference
+- [API Reference](docs/API_REFERENCE.md) — Quick API reference
+- [API Spec](docs/specs/API_SPEC.md) — Detailed endpoint specs
+- [Architecture](docs/specs/ARCHITECTURE.md) — System design
+
+### Architecture
+- [Frontend Architecture](docs/architecture/FRONTEND_ARCHITECTURE.md)
+- [Worker Architecture](docs/architecture/WORKER_ARCHITECTURE.md)
+
+### Project
+- [Project Overview](docs/PROJECT_OVERVIEW.md) — Goals and status
+- [Implementation Plan](docs/IMPLEMENTATION_PLAN.md) — Milestones (all complete)
+- [TODO](docs/TODO.md) — Remaining polish items
+
+## Contributing
+
+See [CONTRIBUTING.md](.kiro/steering/CONTRIBUTING.md) for guidelines.
+
+The easiest way to contribute is adding achievement strategies — see [strategy README](workers/api/src/data/strategy/README.md).
