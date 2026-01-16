@@ -1,0 +1,16 @@
+{
+  "id": 7520,
+  "name": "The Loremaster",
+  "strategy": [
+    {
+      "title": "Systematic Approach",
+      "steps": [
+        "Use an addon like BTWQuests or Loremaster to track progress per zone",
+        "Start with your faction's home continent (Eastern Kingdoms for Alliance, Kalimdor for Horde)",
+        "Complete each zone fully before moving to the next",
+        "Check for breadcrumb quests at capital city boards",
+        "Some quests require specific prerequisites - check Wowhead comments for chains"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,30 @@
+{
+  "id": 2144,
+  "name": "What a Long, Strange Trip It's Been",
+  "strategy": [
+    {
+      "title": "Year-Long Planning",
+      "steps": [
+        "This meta-achievement requires completing all major holiday achievements",
+        "Start tracking during Lunar Festival (late January/February)",
+        "Mark your calendar for each holiday event",
+        "Noblegarden and Children's Week are often the most time-sensitive",
+        "Some achievements require PvP (School of Hard Knocks) - prepare accordingly"
+      ]
+    },
+    {
+      "title": "Holiday Order",
+      "steps": [
+        "Lunar Festival (Jan-Feb): Elders",
+        "Love is in the Air (Feb): Fool For Love",
+        "Noblegarden (Apr): Noble Gardener",
+        "Children's Week (May): For the Children",
+        "Midsummer (Jun-Jul): Flame Keeper/Warden",
+        "Brewfest (Sep-Oct): Brewmaster",
+        "Hallow's End (Oct): Hallowed Be Thy Name",
+        "Pilgrim's Bounty (Nov): Pilgrim",
+        "Winter Veil (Dec-Jan): Merrymaker"
+      ]
+    }
+  ]
+}

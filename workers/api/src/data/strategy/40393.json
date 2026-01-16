@@ -1,0 +1,15 @@
+{
+  "id": 40393,
+  "name": "Completion of the Earthen Saga",
+  "strategy": [
+    {
+      "title": "Campaign Completion",
+      "steps": [
+        "Complete all main story chapters in Khaz Algar zones",
+        "Follow the breadcrumb quests from each zone hub",
+        "Isle of Dorn → The Ringing Deeps → Hallowfall → Azj-Kahet",
+        "Some chapters unlock at specific renown levels with factions"
+      ]
+    }
+  ]
+}
