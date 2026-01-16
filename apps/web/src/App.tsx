@@ -7,6 +7,7 @@ import { useSearch } from "./lib/search";
 import { calculatePoints, formatPoints } from "./lib/points";
 import { buildCategoryExpansionMap, EXPANSIONS, EXPANSION_LABELS, type Expansion } from "./lib/expansions";
 import { CategoryTree, RECENT_CATEGORY_ID } from "./components/CategoryTree";
+import { ProgressStats } from "./components/ProgressStats";
 import { AchievementList } from "./components/AchievementList";
 import { AchievementDrawer } from "./components/AchievementDrawer";
 import { CharacterLookup } from "./components/CharacterLookup";
@@ -246,6 +247,11 @@ function AppContent() {
         </div>
       )}
       <CategoryTree categories={categories} selectedId={selectedCategory} onSelect={handleCategorySelect} achievements={achievements} completedIds={completedIds} hasCompletedAt={!!completedAt && Object.keys(completedAt).length > 0} />
+      {completedIds && completedIds.size > 0 && (
+        <div style={{ borderTop: "1px solid var(--border)", marginTop: 8 }}>
+          <ProgressStats achievements={achievements} completedIds={completedIds} categories={categories} />
+        </div>
+      )}
     </>
   );
 
