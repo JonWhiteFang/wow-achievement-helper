@@ -97,3 +97,13 @@
 .text-danger { color: var(--danger); }
 
 .achievement-meta { border-left: 3px solid var(--accent); }
+
+.wowhead-link {
+  color: var(--muted);
+  font-size: 12px;
+  padding: 0 4px;
+  opacity: 0;
+  text-decoration: none;
+}
+button:hover .wowhead-link { opacity: 1; }
+.wowhead-link:hover { color: var(--link); }

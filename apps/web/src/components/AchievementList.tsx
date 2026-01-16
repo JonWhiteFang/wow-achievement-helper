@@ -125,6 +125,14 @@ export function AchievementList({ achievements, onSelect, completedIds, progress
           </div>
         )}
         {!showDates && <span style={{ color: "var(--muted)", fontSize: 12, width: 32, textAlign: "right" }}>{a.points || 0}</span>}
+        <a
+          href={`https://www.wowhead.com/achievement=${a.id}`}
+          target="_blank"
+          rel="noopener noreferrer"
+          onClick={(e) => e.stopPropagation()}
+          className="wowhead-link"
+          title="View on Wowhead"
+        >↗</a>
       </button>
     );
   };
