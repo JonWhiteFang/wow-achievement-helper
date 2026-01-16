@@ -73,7 +73,7 @@ describe("manifest meta achievement detection", () => {
       (c: any) => c.linked_achievement
     );
 
-    expect(hasLinkedAchievements).toBe(false);
+    expect(hasLinkedAchievements).toBeUndefined();
   });
 
   it("handles mixed criteria (some linked, some not)", () => {

@@ -5,7 +5,7 @@
   - banner [ref=e4]:
     - button "☰" [ref=e5] [cursor=pointer]
     - heading "WoW Achievements" [level=1] [ref=e6]
-    - searchbox "Search achievements..." [active] [ref=e7]: xyznonexistentachievement123
+    - searchbox "Search achievements..." [ref=e7]
     - generic [ref=e8]:
       - combobox [ref=e9]:
         - option "Select realm" [selected]
@@ -441,6 +441,78 @@
           - button "▶" [ref=e98]
           - generic [ref=e99]: "Legion: Remix"
     - main [ref=e100]:
-      - generic [ref=e101]: 0 achievements
-      - generic [ref=e103]: No achievements found
+      - generic [ref=e101]: 8108 achievements
+      - generic [ref=e105]:
+        - button "○ ...And Chew Mana Buns 10" [ref=e106] [cursor=pointer]:
+          - generic [ref=e107]: ○
+          - generic [ref=e108]: ...And Chew Mana Buns
+          - generic [ref=e109]: "10"
+        - button "○ ...They All Fall Down 10" [ref=e110] [cursor=pointer]:
+          - generic [ref=e111]: ○
+          - generic [ref=e112]: ...They All Fall Down
+          - generic [ref=e113]: "10"
+        - button "○ 'Ghast Five 10" [ref=e114] [cursor=pointer]:
+          - generic [ref=e115]: ○
+          - generic [ref=e116]: "'Ghast Five"
+          - generic [ref=e117]: "10"
+        - button "○ 'Tis the Season 10" [ref=e118] [cursor=pointer]:
+          - generic [ref=e119]: ○
+          - generic [ref=e120]: "'Tis the Season"
+          - generic [ref=e121]: "10"
+        - button "○ \"Employee\" of the Month 0" [ref=e122] [cursor=pointer]:
+          - generic [ref=e123]: ○
+          - generic [ref=e124]: "\"Employee\" of the Month"
+          - generic [ref=e125]: "0"
+        - button "○ \"FOOD FIGHT!\" 10" [ref=e126] [cursor=pointer]:
+          - generic [ref=e127]: ○
+          - generic [ref=e128]: "\"FOOD FIGHT!\""
+          - generic [ref=e129]: "10"
+        - button "○ \"S.A.F.E\" Pilot 0" [ref=e130] [cursor=pointer]:
+          - generic [ref=e131]: ○
+          - generic [ref=e132]: "\"S.A.F.E\" Pilot"
+          - generic [ref=e133]: "0"
+        - button "○ (Ruth)less is More 10" [ref=e134] [cursor=pointer]:
+          - generic [ref=e135]: ○
+          - generic [ref=e136]: (Ruth)less is More
+          - generic [ref=e137]: "10"
+        - button "○ 10 Algari Anglerthread 10" [ref=e138] [cursor=pointer]:
+          - generic [ref=e139]: ○
+          - generic [ref=e140]: 10 Algari Anglerthread
+          - generic [ref=e141]: "10"
+        - button "○ 10 Algari Seekerthread 10" [ref=e142] [cursor=pointer]:
+          - generic [ref=e143]: ○
+          - generic [ref=e144]: 10 Algari Seekerthread
+          - generic [ref=e145]: "10"
+        - button "○ 10 Coins of Ancestry 10" [ref=e146] [cursor=pointer]:
+          - generic [ref=e147]: ○
+          - generic [ref=e148]: 10 Coins of Ancestry
+          - generic [ref=e149]: "10"
+        - button "○ 10 Cooking Awards 10" [ref=e150] [cursor=pointer]:
+          - generic [ref=e151]: ○
+          - generic [ref=e152]: 10 Cooking Awards
+          - generic [ref=e153]: "10"
+        - button "○ 10 Exalted Reputations 10" [ref=e154] [cursor=pointer]:
+          - generic [ref=e155]: ○
+          - generic [ref=e156]: 10 Exalted Reputations
+          - generic [ref=e157]: "10"
+        - button "○ 10,000 World Quests Completed 5" [ref=e158] [cursor=pointer]:
+          - generic [ref=e159]: ○
+          - generic [ref=e160]: 10,000 World Quests Completed
+          - generic [ref=e161]: "5"
+        - button "○ 100 Algari Anglerthread 10" [ref=e162] [cursor=pointer]:
+          - generic [ref=e163]: ○
+          - generic [ref=e164]: 100 Algari Anglerthread
+          - generic [ref=e165]: "10"
+        - button "○ 100 Algari Seekerthread 10" [ref=e166] [cursor=pointer]:
+          - generic [ref=e167]: ○
+          - generic [ref=e168]: 100 Algari Seekerthread
+          - generic [ref=e169]: "10"
+        - button "○ 100 Cooking Awards 10" [ref=e170] [cursor=pointer]:
+          - generic [ref=e171]: ○
+          - generic [ref=e172]: 100 Cooking Awards
+          - generic [ref=e173]: "10"
+    - complementary [ref=e174]:
+      - generic [ref=e176]:
+        - paragraph [ref=e178]: Loading...
+        - button "×" [ref=e179] [cursor=pointer]
 ```
