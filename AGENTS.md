@@ -60,12 +60,12 @@ The agent must write (in its own planning) a short checklist:
 
 When implementing features, follow these documents (in order of priority):
 
-1) `docs/API_SPEC.md` — endpoint shapes and error conventions
-2) `docs/UX_SPEC.md` — UI behaviors/layout expectations
-3) `docs/ARCHITECTURE.md` — flows, caching, security model
-4) `docs/HELP_PROVIDERS.md` — provider adapter contract
+1) `docs/specs/API_SPEC.md` — endpoint shapes and error conventions
+2) `docs/specs/UX_SPEC.md` — UI behaviors/layout expectations
+3) `docs/specs/ARCHITECTURE.md` — flows, caching, security model
+4) `docs/specs/HELP_PROVIDERS.md` — provider adapter contract
 5) `docs/IMPLEMENTATION_PLAN.md` — sequencing and milestones
-6) `docs/WORKER_SKELETON.md` / `docs/WEB_SCAFFOLD.md` / `docs/CI_AND_DEPLOYMENT.md` — scaffolding guidance
+6) `docs/setup/` — scaffolding guidance (WEB_SCAFFOLD, WORKER_SKELETON, CI_AND_DEPLOYMENT)
 
 If you must deviate, **update the relevant docs in the same PR**.
 
