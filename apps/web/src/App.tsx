@@ -8,6 +8,7 @@ import { calculatePoints, formatPoints } from "./lib/points";
 import { buildCategoryExpansionMap, EXPANSIONS, EXPANSION_LABELS, type Expansion } from "./lib/expansions";
 import { CategoryTree, RECENT_CATEGORY_ID } from "./components/CategoryTree";
 import { ProgressStats } from "./components/ProgressStats";
+import { ExportButtons } from "./components/ExportButtons";
 import { AchievementList } from "./components/AchievementList";
 import { AchievementDrawer } from "./components/AchievementDrawer";
 import { CharacterLookup } from "./components/CharacterLookup";
@@ -323,6 +324,9 @@ function AppContent() {
           {isMobile ? "Acct" : "Account-wide"}
         </label>
         <div style={{ marginLeft: "auto", display: "flex", alignItems: "center", gap: 8 }}>
+          {completedIds && completedIds.size > 0 && (
+            <ExportButtons achievements={achievements} completedIds={completedIds} completedAt={completedAt} characterName={charProgress?.character.name} />
+          )}
           <button
             className="btn btn-ghost"
             onClick={() => { const newTheme = theme === "dark" ? "light" : "dark"; setThemeState(newTheme); setTheme(newTheme); }}
