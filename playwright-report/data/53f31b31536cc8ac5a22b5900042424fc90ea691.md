@@ -1,0 +1,514 @@
+# Page snapshot
+
+```yaml
+- generic [ref=e3]:
+  - banner [ref=e4]:
+    - button "☰" [ref=e5] [cursor=pointer]
+    - heading "WoW Achievements" [level=1] [ref=e6]
+    - searchbox "Search achievements..." [ref=e7]
+    - generic [ref=e8]:
+      - combobox [ref=e9]:
+        - option "Select realm" [selected]
+        - option "Aegwynn"
+        - option "Aerie Peak"
+        - option "Agamaggan"
+        - option "Aggra (Português)"
+        - option "Aggramar"
+        - option "Ahn'Qiraj"
+        - option "Al'Akir"
+        - option "Alexstrasza"
+        - option "Alleria"
+        - option "Alonsus"
+        - option "Aman'Thul"
+        - option "Ambossar"
+        - option "Anachronos"
+        - option "Anetheron"
+        - option "Antonidas"
+        - option "Anub'arak"
+        - option "Arak-arahm"
+        - option "Arathi"
+        - option "Arathor"
+        - option "Archimonde"
+        - option "Area 52"
+        - option "Argent Dawn"
+        - option "Arthas"
+        - option "Arygos"
+        - option "Ashenvale"
+        - option "Aszune"
+        - option "Auchindoun"
+        - option "Azjol-Nerub"
+        - option "Azshara"
+        - option "Azuregos"
+        - option "Azuremyst"
+        - option "Baelgun"
+        - option "Balnazzar"
+        - option "Blackhand"
+        - option "Blackmoore"
+        - option "Blackrock"
+        - option "Blackscar"
+        - option "Blade's Edge"
+        - option "Bladefist"
+        - option "Bloodfeather"
+        - option "Bloodhoof"
+        - option "Bloodscalp"
+        - option "Blutkessel"
+        - option "Booty Bay"
+        - option "Borean Tundra"
+        - option "Boulderfist"
+        - option "Bronze Dragonflight"
+        - option "Bronzebeard"
+        - option "Burning Blade"
+        - option "Burning Legion"
+        - option "Burning Steppes"
+        - option "C'Thun"
+        - option "Chamber of Aspects"
+        - option "Chants éternels"
+        - option "Cho'gall"
+        - option "Chromaggus"
+        - option "Colinas Pardas"
+        - option "Confrérie du Thorium"
+        - option "Conseil des Ombres"
+        - option "Crushridge"
+        - option "Culte de la Rive noire"
+        - option "Daggerspine"
+        - option "Dalaran"
+        - option "Dalvengyr"
+        - option "Darkmoon Faire"
+        - option "Darksorrow"
+        - option "Darkspear"
+        - option "Das Konsortium"
+        - option "Das Syndikat"
+        - option "Deathguard"
+        - option "Deathweaver"
+        - option "Deathwing"
+        - option "Deepholm"
+        - option "Defias Brotherhood"
+        - option "Dentarg"
+        - option "Der abyssische Rat"
+        - option "Der Mithrilorden"
+        - option "Der Rat von Dalaran"
+        - option "Destromath"
+        - option "Dethecus"
+        - option "Die Aldor"
+        - option "Die Arguswacht"
+        - option "Die ewige Wacht"
+        - option "Die Nachtwache"
+        - option "Die Silberne Hand"
+        - option "Die Todeskrallen"
+        - option "Doomhammer"
+        - option "Draenor"
+        - option "Dragonblight"
+        - option "Dragonmaw"
+        - option "Drak'thul"
+        - option "Drek'Thar"
+        - option "Dun Modr"
+        - option "Dun Morogh"
+        - option "Dunemaul"
+        - option "Durotan"
+        - option "Earthen Ring"
+        - option "Echsenkessel"
+        - option "Eitrigg"
+        - option "Eldre'Thalas"
+        - option "Elune"
+        - option "Emerald Dream"
+        - option "Emeriss"
+        - option "Eonar"
+        - option "Eredar"
+        - option "EU Arena Pass CSBG"
+        - option "EU Arena Pass CSBG 2"
+        - option "EU Auxiliary 70"
+        - option "EU1A Account Realm"
+        - option "EU1A1-INST"
+        - option "EU1A2-INST"
+        - option "EU1B Account Realm"
+        - option "EU1B1-INST"
+        - option "EU1B2-INST"
+        - option "EU2A Account Realm"
+        - option "EU2A1-INST"
+        - option "EU2A2-INST"
+        - option "EU2B Account Realm"
+        - option "EU2B1-INST"
+        - option "EU2B2-INST"
+        - option "EU3A Account Realm"
+        - option "EU3A1-INST"
+        - option "EU3A2-INST"
+        - option "EU3B Account Realm"
+        - option "EU3B1-INST"
+        - option "EU3B2-INST"
+        - option "EU4A Account Realm"
+        - option "EU4A1-INST"
+        - option "EU4A1-INST-BFA"
+        - option "EU4A2-INST"
+        - option "EU4A2-INST-BFA"
+        - option "EU4A3-INST"
+        - option "EU4A3-INST-BFA"
+        - option "EU4A4-INST"
+        - option "EU4A4-INST-SL"
+        - option "EU4B Account Realm"
+        - option "EU4B1-INST"
+        - option "EU4B1-INST-BFA"
+        - option "EU4B2-INST"
+        - option "EU4B2-INST-BFA"
+        - option "EU4B3-INST"
+        - option "EU4B3-INST-BFA"
+        - option "EU4B4-INST"
+        - option "EU4B4-INST-SL"
+        - option "EU5A Account Realm"
+        - option "EU5A1-INST"
+        - option "EU5A1-INST-BFA"
+        - option "EU5A2-INST"
+        - option "EU5A2-INST-BFA"
+        - option "EU5A3-INST"
+        - option "EU5A3-INST-BFA"
+        - option "EU5A4-INST"
+        - option "EU5A4-INST-SL"
+        - option "EU5B Account Realm"
+        - option "EU5B1-INST"
+        - option "EU5B1-INST-BFA"
+        - option "EU5B2-INST"
+        - option "EU5B2-INST-BFA"
+        - option "EU5B3-INST"
+        - option "EU5B3-INST-BFA"
+        - option "EU5B4-INST"
+        - option "EU5B4-INST-SL"
+        - option "EU6A Account Realm"
+        - option "EU6A1-INST"
+        - option "EU6A1-INST-BFA"
+        - option "EU6A2-INST"
+        - option "EU6A2-INST-BFA"
+        - option "EU6A3-INST"
+        - option "EU6A3-INST-BFA"
+        - option "EU6A4-INST"
+        - option "EU6A4-INST-SL"
+        - option "EU6B Account Realm"
+        - option "EU6B1-INST"
+        - option "EU6B1-INST-BFA"
+        - option "EU6B2-INST"
+        - option "EU6B2-INST-BFA"
+        - option "EU6B3-INST"
+        - option "EU6B3-INST-BFA"
+        - option "EU6B4-INST"
+        - option "EU6B4-INST-SL"
+        - option "EU7A-BG-RU"
+        - option "EU7A1-INST"
+        - option "EU7A1-INST-BFA"
+        - option "EU7A2-INST"
+        - option "EU7A2-INST-BFA"
+        - option "EU7A3-INST"
+        - option "EU7A3-INST-BFA"
+        - option "EU7A4-INST"
+        - option "EU7A4-INST-SL"
+        - option "EU7B1-INST"
+        - option "EU7B1-INST-BFA"
+        - option "EU7B2-INST"
+        - option "EU7B2-INST-BFA"
+        - option "EU7B3-INST"
+        - option "EU7B3-INST-BFA"
+        - option "EU7B4-INST"
+        - option "EU7B4-INST-SL"
+        - option "Eversong"
+        - option "Executus"
+        - option "Exodar"
+        - option "Festung der Stürme"
+        - option "Fordragon"
+        - option "Forscherliga"
+        - option "Frostmane"
+        - option "Frostmourne"
+        - option "Frostwhisper"
+        - option "Frostwolf"
+        - option "Galakrond"
+        - option "Garona"
+        - option "Garrosh"
+        - option "Genjuros"
+        - option "Ghostlands"
+        - option "Gilneas"
+        - option "Goldrinn"
+        - option "Gordunni"
+        - option "Gorgonnash"
+        - option "Greymane"
+        - option "Grim Batol"
+        - option "Grom"
+        - option "Gul'dan"
+        - option "Hakkar"
+        - option "Haomarush"
+        - option "Hellfire"
+        - option "Hellscream"
+        - option "Howling Fjord"
+        - option "Hyjal"
+        - option "Illidan"
+        - option "Jaedenar"
+        - option "Kael'thas"
+        - option "Karazhan"
+        - option "Kargath"
+        - option "Kazzak"
+        - option "Kel'Thuzad"
+        - option "Khadgar"
+        - option "Khaz Modan"
+        - option "Khaz'goroth"
+        - option "Kil'jaeden"
+        - option "Kilrogg"
+        - option "Kirin Tor"
+        - option "Kor'gall"
+        - option "Krag'jin"
+        - option "Krasus"
+        - option "Kul Tiras"
+        - option "Kult der Verdammten"
+        - option "La Croisade écarlate"
+        - option "Laughing Skull"
+        - option "Les Clairvoyants"
+        - option "Les Sentinelles"
+        - option "Lich King"
+        - option "Lightbringer"
+        - option "Lightning's Blade"
+        - option "Lordaeron"
+        - option "Los Errantes"
+        - option "Lothar"
+        - option "Madmortem"
+        - option "Magtheridon"
+        - option "Mal'Ganis"
+        - option "Malfurion"
+        - option "Malorne"
+        - option "Malygos"
+        - option "Mannoroth"
+        - option "Marécage de Zangar"
+        - option "Mazrigos"
+        - option "Medivh"
+        - option "Minahonda"
+        - option "Moonglade"
+        - option "Mug'thol"
+        - option "Nagrand"
+        - option "Nathrezim"
+        - option "Naxxramas"
+        - option "Nazjatar"
+        - option "Nefarian"
+        - option "Nemesis"
+        - option "Neptulon"
+        - option "Ner'zhul"
+        - option "Nera'thor"
+        - option "Nethersturm"
+        - option "Nordrassil"
+        - option "Norgannon"
+        - option "Nozdormu"
+        - option "Onyxia"
+        - option "Outland"
+        - option "Perenolde"
+        - option "Pozzo dell'Eternità"
+        - option "Proudmoore"
+        - option "Quel'Thalas"
+        - option "Ragnaros"
+        - option "Rajaxx"
+        - option "Rashgarroth"
+        - option "Ravencrest"
+        - option "Ravenholdt"
+        - option "Razuvious"
+        - option "RDB EU"
+        - option "Rexxar"
+        - option "Runetotem"
+        - option "Sanguino"
+        - option "Sargeras"
+        - option "Saurfang"
+        - option "Scarshield Legion"
+        - option "Sen'jin"
+        - option "Shadowsong"
+        - option "Shattered Halls"
+        - option "Shattered Hand"
+        - option "Shattrath"
+        - option "Shen'dralar"
+        - option "Silvermoon"
+        - option "Sinstralis"
+        - option "Skullcrusher"
+        - option "Soulflayer"
+        - option "Spinebreaker"
+        - option "Sporeggar"
+        - option "Steamwheedle Cartel"
+        - option "Stormrage"
+        - option "Stormreaver"
+        - option "Stormscale"
+        - option "Sunstrider"
+        - option "Suramar"
+        - option "Sylvanas"
+        - option "Taerar"
+        - option "Talnivarr"
+        - option "Tarren Mill"
+        - option "Teldrassil"
+        - option "Temple noir"
+        - option "Terenas"
+        - option "Terokkar"
+        - option "Terrordar"
+        - option "The Maelstrom"
+        - option "The Sha'tar"
+        - option "The Venture Co"
+        - option "Theradras"
+        - option "Thermaplugg"
+        - option "Thrall"
+        - option "Throk'Feroth"
+        - option "Thunderhorn"
+        - option "Tichondrius"
+        - option "Tirion"
+        - option "Todeswache"
+        - option "Trollbane"
+        - option "Turalyon"
+        - option "Twilight's Hammer"
+        - option "Twisting Nether"
+        - option "Tyrande"
+        - option "Uldaman"
+        - option "Ulduar"
+        - option "Uldum"
+        - option "Un'Goro"
+        - option "Varimathras"
+        - option "Vashj"
+        - option "Vek'lor"
+        - option "Vek'nilash"
+        - option "Vol'jin"
+        - option "Wildhammer"
+        - option "Wrathbringer"
+        - option "Xavius"
+        - option "Ysera"
+        - option "Ysondre"
+        - option "Zenedar"
+        - option "Zirkel des Cenarius"
+        - option "Zul'jin"
+        - option "Zuluhed"
+        - option "zzz_RDB EU"
+      - textbox "Character" [ref=e10]
+      - button "Lookup" [disabled] [ref=e11]
+    - combobox [ref=e12]:
+      - option "All Xpacs" [selected]
+      - option "Classic"
+      - option "TBC"
+      - option "Wrath"
+      - option "Cataclysm"
+      - option "Pandaria"
+      - option "Draenor"
+      - option "Legion"
+      - option "BfA"
+      - option "Shadowlands"
+      - option "Dragonflight"
+      - option "War Within"
+    - generic [ref=e13] [cursor=pointer]:
+      - checkbox "Account-wide" [ref=e14]
+      - text: Account-wide
+    - link "Sign in with Battle.net" [ref=e16] [cursor=pointer]:
+      - /url: https://wow-achievement-helper-api.jono2411.workers.dev/auth/login
+  - generic [ref=e17]:
+    - complementary [ref=e18]:
+      - generic [ref=e19]:
+        - button "All Achievements" [ref=e20] [cursor=pointer]
+        - generic [ref=e23] [cursor=pointer]:
+          - button "▶" [ref=e24]
+          - generic [ref=e25]: Guild
+        - generic [ref=e28] [cursor=pointer]:
+          - button "▶" [ref=e29]
+          - generic [ref=e30]: Quests
+        - generic [ref=e33] [cursor=pointer]:
+          - button "▶" [ref=e34]
+          - generic [ref=e35]: Feats of Strength
+        - generic [ref=e38] [cursor=pointer]:
+          - button "▶" [ref=e39]
+          - generic [ref=e40]: Reputation
+        - generic [ref=e43] [cursor=pointer]:
+          - button "▶" [ref=e44]
+          - generic [ref=e45]: Player vs. Player
+        - generic [ref=e48] [cursor=pointer]:
+          - button "▶" [ref=e49]
+          - generic [ref=e50]: Exploration
+        - generic [ref=e54] [cursor=pointer]: Characters
+        - generic [ref=e57] [cursor=pointer]:
+          - button "▶" [ref=e58]
+          - generic [ref=e59]: Pet Battles
+        - generic [ref=e62] [cursor=pointer]:
+          - button "▶" [ref=e63]
+          - generic [ref=e64]: World Events
+        - generic [ref=e67] [cursor=pointer]:
+          - button "▶" [ref=e68]
+          - generic [ref=e69]: Dungeons & Raids
+        - generic [ref=e72] [cursor=pointer]:
+          - button "▶" [ref=e73]
+          - generic [ref=e74]: Professions
+        - generic [ref=e77] [cursor=pointer]:
+          - button "▶" [ref=e78]
+          - generic [ref=e79]: Legacy
+        - generic [ref=e82] [cursor=pointer]:
+          - button "▶" [ref=e83]
+          - generic [ref=e84]: Collections
+        - generic [ref=e87] [cursor=pointer]:
+          - button "▶" [ref=e88]
+          - generic [ref=e89]: Expansion Features
+        - generic [ref=e92] [cursor=pointer]:
+          - button "▶" [ref=e93]
+          - generic [ref=e94]: Delves
+        - generic [ref=e97] [cursor=pointer]:
+          - button "▶" [ref=e98]
+          - generic [ref=e99]: "Legion: Remix"
+    - main [ref=e100]:
+      - generic [ref=e101]: 8108 achievements
+      - generic [ref=e105]:
+        - button "○ ...And Chew Mana Buns 10" [ref=e106] [cursor=pointer]:
+          - generic [ref=e107]: ○
+          - generic [ref=e108]: ...And Chew Mana Buns
+          - generic [ref=e109]: "10"
+        - button "○ ...They All Fall Down 10" [ref=e110] [cursor=pointer]:
+          - generic [ref=e111]: ○
+          - generic [ref=e112]: ...They All Fall Down
+          - generic [ref=e113]: "10"
+        - button "○ 'Ghast Five 10" [ref=e114] [cursor=pointer]:
+          - generic [ref=e115]: ○
+          - generic [ref=e116]: "'Ghast Five"
+          - generic [ref=e117]: "10"
+        - button "○ 'Tis the Season 10" [ref=e118] [cursor=pointer]:
+          - generic [ref=e119]: ○
+          - generic [ref=e120]: "'Tis the Season"
+          - generic [ref=e121]: "10"
+        - button "○ \"Employee\" of the Month 0" [ref=e122] [cursor=pointer]:
+          - generic [ref=e123]: ○
+          - generic [ref=e124]: "\"Employee\" of the Month"
+          - generic [ref=e125]: "0"
+        - button "○ \"FOOD FIGHT!\" 10" [ref=e126] [cursor=pointer]:
+          - generic [ref=e127]: ○
+          - generic [ref=e128]: "\"FOOD FIGHT!\""
+          - generic [ref=e129]: "10"
+        - button "○ \"S.A.F.E\" Pilot 0" [ref=e130] [cursor=pointer]:
+          - generic [ref=e131]: ○
+          - generic [ref=e132]: "\"S.A.F.E\" Pilot"
+          - generic [ref=e133]: "0"
+        - button "○ (Ruth)less is More 10" [ref=e134] [cursor=pointer]:
+          - generic [ref=e135]: ○
+          - generic [ref=e136]: (Ruth)less is More
+          - generic [ref=e137]: "10"
+        - button "○ 10 Algari Anglerthread 10" [ref=e138] [cursor=pointer]:
+          - generic [ref=e139]: ○
+          - generic [ref=e140]: 10 Algari Anglerthread
+          - generic [ref=e141]: "10"
+        - button "○ 10 Algari Seekerthread 10" [ref=e142] [cursor=pointer]:
+          - generic [ref=e143]: ○
+          - generic [ref=e144]: 10 Algari Seekerthread
+          - generic [ref=e145]: "10"
+        - button "○ 10 Coins of Ancestry 10" [ref=e146] [cursor=pointer]:
+          - generic [ref=e147]: ○
+          - generic [ref=e148]: 10 Coins of Ancestry
+          - generic [ref=e149]: "10"
+        - button "○ 10 Cooking Awards 10" [ref=e150] [cursor=pointer]:
+          - generic [ref=e151]: ○
+          - generic [ref=e152]: 10 Cooking Awards
+          - generic [ref=e153]: "10"
+        - button "○ 10 Exalted Reputations 10" [ref=e154] [cursor=pointer]:
+          - generic [ref=e155]: ○
+          - generic [ref=e156]: 10 Exalted Reputations
+          - generic [ref=e157]: "10"
+        - button "○ 10,000 World Quests Completed 5" [ref=e158] [cursor=pointer]:
+          - generic [ref=e159]: ○
+          - generic [ref=e160]: 10,000 World Quests Completed
+          - generic [ref=e161]: "5"
+        - button "○ 100 Algari Anglerthread 10" [ref=e162] [cursor=pointer]:
+          - generic [ref=e163]: ○
+          - generic [ref=e164]: 100 Algari Anglerthread
+          - generic [ref=e165]: "10"
+        - button "○ 100 Algari Seekerthread 10" [ref=e166] [cursor=pointer]:
+          - generic [ref=e167]: ○
+          - generic [ref=e168]: 100 Algari Seekerthread
+          - generic [ref=e169]: "10"
+        - button "○ 100 Cooking Awards 10" [ref=e170] [cursor=pointer]:
+          - generic [ref=e171]: ○
+          - generic [ref=e172]: 100 Cooking Awards
+          - generic [ref=e173]: "10"
+```

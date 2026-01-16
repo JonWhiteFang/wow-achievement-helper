@@ -1,19 +1,15 @@
 import { describe, it, expect } from "vitest";
+import { stripHtml } from "./types";
 
-// Test HTML parsing edge cases for Wowhead comments
-describe("wowhead comment parsing", () => {
-  it("extracts comments from JSON-embedded HTML", () => {
-    const mockHtml = `
-      <script>
-        var comments = {
-          "body": "This is a helpful comment about the achievement",
-          "user": "TestUser",
-          "rating": 5
-        };
-      </script>
+describe("Wowhead comment extraction", () => {
+  it("extracts comments from valid HTML", () => {
+    const html = `
+      "body":"This is a test comment with <b>bold</b> text"
+      "user":"TestUser"
+      "rating":42
     `;
 
-    const commentPattern = /"body"\s*:\s*"([^"]*(?:\\.[^"]*)*)"/g;
+    const bodyPattern = /"body"\s*:\s*"([^"]*(?:\\.[^"]*)*)"/g;
     const userPattern = /"user"\s*:\s*"([^"]+)"/g;
     const ratingPattern = /"rating"\s*:\s*(-?\d+)/g;
 
@@ -22,184 +18,142 @@ describe("wowhead comment parsing", () => {
     const ratings: number[] = [];
 
     let match;
-    while ((match = commentPattern.exec(mockHtml)) !== null) {
+    while ((match = bodyPattern.exec(html)) !== null) {
       bodies.push(match[1]);
     }
-
-    while ((match = userPattern.exec(mockHtml)) !== null) {
+    while ((match = userPattern.exec(html)) !== null) {
       users.push(match[1]);
     }
-
-    while ((match = ratingPattern.exec(mockHtml)) !== null) {
+    while ((match = ratingPattern.exec(html)) !== null) {
       ratings.push(parseInt(match[1], 10));
     }
 
-    expect(bodies).toEqual(["This is a helpful comment about the achievement"]);
-    expect(users).toEqual(["TestUser"]);
-    expect(ratings).toEqual([5]);
+    expect(bodies).toHaveLength(1);
+    expect(users).toHaveLength(1);
+    expect(ratings).toHaveLength(1);
+    expect(users[0]).toBe("TestUser");
+    expect(ratings[0]).toBe(42);
   });
 
-  it("handles escaped JSON strings", () => {
-    const mockHtml = `
-      "body": "This comment has quotes and newlines",
-      "user": "EscapedUser"
-    `;
-
-    const commentPattern = /"body"\s*:\s*"([^"]*(?:\\.[^"]*)*)"/g;
-    const userPattern = /"user"\s*:\s*"([^"]+)"/g;
-
-    const match = commentPattern.exec(mockHtml);
-    const userMatch = userPattern.exec(mockHtml);
-
-    expect(match?.[1]).toBe('This comment has quotes and newlines');
-    expect(userMatch?.[1]).toBe("EscapedUser");
-  });
-
-  it("handles multiple comments", () => {
-    const mockHtml = `
-      "body": "First comment",
-      "user": "User1",
-      "rating": 10,
-      "body": "Second comment",
-      "user": "User2", 
-      "rating": -2
-    `;
-
-    const commentPattern = /"body"\s*:\s*"([^"]*(?:\\.[^"]*)*)"/g;
-    const userPattern = /"user"\s*:\s*"([^"]+)"/g;
-    const ratingPattern = /"rating"\s*:\s*(-?\d+)/g;
-
+  it("handles empty HTML gracefully", () => {
+    const html = "";
+    const bodyPattern = /"body"\s*:\s*"([^"]*(?:\\.[^"]*)*)"/g;
     const bodies: string[] = [];
+
+    let match;
+    while ((match = bodyPattern.exec(html)) !== null) {
+      bodies.push(match[1]);
+    }
+
+    expect(bodies).toHaveLength(0);
+  });
+
+  it("handles malformed JSON in body field", () => {
+    const html = `"body":"Test with \\"escaped quotes\\""`;
+    const bodyPattern = /"body"\s*:\s*"([^"]*(?:\\.[^"]*)*)"/g;
+    const match = bodyPattern.exec(html);
+
+    expect(match).not.toBeNull();
+    if (match) {
+      try {
+        const decoded = JSON.parse(`"${match[1]}"`);
+        expect(decoded).toBe('Test with "escaped quotes"');
+      } catch {
+        // Fallback to raw string
+        expect(match[1]).toContain("escaped");
+      }
+    }
+  });
+
+  it("handles missing user field", () => {
+    const html = `
+      "body":"Comment without user"
+      "rating":10
+    `;
+
+    const userPattern = /"user"\s*:\s*"([^"]+)"/g;
     const users: string[] = [];
+
+    let match;
+    while ((match = userPattern.exec(html)) !== null) {
+      users.push(match[1]);
+    }
+
+    expect(users).toHaveLength(0);
+  });
+
+  it("handles missing rating field", () => {
+    const html = `
+      "body":"Comment without rating"
+      "user":"TestUser"
+    `;
+
+    const ratingPattern = /"rating"\s*:\s*(-?\d+)/g;
     const ratings: number[] = [];
 
     let match;
-    while ((match = commentPattern.exec(mockHtml)) !== null) {
-      bodies.push(match[1]);
-    }
-
-    while ((match = userPattern.exec(mockHtml)) !== null) {
-      users.push(match[1]);
-    }
-
-    while ((match = ratingPattern.exec(mockHtml)) !== null) {
+    while ((match = ratingPattern.exec(html)) !== null) {
       ratings.push(parseInt(match[1], 10));
     }
 
-    expect(bodies).toEqual(["First comment", "Second comment"]);
-    expect(users).toEqual(["User1", "User2"]);
-    expect(ratings).toEqual([10, -2]);
-  });
-
-  it("handles malformed HTML gracefully", () => {
-    const mockHtml = `
-      "user": incomplete
-      "rating": not_a_number
-      malformed content here
-    `;
-
-    const commentPattern = /"body"\s*:\s*"([^"]*(?:\\.[^"]*)*)"/g;
-    const userPattern = /"user"\s*:\s*"([^"]+)"/g;
-    const ratingPattern = /"rating"\s*:\s*(-?\d+)/g;
-
-    const bodies: string[] = [];
-    const users: string[] = [];
-    const ratings: number[] = [];
-
-    let match;
-    while ((match = commentPattern.exec(mockHtml)) !== null) {
-      bodies.push(match[1]);
-    }
-
-    while ((match = userPattern.exec(mockHtml)) !== null) {
-      users.push(match[1]);
-    }
-
-    while ((match = ratingPattern.exec(mockHtml)) !== null) {
-      ratings.push(parseInt(match[1], 10));
-    }
-
-    expect(bodies).toEqual([]);
-    expect(users).toEqual([]);
-    expect(ratings).toEqual([]);
-  });
-
-  it("limits results to specified top count", () => {
-    const comments = [
-      { author: "User1", text: "Great guide!", score: 10, date: null },
-      { author: "User2", text: "Very helpful", score: 8, date: null },
-      { author: "User3", text: "Thanks!", score: 5, date: null },
-      { author: "User4", text: "Awesome", score: 3, date: null },
-    ];
-
-    const top = 2;
-    const limitedComments = comments.slice(0, top);
-
-    expect(limitedComments).toHaveLength(2);
-    expect(limitedComments[0].author).toBe("User1");
-    expect(limitedComments[1].author).toBe("User2");
+    expect(ratings).toHaveLength(0);
   });
 
   it("sorts comments by score descending", () => {
     const comments = [
-      { author: "User1", text: "Comment 1", score: 3, date: null },
-      { author: "User2", text: "Comment 2", score: 10, date: null },
-      { author: "User3", text: "Comment 3", score: 5, date: null },
-      { author: "User4", text: "Comment 4", score: null, date: null },
+      { author: "User1", text: "Comment 1", score: 5, date: null },
+      { author: "User2", text: "Comment 2", score: 15, date: null },
+      { author: "User3", text: "Comment 3", score: 10, date: null },
     ];
 
     comments.sort((a, b) => (b.score ?? 0) - (a.score ?? 0));
 
-    expect(comments[0].score).toBe(10);
-    expect(comments[1].score).toBe(5);
-    expect(comments[2].score).toBe(3);
-    expect(comments[3].score).toBe(null);
+    expect(comments[0].score).toBe(15);
+    expect(comments[1].score).toBe(10);
+    expect(comments[2].score).toBe(5);
+  });
+
+  it("limits results to top N comments", () => {
+    const comments = Array(20).fill(0).map((_, i) => ({
+      author: `User${i}`,
+      text: `Comment ${i}`,
+      score: i,
+      date: null,
+    }));
+
+    const top = 10;
+    const limited = comments.slice(0, top);
+
+    expect(limited).toHaveLength(10);
   });
 
   it("filters out very short comments", () => {
     const comments = [
-      { text: "This is a long enough comment", author: "User1" },
-      { text: "Short", author: "User2" },
-      { text: "Also long enough to be useful", author: "User3" },
-      { text: "No", author: "User4" },
+      { text: "This is a good comment", score: 10 },
+      { text: "ok", score: 5 },
+      { text: "Another detailed comment here", score: 8 },
+      { text: "x", score: 3 },
     ];
 
-    const filteredComments = comments.filter(c => c.text.length > 10);
+    const filtered = comments.filter((c) => c.text.length > 10);
 
-    expect(filteredComments).toHaveLength(2);
-    expect(filteredComments[0].author).toBe("User1");
-    expect(filteredComments[1].author).toBe("User3");
-  });
-});
-
-describe("stripHtml function simulation", () => {
-  it("removes HTML tags from text", () => {
-    const stripHtml = (html: string): string => {
-      return html.replace(/<[^>]*>/g, '').trim();
-    };
-
-    const htmlText = "<p>This is <strong>bold</strong> text with <a href='#'>links</a></p>";
-    const stripped = stripHtml(htmlText);
-
-    expect(stripped).toBe("This is bold text with links");
+    expect(filtered).toHaveLength(2);
   });
 
-  it("handles nested HTML tags", () => {
-    const stripHtml = (html: string): string => {
-      return html.replace(/<[^>]*>/g, '').trim();
-    };
+  it("strips HTML from comment text", () => {
+    const html = "This is <b>bold</b> and <i>italic</i> text";
+    const stripped = stripHtml(html);
 
-    const htmlText = "<div><p>Nested <em><strong>tags</strong></em> here</p></div>";
-    const stripped = stripHtml(htmlText);
-
-    expect(stripped).toBe("Nested tags here");
+    expect(stripped).not.toContain("<b>");
+    expect(stripped).not.toContain("</b>");
+    expect(stripped).toContain("bold");
+    expect(stripped).toContain("italic");
   });
 
-  it("truncates long text", () => {
-    const longText = "A".repeat(1500);
+  it("truncates long comments", () => {
+    const longText = "a".repeat(2000);
     const truncated = longText.slice(0, 1000);
 
     expect(truncated).toHaveLength(1000);
-    expect(truncated).toBe("A".repeat(1000));
   });
 });

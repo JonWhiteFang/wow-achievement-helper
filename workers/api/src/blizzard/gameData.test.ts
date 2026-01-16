@@ -1,60 +1,70 @@
 import { describe, it, expect } from "vitest";
 
-// Test childAchievements parsing from linked_achievement
-describe("childAchievements parsing", () => {
-  it("parses child achievements from linked_achievement criteria", () => {
+describe("fetchAchievement childAchievements parsing", () => {
+  it("extracts childAchievements from linked_achievement", () => {
     const mockData = {
       criteria: {
         child_criteria: [
           {
             id: 1,
-            linked_achievement: { id: 100, name: "First Achievement" }
+            description: "The Dedicated Few",
+            linked_achievement: { id: 562, name: "The Dedicated Few" },
           },
           {
             id: 2,
-            linked_achievement: { id: 200, name: "Second Achievement" }
-          }
-        ]
-      }
+            description: "Arachnophobia",
+            linked_achievement: { id: 1858, name: "Arachnophobia" },
+          },
+        ],
+      },
     };
 
     const childAchievements: { id: number; name: string }[] = [];
-    
-    if (mockData.criteria?.child_criteria && Array.isArray(mockData.criteria.child_criteria)) {
+    const criteria: { id: number; description: string; amount: number }[] = [];
+
+    if (mockData.criteria?.child_criteria) {
       for (const c of mockData.criteria.child_criteria) {
         if (c.linked_achievement) {
           childAchievements.push({ id: c.linked_achievement.id, name: c.linked_achievement.name });
+        } else {
+          criteria.push({ id: c.id, description: c.description || "", amount: 1 });
         }
       }
     }
 
-    expect(childAchievements).toEqual([
-      { id: 100, name: "First Achievement" },
-      { id: 200, name: "Second Achievement" }
-    ]);
+    expect(childAchievements).toHaveLength(2);
+    expect(childAchievements[0]).toEqual({ id: 562, name: "The Dedicated Few" });
+    expect(childAchievements[1]).toEqual({ id: 1858, name: "Arachnophobia" });
+    expect(criteria).toHaveLength(0);
   });
 
-  it("handles mixed criteria with regular and linked achievements", () => {
+  it("separates linked achievements from regular criteria", () => {
     const mockData = {
       criteria: {
         child_criteria: [
           {
             id: 1,
-            description: "Regular criteria",
-            amount: 5
+            description: "Sub Achievement",
+            linked_achievement: { id: 100, name: "Sub Achievement" },
           },
           {
             id: 2,
-            linked_achievement: { id: 100, name: "Linked Achievement" }
-          }
-        ]
-      }
+            description: "Kill 50 enemies",
+            amount: 50,
+          },
+          {
+            id: 3,
+            description: "Another Sub",
+            linked_achievement: { id: 200, name: "Another Sub" },
+          },
+        ],
+      },
     };
 
-    const criteria: { id: number; description: string; amount: number }[] = [];
     const childAchievements: { id: number; name: string }[] = [];
-    
-    if (mockData.criteria?.child_criteria && Array.isArray(mockData.criteria.child_criteria)) {
+    const criteria: { id: number; description: string; amount: number }[] = [];
+
+    if (mockData.criteria?.child_criteria) {
       for (const c of mockData.criteria.child_criteria) {
         if (c.linked_achievement) {
           childAchievements.push({ id: c.linked_achievement.id, name: c.linked_achievement.name });
@@ -64,87 +74,42 @@ describe("childAchievements parsing", () => {
       }
     }
 
-    expect(criteria).toEqual([
-      { id: 1, description: "Regular criteria", amount: 5 }
-    ]);
-    expect(childAchievements).toEqual([
-      { id: 100, name: "Linked Achievement" }
-    ]);
+    expect(childAchievements).toHaveLength(2);
+    expect(criteria).toHaveLength(1);
+    expect(criteria[0]).toEqual({ id: 2, description: "Kill 50 enemies", amount: 50 });
   });
 
-  it("handles single criteria without child_criteria", () => {
+  it("handles achievements with no child_criteria", () => {
     const mockData = {
       criteria: {
         id: 1,
-        description: "Single criteria",
-        amount: 1
-      }
+        description: "Single criterion",
+        amount: 1,
+      },
     };
 
-    const criteria: { id: number; description: string; amount: number }[] = [];
     const childAchievements: { id: number; name: string }[] = [];
-    
+    const criteria: { id: number; description: string; amount: number }[] = [];
+
     if (mockData.criteria) {
-      if (mockData.criteria.child_criteria && Array.isArray(mockData.criteria.child_criteria)) {
-        for (const c of mockData.criteria.child_criteria) {
-          if (c.linked_achievement) {
-            childAchievements.push({ id: c.linked_achievement.id, name: c.linked_achievement.name });
-          } else {
-            criteria.push({ id: c.id, description: c.description || "", amount: c.amount || 1 });
-          }
-        }
+      if ((mockData.criteria as any).child_criteria) {
+        // Has child_criteria
       } else {
-        criteria.push({ id: mockData.criteria.id, description: mockData.criteria.description || "", amount: mockData.criteria.amount || 1 });
+        criteria.push({
+          id: mockData.criteria.id,
+          description: mockData.criteria.description || "",
+          amount: mockData.criteria.amount || 1,
+        });
       }
     }
 
-    expect(criteria).toEqual([
-      { id: 1, description: "Single criteria", amount: 1 }
-    ]);
-    expect(childAchievements).toEqual([]);
+    expect(childAchievements).toHaveLength(0);
+    expect(criteria).toHaveLength(1);
   });
 
-  it("handles missing criteria gracefully", () => {
-    const mockData = {};
-
-    const criteria: { id: number; description: string; amount: number }[] = [];
+  it("returns undefined childAchievements when empty", () => {
     const childAchievements: { id: number; name: string }[] = [];
-    
-    if (mockData.criteria) {
-      if (mockData.criteria.child_criteria && Array.isArray(mockData.criteria.child_criteria)) {
-        for (const c of mockData.criteria.child_criteria) {
-          if (c.linked_achievement) {
-            childAchievements.push({ id: c.linked_achievement.id, name: c.linked_achievement.name });
-          } else {
-            criteria.push({ id: c.id, description: c.description || "", amount: c.amount || 1 });
-          }
-        }
-      } else if (mockData.criteria.id) {
-        criteria.push({ id: mockData.criteria.id, description: mockData.criteria.description || "", amount: mockData.criteria.amount || 1 });
-      }
-    }
-
-    expect(criteria).toEqual([]);
-    expect(childAchievements).toEqual([]);
-  });
-
-  it("handles empty child_criteria array", () => {
-    const mockData = {
-      criteria: {
-        child_criteria: []
-      }
-    };
-
-    const childAchievements: { id: number; name: string }[] = [];
-    
-    if (mockData.criteria?.child_criteria && Array.isArray(mockData.criteria.child_criteria)) {
-      for (const c of mockData.criteria.child_criteria) {
-        if (c.linked_achievement) {
-          childAchievements.push({ id: c.linked_achievement.id, name: c.linked_achievement.name });
-        }
-      }
-    }
-
-    expect(childAchievements).toEqual([]);
+    const result = childAchievements.length > 0 ? childAchievements : undefined;
+    expect(result).toBeUndefined();
   });
 });

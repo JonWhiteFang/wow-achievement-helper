@@ -1,134 +1,107 @@
 import { describe, it, expect } from "vitest";
 
-// Test meta achievement detection logic
-describe("meta achievement detection", () => {
-  it("detects meta achievements from child_criteria with linked_achievement", () => {
-    const mockCriteria = {
-      child_criteria: [
-        {
-          id: 12345,
-          description: "Achievement Name",
-          linked_achievement: { id: 6789, name: "Achievement Name" }
-        },
-        {
-          id: 12346,
-          description: "Another Achievement",
-          linked_achievement: { id: 6790, name: "Another Achievement" }
-        }
-      ]
-    };
-
-    const linkedAchievements = mockCriteria.child_criteria
-      .filter(c => c.linked_achievement)
-      .map(c => c.linked_achievement!.id);
-
-    expect(linkedAchievements).toEqual([6789, 6790]);
-    expect(linkedAchievements.length > 0).toBe(true);
-  });
-
-  it("returns empty array when no linked achievements", () => {
-    const mockCriteria = {
-      child_criteria: [
-        {
-          id: 12345,
-          description: "Regular criteria",
-          amount: 1
-        }
-      ]
-    };
-
-    const linkedAchievements = mockCriteria.child_criteria
-      .filter(c => c.linked_achievement)
-      .map(c => c.linked_achievement!.id);
-
-    expect(linkedAchievements).toEqual([]);
-    expect(linkedAchievements.length > 0).toBe(false);
-  });
-
-  it("handles mixed criteria types", () => {
-    const mockCriteria = {
-      child_criteria: [
-        {
-          id: 12345,
-          description: "Regular criteria",
-          amount: 5
-        },
-        {
-          id: 12346,
-          description: "Linked achievement",
-          linked_achievement: { id: 6789, name: "Sub Achievement" }
-        }
-      ]
-    };
-
-    const linkedAchievements = mockCriteria.child_criteria
-      .filter(c => c.linked_achievement)
-      .map(c => c.linked_achievement!.id);
-
-    expect(linkedAchievements).toEqual([6789]);
-  });
-
-  it("handles empty child_criteria", () => {
-    const mockCriteria = {
-      child_criteria: []
-    };
-
-    const linkedAchievements = mockCriteria.child_criteria
-      .filter(c => c.linked_achievement)
-      .map(c => c.linked_achievement!.id);
-
-    expect(linkedAchievements).toEqual([]);
-  });
-});
-
-describe("childAchievementIds extraction", () => {
-  it("extracts child achievement IDs correctly", () => {
-    const mockResponse = {
+describe("manifest meta achievement detection", () => {
+  it("detects meta achievements from linked_achievement in child_criteria", () => {
+    // Mock Blizzard API response with linked_achievement
+    const mockAchievementData = {
+      id: 2144,
+      name: "Glory of the Raider",
+      points: 25,
+      is_account_wide: true,
       criteria: {
         child_criteria: [
-          { linked_achievement: { id: 100 } },
-          { linked_achievement: { id: 200 } },
-          { linked_achievement: { id: 300 } }
-        ]
-      }
+          {
+            id: 1,
+            description: "The Dedicated Few",
+            linked_achievement: { id: 562, name: "The Dedicated Few" },
+          },
+          {
+            id: 2,
+            description: "Arachnophobia",
+            linked_achievement: { id: 1858, name: "Arachnophobia" },
+          },
+        ],
+      },
     };
 
-    let isMeta = false;
-    let childAchievementIds: number[] | undefined;
+    // Extract meta achievement info
+    const hasLinkedAchievements = mockAchievementData.criteria?.child_criteria?.some(
+      (c: any) => c.linked_achievement
+    );
+    const childAchievementIds = mockAchievementData.criteria?.child_criteria
+      ?.filter((c: any) => c.linked_achievement)
+      .map((c: any) => c.linked_achievement.id);
 
-    if (mockResponse.criteria?.child_criteria) {
-      const linkedAchievements = mockResponse.criteria.child_criteria
-        .filter(c => c.linked_achievement)
-        .map(c => c.linked_achievement!.id);
-      
-      if (linkedAchievements.length > 0) {
-        isMeta = true;
-        childAchievementIds = linkedAchievements;
-      }
-    }
-
-    expect(isMeta).toBe(true);
-    expect(childAchievementIds).toEqual([100, 200, 300]);
+    expect(hasLinkedAchievements).toBe(true);
+    expect(childAchievementIds).toEqual([562, 1858]);
   });
 
-  it("handles missing criteria structure", () => {
-    const mockResponse = {};
+  it("does not mark regular achievements as meta", () => {
+    // Mock regular achievement without linked_achievement
+    const mockAchievementData = {
+      id: 100,
+      name: "Regular Achievement",
+      points: 10,
+      is_account_wide: false,
+      criteria: {
+        child_criteria: [
+          {
+            id: 1,
+            description: "Kill 10 enemies",
+            amount: 10,
+          },
+        ],
+      },
+    };
 
-    let isMeta = false;
-    let childAchievementIds: number[] | undefined;
+    const hasLinkedAchievements = mockAchievementData.criteria?.child_criteria?.some(
+      (c: any) => c.linked_achievement
+    );
 
-    if (mockResponse.criteria?.child_criteria) {
-      const linkedAchievements = mockResponse.criteria.child_criteria
-        .filter(c => c.linked_achievement)
-        .map(c => c.linked_achievement!.id);
-      
-      if (linkedAchievements.length > 0) {
-        isMeta = true;
-        childAchievementIds = linkedAchievements;
-      }
-    }
+    expect(hasLinkedAchievements).toBe(false);
+  });
 
-    expect(isMeta).toBe(false);
-    expect(childAchievementIds).toBeUndefined();
+  it("handles achievements with no criteria", () => {
+    const mockAchievementData = {
+      id: 200,
+      name: "Simple Achievement",
+      points: 5,
+      is_account_wide: false,
+    };
+
+    const hasLinkedAchievements = mockAchievementData.criteria?.child_criteria?.some(
+      (c: any) => c.linked_achievement
+    );
+
+    expect(hasLinkedAchievements).toBe(false);
+  });
+
+  it("handles mixed criteria (some linked, some not)", () => {
+    const mockAchievementData = {
+      id: 300,
+      name: "Mixed Achievement",
+      points: 15,
+      is_account_wide: true,
+      criteria: {
+        child_criteria: [
+          {
+            id: 1,
+            description: "Sub Achievement",
+            linked_achievement: { id: 400, name: "Sub Achievement" },
+          },
+          {
+            id: 2,
+            description: "Regular criterion",
+            amount: 5,
+          },
+        ],
+      },
+    };
+
+    const linkedAchievements = mockAchievementData.criteria?.child_criteria
+      ?.filter((c: any) => c.linked_achievement)
+      .map((c: any) => c.linked_achievement.id);
+
+    expect(linkedAchievements).toEqual([400]);
   });
 });
