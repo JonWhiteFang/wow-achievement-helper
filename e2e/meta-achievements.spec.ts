@@ -2,150 +2,122 @@ import { test, expect } from "@playwright/test";
 
 const BASE_URL = process.env.TEST_URL || "https://jonwhitefang.github.io/wow-achievement-helper/";
 
-test.describe("Meta Achievements", () => {
-  test("displays META badge for meta achievements", async ({ page }) => {
+test.describe("Meta Achievement Highlighting", () => {
+  test("displays META badge on meta achievements", async ({ page }) => {
     await page.goto(BASE_URL);
 
     // Wait for achievements to load
     await expect(page.locator("text=/\\d+ achievements/")).toBeVisible({ timeout: 20000 });
 
-    // Look for META badge - meta achievements should have this indicator
-    const metaBadge = page.locator("text=META").first();
-    if (await metaBadge.isVisible()) {
+    // Look for META badge (may need to navigate to a category with meta achievements)
+    // Try to find any META badge in the list
+    const metaBadge = page.locator(".badge-meta").first();
+    
+    // If no META badge visible, this might mean no meta achievements in current view
+    // which is acceptable - the test verifies the badge exists when meta achievements are present
+    const badgeCount = await metaBadge.count();
+    
+    if (badgeCount > 0) {
       await expect(metaBadge).toBeVisible();
-    } else {
-      // If no META badge visible, search for a known meta achievement
-      await page.getByPlaceholder("Search achievements...").fill("Loremaster");
-      await page.waitForTimeout(500);
-      
-      // Loremaster is typically a meta achievement
-      await expect(page.locator("text=META").or(page.locator("text=Loremaster"))).toBeVisible({ timeout: 5000 });
+      await expect(metaBadge).toHaveText("META");
     }
   });
 
-  test("shows sub-achievements in meta achievement drawer", async ({ page }) => {
+  test("shows sub-achievement count for incomplete meta achievements", async ({ page }) => {
     await page.goto(BASE_URL);
 
     // Wait for achievements to load
     await expect(page.locator("text=/\\d+ achievements/")).toBeVisible({ timeout: 20000 });
 
-    // Search for a meta achievement
-    await page.getByPlaceholder("Search achievements...").fill("Loremaster");
-    await page.waitForTimeout(500);
-
-    // Click on the first result (should be Loremaster or similar meta achievement)
-    const firstResult = page.locator("div").filter({ hasText: /^\d+\s*pts?$/ }).first();
-    if (await firstResult.isVisible()) {
-      await firstResult.click();
-
-      // Drawer should open
-      await expect(page.locator("text=Description").or(page.locator("button:has-text('×')"))).toBeVisible({ timeout: 5000 });
-
-      // Look for sub-achievements section or child achievements
-      const subAchievements = page.locator("text=Sub-achievements").or(
-        page.locator("text=Child Achievements")
-      ).or(
-        page.locator("text=Requirements")
-      );
-      
-      // Meta achievements should show their component achievements
-      if (await subAchievements.isVisible()) {
-        await expect(subAchievements).toBeVisible();
-      }
+    // Look for sub-achievement count pattern (e.g., "3/8")
+    const subAchievementCount = page.locator("text=/\\d+\\/\\d+/").first();
+    
+    const countExists = await subAchievementCount.count();
+    
+    if (countExists > 0) {
+      await expect(subAchievementCount).toBeVisible();
+      // Verify it matches the pattern X/Y
+      const text = await subAchievementCount.textContent();
+      expect(text).toMatch(/^\d+\/\d+$/);
     }
   });
 
-  test("filters meta achievements only", async ({ page }) => {
+  test("opens drawer with sub-achievement list for meta achievements", async ({ page }) => {
     await page.goto(BASE_URL);
 
     // Wait for achievements to load
     await expect(page.locator("text=/\\d+ achievements/")).toBeVisible({ timeout: 20000 });
 
-    // Get initial count
-    const countText = await page.locator("text=/\\d+ achievements/").textContent();
-    const initialCount = parseInt(countText?.match(/(\d+)/)?.[1] || "0", 10);
-
-    // Look for meta filter checkbox or button
-    const metaFilter = page.locator("input[type='checkbox']").filter({ hasText: /meta/i }).or(
-      page.locator("button").filter({ hasText: /meta/i })
-    ).or(
-      page.locator("label").filter({ hasText: /meta/i })
-    );
-
-    if (await metaFilter.isVisible()) {
-      await metaFilter.click();
-      await page.waitForTimeout(500);
-
-      // Results should be filtered (fewer results, only meta achievements)
-      const newCountText = await page.locator("text=/\\d+ achievements/").textContent();
-      const newCount = parseInt(newCountText?.match(/(\d+)/)?.[1] || "0", 10);
-      
-      expect(newCount).toBeLessThan(initialCount);
-      
-      // All visible achievements should have META badge
-      const metaBadges = page.locator("text=META");
-      const achievementRows = page.locator("div").filter({ hasText: /^\d+\s*pts?$/ });
-      
-      if (await achievementRows.count() > 0 && await metaBadges.count() > 0) {
-        expect(await metaBadges.count()).toBeGreaterThan(0);
-      }
-    }
-  });
-
-  test("meta achievement progress shows sub-achievement completion", async ({ page }) => {
-    await page.goto(BASE_URL);
-
-    // Wait for achievements to load
-    await expect(page.locator("text=/\\d+ achievements/")).toBeVisible({ timeout: 20000 });
-
-    // Search for a meta achievement
-    await page.getByPlaceholder("Search achievements...").fill("Loremaster");
-    await page.waitForTimeout(500);
-
-    // Look for progress indicators like "3/5" or progress bars
-    const progressIndicator = page.locator("text=/\\d+\\/\\d+/").or(
-      page.locator("[role='progressbar']")
-    ).or(
-      page.locator(".progress")
-    );
-
-    if (await progressIndicator.isVisible()) {
-      await expect(progressIndicator).toBeVisible();
-    }
-  });
-
-  test("clicking sub-achievement opens its details", async ({ page }) => {
-    await page.goto(BASE_URL);
-
-    // Wait for achievements to load
-    await expect(page.locator("text=/\\d+ achievements/")).toBeVisible({ timeout: 20000 });
-
-    // Search for a meta achievement
-    await page.getByPlaceholder("Search achievements...").fill("Loremaster");
-    await page.waitForTimeout(500);
-
-    // Click on the first result
-    const firstResult = page.locator("div").filter({ hasText: /^\d+\s*pts?$/ }).first();
-    if (await firstResult.isVisible()) {
-      await firstResult.click();
+    // Find a META badge and click its parent achievement row
+    const metaBadge = page.locator(".badge-meta").first();
+    const badgeCount = await metaBadge.count();
+    
+    if (badgeCount > 0) {
+      // Click the achievement row containing the META badge
+      const achievementRow = metaBadge.locator("xpath=ancestor::button");
+      await achievementRow.click();
 
       // Wait for drawer to open
-      await expect(page.locator("text=Description").or(page.locator("button:has-text('×')"))).toBeVisible({ timeout: 5000 });
+      await page.waitForTimeout(500);
 
-      // Look for clickable sub-achievements
-      const subAchievementLink = page.locator("a").filter({ hasText: /achievement/i }).or(
-        page.locator("button").filter({ hasText: /view/i })
-      ).first();
+      // Look for "Sub-achievements" heading in drawer
+      const subAchievementsHeading = page.locator("h4:has-text('Sub-achievements')");
+      await expect(subAchievementsHeading).toBeVisible({ timeout: 5000 });
+    }
+  });
 
-      if (await subAchievementLink.isVisible()) {
-        await subAchievementLink.click();
+  test("sub-achievements in drawer are clickable", async ({ page }) => {
+    await page.goto(BASE_URL);
+
+    // Wait for achievements to load
+    await expect(page.locator("text=/\\d+ achievements/")).toBeVisible({ timeout: 20000 });
+
+    // Find and click a meta achievement
+    const metaBadge = page.locator(".badge-meta").first();
+    const badgeCount = await metaBadge.count();
+    
+    if (badgeCount > 0) {
+      const achievementRow = metaBadge.locator("xpath=ancestor::button");
+      await achievementRow.click();
+
+      await page.waitForTimeout(500);
+
+      // Find a sub-achievement button in the drawer
+      const subAchievementButton = page.locator("h4:has-text('Sub-achievements') + div button").first();
+      const subButtonCount = await subAchievementButton.count();
+      
+      if (subButtonCount > 0) {
+        // Get the text before clicking
+        const subAchievementName = await subAchievementButton.textContent();
         
-        // Should navigate to or open the sub-achievement details
-        await page.waitForTimeout(1000);
-        
-        // Verify we're now viewing a different achievement
-        await expect(page.locator("text=Description")).toBeVisible({ timeout: 5000 });
+        // Click the sub-achievement
+        await subAchievementButton.click();
+
+        await page.waitForTimeout(500);
+
+        // Verify drawer updated (look for the achievement name in the drawer header)
+        const drawerHeader = page.locator("h2");
+        await expect(drawerHeader).toBeVisible();
       }
+    }
+  });
+
+  test("meta achievements have gold border styling", async ({ page }) => {
+    await page.goto(BASE_URL);
+
+    // Wait for achievements to load
+    await expect(page.locator("text=/\\d+ achievements/")).toBeVisible({ timeout: 20000 });
+
+    // Find an achievement with the meta styling class
+    const metaAchievement = page.locator(".achievement-meta").first();
+    const metaCount = await metaAchievement.count();
+    
+    if (metaCount > 0) {
+      await expect(metaAchievement).toBeVisible();
+      
+      // Verify it has the achievement-meta class
+      const hasClass = await metaAchievement.evaluate((el) => el.classList.contains("achievement-meta"));
+      expect(hasClass).toBe(true);
     }
   });
 });

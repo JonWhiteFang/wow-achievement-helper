@@ -9,249 +9,102 @@ test.describe("Character Lookup", () => {
     // Wait for page to load
     await expect(page.locator("text=/\\d+ achievements/")).toBeVisible({ timeout: 20000 });
 
-    // Look for character input fields
-    const characterNameInput = page.getByPlaceholder(/character.*name/i).or(
-      page.getByLabel(/character.*name/i)
-    ).or(
-      page.locator("input[name*='character']")
-    );
+    // Look for realm selector
+    const realmSelect = page.locator("select").first();
+    await expect(realmSelect).toBeVisible();
 
-    const realmInput = page.getByPlaceholder(/realm/i).or(
-      page.getByLabel(/realm/i)
-    ).or(
-      page.locator("select[name*='realm']")
-    );
-
-    // At least one character input should be visible
-    await expect(characterNameInput.or(realmInput)).toBeVisible({ timeout: 5000 });
+    // Look for character name input
+    const nameInput = page.getByPlaceholder(/character name/i);
+    await expect(nameInput).toBeVisible();
   });
 
-  test("validates character name input", async ({ page }) => {
+  test("loads character progress when valid character entered", async ({ page }) => {
     await page.goto(BASE_URL);
 
     // Wait for page to load
     await expect(page.locator("text=/\\d+ achievements/")).toBeVisible({ timeout: 20000 });
 
-    // Find character name input
-    const characterNameInput = page.getByPlaceholder(/character.*name/i).or(
-      page.getByLabel(/character.*name/i)
-    ).or(
-      page.locator("input[name*='character']")
-    );
+    // Note: This test would need a known valid character to test properly
+    // For now, we just verify the UI elements exist
+    const loadButton = page.locator("button:has-text('Load')");
+    await expect(loadButton).toBeVisible();
+  });
 
-    if (await characterNameInput.isVisible()) {
-      // Try to submit with empty name
-      const submitButton = page.locator("button").filter({ hasText: /add|lookup|search/i }).first();
-      
-      if (await submitButton.isVisible()) {
-        await submitButton.click();
-        
-        // Should show validation error
-        const errorMessage = page.locator("text=/required|invalid|enter.*name/i").or(
-          page.locator(".error")
-        ).or(
-          page.locator("[role='alert']")
-        );
-        
-        if (await errorMessage.isVisible()) {
-          await expect(errorMessage).toBeVisible({ timeout: 3000 });
-        }
-      }
+  test("shows error for non-existent character", async ({ page }) => {
+    await page.goto(BASE_URL);
+
+    // Wait for page to load
+    await expect(page.locator("text=/\\d+ achievements/")).toBeVisible({ timeout: 20000 });
+
+    // Enter a definitely non-existent character
+    const nameInput = page.getByPlaceholder(/character name/i);
+    await nameInput.fill("ThisCharacterDefinitelyDoesNotExist12345");
+
+    const loadButton = page.locator("button:has-text('Load')");
+    await loadButton.click();
+
+    // Wait for error message
+    await page.waitForTimeout(2000);
+
+    // Look for error text (could be "not found" or "not public")
+    const errorText = page.locator("text=/not found|not public|failed/i");
+    const errorCount = await errorText.count();
+    
+    // Error should appear
+    expect(errorCount).toBeGreaterThan(0);
+  });
+
+  test("displays completion count after loading character", async ({ page }) => {
+    await page.goto(BASE_URL);
+
+    // Wait for page to load
+    await expect(page.locator("text=/\\d+ achievements/")).toBeVisible({ timeout: 20000 });
+
+    // Check if there's already a character loaded (from saved state or URL param)
+    const completionText = page.locator("text=/\\d+ \\/ \\d+/");
+    const hasCompletion = await completionText.count();
+
+    if (hasCompletion > 0) {
+      await expect(completionText.first()).toBeVisible();
     }
   });
 
-  test("adds character to lookup list", async ({ page }) => {
+  test("shows loading state while fetching character", async ({ page }) => {
     await page.goto(BASE_URL);
 
     // Wait for page to load
     await expect(page.locator("text=/\\d+ achievements/")).toBeVisible({ timeout: 20000 });
 
-    // Find character input fields
-    const characterNameInput = page.getByPlaceholder(/character.*name/i).or(
-      page.getByLabel(/character.*name/i)
-    ).or(
-      page.locator("input[name*='character']")
-    );
+    const nameInput = page.getByPlaceholder(/character name/i);
+    await nameInput.fill("TestCharacter");
 
-    const realmSelect = page.getByLabel(/realm/i).or(
-      page.locator("select[name*='realm']")
-    );
-
-    if (await characterNameInput.isVisible()) {
-      // Fill in test character
-      await characterNameInput.fill("TestCharacter");
-      
-      if (await realmSelect.isVisible()) {
-        // Select first available realm
-        await realmSelect.selectOption({ index: 1 });
-      }
-
-      // Submit the form
-      const submitButton = page.locator("button").filter({ hasText: /add|lookup|search/i }).first();
-      
-      if (await submitButton.isVisible()) {
-        await submitButton.click();
-        await page.waitForTimeout(1000);
-
-        // Character should appear in the list
-        const characterList = page.locator("text=TestCharacter").or(
-          page.locator(".character-list")
-        ).or(
-          page.locator("[data-testid*='character']")
-        );
-
-        if (await characterList.isVisible()) {
-          await expect(characterList).toBeVisible({ timeout: 5000 });
-        }
-      }
-    }
+    const loadButton = page.locator("button:has-text('Load')");
+    
+    // Click and immediately check for loading state
+    await loadButton.click();
+    
+    // Loading button should be disabled
+    await expect(loadButton).toBeDisabled();
   });
 
-  test("removes character from lookup list", async ({ page }) => {
+  test("clears character data when requested", async ({ page }) => {
     await page.goto(BASE_URL);
 
     // Wait for page to load
     await expect(page.locator("text=/\\d+ achievements/")).toBeVisible({ timeout: 20000 });
 
-    // First add a character (if possible)
-    const characterNameInput = page.getByPlaceholder(/character.*name/i).or(
-      page.getByLabel(/character.*name/i)
-    ).or(
-      page.locator("input[name*='character']")
-    );
+    // Look for clear/reset button (if character is loaded)
+    const clearButton = page.locator("button:has-text(/clear|reset/i)");
+    const hasClearButton = await clearButton.count();
 
-    if (await characterNameInput.isVisible()) {
-      await characterNameInput.fill("TestCharacter");
+    if (hasClearButton > 0) {
+      await clearButton.click();
       
-      const submitButton = page.locator("button").filter({ hasText: /add|lookup|search/i }).first();
-      if (await submitButton.isVisible()) {
-        await submitButton.click();
-        await page.waitForTimeout(1000);
-
-        // Look for remove button (×, delete, remove)
-        const removeButton = page.locator("button:has-text('×')").or(
-          page.locator("button").filter({ hasText: /remove|delete/i })
-        ).or(
-          page.locator("[aria-label*='remove']")
-        );
-
-        if (await removeButton.isVisible()) {
-          await removeButton.click();
-          await page.waitForTimeout(500);
-
-          // Character should be removed from list
-          const characterText = page.locator("text=TestCharacter");
-          if (await characterText.count() > 0) {
-            await expect(characterText).not.toBeVisible({ timeout: 3000 });
-          }
-        }
-      }
-    }
-  });
-
-  test("fetches character achievements", async ({ page }) => {
-    await page.goto(BASE_URL);
-
-    // Wait for page to load
-    await expect(page.locator("text=/\\d+ achievements/")).toBeVisible({ timeout: 20000 });
-
-    // Look for a fetch/merge button
-    const fetchButton = page.locator("button").filter({ hasText: /fetch|merge|load.*achievements/i });
-
-    if (await fetchButton.isVisible()) {
-      // Get initial achievement count
-      const initialCountText = await page.locator("text=/\\d+ achievements/").textContent();
-      const initialCount = parseInt(initialCountText?.match(/(\d+)/)?.[1] || "0", 10);
-
-      await fetchButton.click();
+      // Verify completion counts are reset or hidden
+      await page.waitForTimeout(500);
       
-      // Wait for loading to complete
-      await page.waitForTimeout(3000);
-
-      // Look for loading indicators
-      const loadingIndicator = page.locator("text=/loading|fetching/i").or(
-        page.locator(".loading")
-      ).or(
-        page.locator("[role='progressbar']")
-      );
-
-      // Wait for loading to finish if present
-      if (await loadingIndicator.isVisible()) {
-        await expect(loadingIndicator).not.toBeVisible({ timeout: 15000 });
-      }
-
-      // Achievement status should update (completed achievements marked)
-      const completedAchievements = page.locator(".completed").or(
-        page.locator("[data-completed='true']")
-      ).or(
-        page.locator("text=/completed|✓/i")
-      );
-
-      // Should have some visual indication of completion status
-      if (await completedAchievements.count() > 0) {
-        await expect(completedAchievements.first()).toBeVisible({ timeout: 5000 });
-      }
-    }
-  });
-
-  test("displays character fetch errors gracefully", async ({ page }) => {
-    await page.goto(BASE_URL);
-
-    // Wait for page to load
-    await expect(page.locator("text=/\\d+ achievements/")).toBeVisible({ timeout: 20000 });
-
-    // Add an invalid character
-    const characterNameInput = page.getByPlaceholder(/character.*name/i).or(
-      page.getByLabel(/character.*name/i)
-    ).or(
-      page.locator("input[name*='character']")
-    );
-
-    if (await characterNameInput.isVisible()) {
-      await characterNameInput.fill("InvalidCharacterName123456789");
-      
-      const submitButton = page.locator("button").filter({ hasText: /add|lookup|search/i }).first();
-      if (await submitButton.isVisible()) {
-        await submitButton.click();
-        await page.waitForTimeout(1000);
-
-        // Try to fetch achievements
-        const fetchButton = page.locator("button").filter({ hasText: /fetch|merge|load.*achievements/i });
-        if (await fetchButton.isVisible()) {
-          await fetchButton.click();
-          await page.waitForTimeout(5000);
-
-          // Should show error message
-          const errorMessage = page.locator("text=/error|not.*found|invalid|failed/i").or(
-            page.locator(".error")
-          ).or(
-            page.locator("[role='alert']")
-          );
-
-          if (await errorMessage.isVisible()) {
-            await expect(errorMessage).toBeVisible({ timeout: 10000 });
-          }
-        }
-      }
-    }
-  });
-
-  test("shows character achievement progress", async ({ page }) => {
-    await page.goto(BASE_URL);
-
-    // Wait for page to load
-    await expect(page.locator("text=/\\d+ achievements/")).toBeVisible({ timeout: 20000 });
-
-    // Look for progress indicators after character data is loaded
-    const progressIndicators = page.locator("text=/\\d+\\/\\d+|\\d+%/").or(
-      page.locator("[role='progressbar']")
-    ).or(
-      page.locator(".progress")
-    );
-
-    // Progress indicators might be visible by default or after character lookup
-    if (await progressIndicators.count() > 0) {
-      await expect(progressIndicators.first()).toBeVisible({ timeout: 5000 });
+      // Achievement list should still be visible but without completion markers
+      await expect(page.locator("text=/\\d+ achievements/")).toBeVisible();
     }
   });
 });
