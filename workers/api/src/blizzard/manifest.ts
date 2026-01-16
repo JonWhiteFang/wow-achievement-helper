@@ -41,6 +41,7 @@ const MANIFEST_KEY = "manifest:v1";
 const BUILD_STATE_KEY = "manifest:build-state";
 const MANIFEST_TTL = 60 * 60 * 24;
 const BATCH_SIZE = 40;
+const MEDIA_BATCH_SIZE = 20; // Smaller batch for media phase (2 requests per achievement)
 
 export async function getManifest(env: Env): Promise<Manifest | null> {
   const cached = await env.SESSIONS.get(MANIFEST_KEY);
@@ -125,7 +126,7 @@ export async function buildManifestIncremental(env: Env): Promise<{ done: boolea
     if (!state.mediaQueue || state.mediaQueue.length === 0) {
       state.phase = "done";
     } else {
-      const batch = state.mediaQueue.splice(0, BATCH_SIZE);
+      const batch = state.mediaQueue.splice(0, MEDIA_BATCH_SIZE);
       const achievementMap = new Map<number, { icon?: string; points?: number }>();
       
       const results = await Promise.all(
