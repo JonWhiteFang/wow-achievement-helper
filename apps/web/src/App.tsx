@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { fetchManifest, fetchCharacterAchievements, fetchAuthStatus, mergeCharacters, type Category, type AchievementSummary, type CharacterProgress, type AuthStatus, type MergeResult } from "./lib/api";
-import { getSavedCharacter, saveCharacter, clearSavedCharacter, getMergeSelection, saveMergeSelection, clearMergeSelection } from "./lib/storage";
+import { getSavedCharacter, saveCharacter, clearSavedCharacter, getMergeSelection, saveMergeSelection, clearMergeSelection, getRecentCategories, addRecentCategory, type RecentCategory } from "./lib/storage";
 import { useSearch } from "./lib/search";
 import { CategoryTree } from "./components/CategoryTree";
 import { AchievementList } from "./components/AchievementList";
@@ -33,6 +33,7 @@ export default function App() {
   const [auth, setAuth] = useState<AuthStatus>({ loggedIn: false });
   const [showCharSelector, setShowCharSelector] = useState(false);
   const [mergeSelection, setMergeSelection] = useState<{ realm: string; name: string }[]>([]);
+  const [recentCategories, setRecentCategories] = useState<RecentCategory[]>([]);
 
   useEffect(() => {
     fetchManifest()
@@ -50,6 +51,8 @@ export default function App() {
 
     const savedMerge = getMergeSelection();
     if (savedMerge.length > 0) setMergeSelection(savedMerge);
+
+    setRecentCategories(getRecentCategories());
   }, []);
 
   const loadCharacter = async (realm: string, name: string) => {
@@ -97,6 +100,53 @@ export default function App() {
   const categoryFiltered = selectedCategory
     ? achievements.filter((a) => a.categoryId === selectedCategory)
     : achievements;
+
+  // Build breadcrumb path for selected category
+  const getBreadcrumbs = (): { id: number; name: string }[] => {
+    if (!selectedCategory) return [];
+    const path: { id: number; name: string }[] = [];
+    const findPath = (cats: Category[], targetId: number): boolean => {
+      for (const cat of cats) {
+        if (cat.id === targetId) {
+          path.push({ id: cat.id, name: cat.name });
+          return true;
+        }
+        if (cat.children && findPath(cat.children, targetId)) {
+          path.unshift({ id: cat.id, name: cat.name });
+          return true;
+        }
+      }
+      return false;
+    };
+    findPath(categories, selectedCategory);
+    return path;
+  };
+
+  const handleCategorySelect = (id: number | null) => {
+    setSelectedCategory(id);
+    if (id) {
+      const breadcrumbs = getBreadcrumbs();
+      const cat = breadcrumbs.length > 0 ? breadcrumbs[breadcrumbs.length - 1] : null;
+      // Find category name if not in breadcrumbs yet (selection just changed)
+      const findCat = (cats: Category[]): Category | null => {
+        for (const c of cats) {
+          if (c.id === id) return c;
+          if (c.children) {
+            const found = findCat(c.children);
+            if (found) return found;
+          }
+        }
+        return null;
+      };
+      const found = cat || findCat(categories);
+      if (found) {
+        addRecentCategory({ id: found.id, name: found.name });
+        setRecentCategories(getRecentCategories());
+      }
+    }
+  };
+
+  const breadcrumbs = getBreadcrumbs();
 
   const searchResults = useSearch(categoryFiltered, searchQuery);
   const activeData = viewMode === "merged" && mergeResult ? mergeResult.merged : charProgress;
@@ -159,10 +209,31 @@ export default function App() {
       <div style={{ display: "flex", flex: 1, overflow: "hidden" }}>
         {showCategories && (
           <aside style={{ width: 240, background: "var(--panel)", borderRight: "1px solid var(--border)", overflow: "auto" }}>
-            <CategoryTree categories={categories} selectedId={selectedCategory} onSelect={setSelectedCategory} />
+            {recentCategories.length > 0 && (
+              <div style={{ padding: "8px 12px", borderBottom: "1px solid var(--border)" }}>
+                <div style={{ fontSize: 11, color: "var(--muted)", marginBottom: 4 }}>Recent</div>
+                <div style={{ display: "flex", flexWrap: "wrap", gap: 4 }}>
+                  {recentCategories.map((c) => (
+                    <button key={c.id} className="btn btn-ghost" style={{ fontSize: 11, padding: "2px 6px" }} onClick={() => handleCategorySelect(c.id)}>{c.name}</button>
+                  ))}
+                </div>
+              </div>
+            )}
+            <CategoryTree categories={categories} selectedId={selectedCategory} onSelect={handleCategorySelect} />
           </aside>
         )}
         <main style={{ flex: 1, overflow: "hidden", display: "flex", flexDirection: "column" }}>
+          {breadcrumbs.length > 0 && (
+            <div style={{ padding: "6px 16px", borderBottom: "1px solid var(--border)", fontSize: 12, display: "flex", alignItems: "center", gap: 4 }}>
+              <button className="btn btn-ghost" style={{ padding: "2px 6px", fontSize: 12 }} onClick={() => handleCategorySelect(null)}>All</button>
+              {breadcrumbs.map((b, i) => (
+                <span key={b.id} style={{ display: "flex", alignItems: "center", gap: 4 }}>
+                  <span style={{ color: "var(--muted)" }}>›</span>
+                  <button className="btn btn-ghost" style={{ padding: "2px 6px", fontSize: 12, color: i === breadcrumbs.length - 1 ? "var(--accent)" : undefined }} onClick={() => handleCategorySelect(b.id)}>{b.name}</button>
+                </span>
+              ))}
+            </div>
+          )}
           <div style={{ padding: "8px 16px", borderBottom: "1px solid var(--border)", color: "var(--muted)", fontSize: 13 }}>
             {searchResults.length} achievements {selectedCategory && "in category"}
           </div>

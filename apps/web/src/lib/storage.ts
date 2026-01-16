@@ -1,5 +1,6 @@
 const STORAGE_KEY = "wow-ach-character";
 const MERGE_KEY = "wow-ach-merge-selection";
+const RECENT_CATEGORIES_KEY = "wow-ach-recent-categories";
 
 export type SavedCharacter = {
   realm: string;
@@ -38,4 +39,21 @@ export function saveMergeSelection(chars: SavedCharacter[]): void {
 
 export function clearMergeSelection(): void {
   localStorage.removeItem(MERGE_KEY);
+}
+
+export type RecentCategory = { id: number; name: string };
+
+export function getRecentCategories(): RecentCategory[] {
+  try {
+    const data = localStorage.getItem(RECENT_CATEGORIES_KEY);
+    return data ? JSON.parse(data) : [];
+  } catch {
+    return [];
+  }
+}
+
+export function addRecentCategory(cat: RecentCategory): void {
+  const recent = getRecentCategories().filter((c) => c.id !== cat.id);
+  recent.unshift(cat);
+  localStorage.setItem(RECENT_CATEGORIES_KEY, JSON.stringify(recent.slice(0, 5)));
 }

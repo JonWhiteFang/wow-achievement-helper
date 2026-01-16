@@ -1,0 +1,5 @@
+When signed in to battle.net should indicate so where the sign-in button is
+
+Also when signed in there should be a list of my characters to choose from
+
+The realm selector should be a dropdown list
