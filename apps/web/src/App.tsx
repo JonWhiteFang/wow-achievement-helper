@@ -5,7 +5,7 @@ import { fetchManifest, fetchCharacterAchievements, fetchAuthStatus, mergeCharac
 import { getSavedCharacter, saveCharacter, clearSavedCharacter, getMergeSelection, saveMergeSelection, clearMergeSelection, getRecentCategories, addRecentCategory, type RecentCategory } from "./lib/storage";
 import { useSearch } from "./lib/search";
 import { calculatePoints, formatPoints } from "./lib/points";
-import { CategoryTree } from "./components/CategoryTree";
+import { CategoryTree, RECENT_CATEGORY_ID } from "./components/CategoryTree";
 import { AchievementList } from "./components/AchievementList";
 import { AchievementDrawer } from "./components/AchievementDrawer";
 import { CharacterLookup } from "./components/CharacterLookup";
@@ -133,9 +133,27 @@ function AppContent() {
     setSearchParams(searchParams);
   };
 
-  const categoryFiltered = selectedCategory
-    ? achievements.filter((a) => a.categoryId === selectedCategory)
-    : achievements;
+  const activeData = viewMode === "merged" && mergeResult ? mergeResult.merged : charProgress;
+  const completedIds = activeData ? new Set(activeData.completed) : undefined;
+  const completedAt = activeData?.completedAt;
+  const progress = activeData?.progress;
+
+  // Get recent achievements (last 20 by completion date)
+  const getRecentAchievements = () => {
+    if (!completedAt || !completedIds) return [];
+    const withDates = achievements
+      .filter((a) => completedIds.has(a.id) && completedAt[a.id])
+      .map((a) => ({ ...a, completedAt: completedAt[a.id] }))
+      .sort((a, b) => b.completedAt - a.completedAt)
+      .slice(0, 20);
+    return withDates;
+  };
+
+  const categoryFiltered = selectedCategory === RECENT_CATEGORY_ID
+    ? getRecentAchievements()
+    : selectedCategory
+      ? achievements.filter((a) => a.categoryId === selectedCategory)
+      : achievements;
 
   const getBreadcrumbs = (): { id: number; name: string }[] => {
     if (!selectedCategory) return [];
@@ -191,9 +209,6 @@ function AppContent() {
 
   const breadcrumbs = getBreadcrumbs();
   const searchResults = useSearch(categoryFiltered, searchQuery);
-  const activeData = viewMode === "merged" && mergeResult ? mergeResult.merged : charProgress;
-  const completedIds = activeData ? new Set(activeData.completed) : undefined;
-  const progress = activeData?.progress;
 
   const totalPoints = calculatePoints(achievements, completedIds);
   const sectionPoints = calculatePoints(searchResults, completedIds);
@@ -213,7 +228,7 @@ function AppContent() {
           </div>
         </div>
       )}
-      <CategoryTree categories={categories} selectedId={selectedCategory} onSelect={handleCategorySelect} achievements={achievements} completedIds={completedIds} />
+      <CategoryTree categories={categories} selectedId={selectedCategory} onSelect={handleCategorySelect} achievements={achievements} completedIds={completedIds} hasCompletedAt={!!completedAt && Object.keys(completedAt).length > 0} />
     </>
   );
 
@@ -332,6 +347,7 @@ function AppContent() {
               progress={progress}
               filter={filter}
               sort={sort}
+              showDates={selectedCategory === RECENT_CATEGORY_ID}
             />
           </div>
         </main>

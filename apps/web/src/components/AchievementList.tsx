@@ -1,14 +1,18 @@
 import { FixedSizeList as List } from "react-window";
 import { useRef, useEffect, useState } from "react";
 import type { AchievementSummary } from "../lib/api";
+import { formatCompletionDate } from "../lib/dates";
+
+type AchievementWithDate = AchievementSummary & { completedAt?: number };
 
 type Props = {
-  achievements: AchievementSummary[];
+  achievements: AchievementWithDate[];
   onSelect: (id: number) => void;
   completedIds?: Set<number>;
   progress?: Record<number, { completedCriteria: number; totalCriteria: number }>;
   filter?: "all" | "completed" | "incomplete" | "near";
   sort?: "name" | "points" | "completion";
+  showDates?: boolean;
 };
 
 const ROW_HEIGHT = 44;
@@ -23,7 +27,7 @@ function AchievementIcon({ src, size = 20 }: { src?: string; size?: number }) {
   return <img src={src} alt="" loading="lazy" style={{ ...style, objectFit: "cover" }} onError={() => setFailed(true)} />;
 }
 
-export function AchievementList({ achievements, onSelect, completedIds, progress, filter = "all", sort = "name" }: Props) {
+export function AchievementList({ achievements, onSelect, completedIds, progress, filter = "all", sort = "name", showDates }: Props) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [height, setHeight] = useState(400);
 
@@ -94,6 +98,9 @@ export function AchievementList({ achievements, onSelect, completedIds, progress
           {isCompleted ? "✓" : "○"}
         </span>
         <span style={{ flex: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{a.name}</span>
+        {showDates && a.completedAt && (
+          <span style={{ fontSize: 11, color: "var(--muted)", whiteSpace: "nowrap" }}>{formatCompletionDate(a.completedAt)}</span>
+        )}
         {!isCompleted && prog && (
           <div style={{ width: 80, display: "flex", alignItems: "center", gap: 6 }}>
             <div style={{ flex: 1, height: 4, background: "var(--panel-2)", borderRadius: 2 }}>
@@ -102,7 +109,7 @@ export function AchievementList({ achievements, onSelect, completedIds, progress
             <span style={{ fontSize: 11, color: "var(--muted)", width: 28 }}>{pct}%</span>
           </div>
         )}
-        <span style={{ color: "var(--muted)", fontSize: 12, width: 32, textAlign: "right" }}>{a.points || 0}</span>
+        {!showDates && <span style={{ color: "var(--muted)", fontSize: 12, width: 32, textAlign: "right" }}>{a.points || 0}</span>}
       </button>
     );
   };

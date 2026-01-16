@@ -4,6 +4,7 @@ import { getClientToken } from "./token";
 export type CharacterAchievements = {
   character: { realm: string; name: string };
   completed: number[];
+  completedAt: Record<number, number>;
   progress: Record<number, { completedCriteria: number; totalCriteria: number }>;
   fetchedAt: string;
 };
@@ -52,11 +53,13 @@ export async function fetchCharacterAchievements(
   };
 
   const completed: number[] = [];
+  const completedAt: Record<number, number> = {};
   const progress: Record<number, { completedCriteria: number; totalCriteria: number }> = {};
 
   for (const a of data.achievements || []) {
     if (a.completed_timestamp) {
       completed.push(a.id);
+      completedAt[a.id] = a.completed_timestamp;
     } else if (a.criteria?.child_criteria) {
       const total = a.criteria.child_criteria.length;
       const done = a.criteria.child_criteria.filter((c) => c.is_completed).length;
@@ -69,6 +72,7 @@ export async function fetchCharacterAchievements(
   return {
     character: { realm: realmSlug, name: charName },
     completed,
+    completedAt,
     progress,
     fetchedAt: new Date().toISOString(),
   };

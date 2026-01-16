@@ -41,6 +41,7 @@ export type ManifestResponse = {
 export type CharacterProgress = {
   character: { realm: string; name: string };
   completed: number[];
+  completedAt?: Record<number, number>;
   progress: Record<number, { completedCriteria: number; totalCriteria: number }>;
   fetchedAt: string;
 };
@@ -129,6 +130,7 @@ export async function fetchMyCharacters(): Promise<WowCharacter[]> {
 export type MergeResult = {
   merged: {
     completed: number[];
+    completedAt?: Record<number, number>;
     progress: Record<number, { completedCriteria: number; totalCriteria: number }>;
   };
   sources: { realm: string; name: string }[];

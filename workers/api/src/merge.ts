@@ -8,6 +8,7 @@ export type MergeRequest = {
 export type MergeResult = {
   merged: {
     completed: number[];
+    completedAt: Record<number, number>;
     progress: Record<number, { completedCriteria: number; totalCriteria: number }>;
   };
   sources: { realm: string; name: string }[];
@@ -42,11 +43,16 @@ export async function mergeCharacterAchievements(env: Env, characters: { realm: 
 
   // Merge: union of completed, max progress per achievement
   const completedSet = new Set<number>();
+  const completedAtMap: Record<number, number> = {};
   const progressMap: Record<number, { completedCriteria: number; totalCriteria: number }> = {};
 
   for (const r of results) {
     for (const id of r.completed) {
       completedSet.add(id);
+      // Keep the most recent completion timestamp
+      if (r.completedAt[id] && (!completedAtMap[id] || r.completedAt[id] > completedAtMap[id])) {
+        completedAtMap[id] = r.completedAt[id];
+      }
     }
     for (const [idStr, prog] of Object.entries(r.progress)) {
       const id = parseInt(idStr, 10);
@@ -64,6 +70,7 @@ export async function mergeCharacterAchievements(env: Env, characters: { realm: 
   return {
     merged: {
       completed: Array.from(completedSet),
+      completedAt: completedAtMap,
       progress: progressMap,
     },
     sources: results.map((r) => r.character),

@@ -8,9 +8,12 @@ type Props = {
   onSelect: (id: number | null) => void;
   achievements?: AchievementSummary[];
   completedIds?: Set<number>;
+  hasCompletedAt?: boolean;
 };
 
-export function CategoryTree({ categories, selectedId, onSelect, achievements, completedIds }: Props) {
+export const RECENT_CATEGORY_ID = -1;
+
+export function CategoryTree({ categories, selectedId, onSelect, achievements, completedIds, hasCompletedAt }: Props) {
   const [expanded, setExpanded] = useState<Set<number>>(new Set());
 
   const stats = useMemo(
@@ -97,6 +100,24 @@ export function CategoryTree({ categories, selectedId, onSelect, achievements, c
       >
         All Achievements
       </button>
+      {hasCompletedAt && (
+        <button
+          onClick={() => onSelect(RECENT_CATEGORY_ID)}
+          style={{
+            display: "block",
+            width: "100%",
+            textAlign: "left",
+            padding: "6px 12px",
+            background: selectedId === RECENT_CATEGORY_ID ? "var(--panel-2)" : "transparent",
+            border: "none",
+            borderLeft: selectedId === RECENT_CATEGORY_ID ? "2px solid var(--accent)" : "2px solid transparent",
+            color: selectedId === RECENT_CATEGORY_ID ? "var(--accent)" : "var(--success)",
+            cursor: "pointer",
+          }}
+        >
+          ⏱ Recently Completed
+        </button>
+      )}
       {categories.map((c) => renderCategory(c))}
     </div>
   );

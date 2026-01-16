@@ -12,17 +12,6 @@ Remaining tasks and improvements not yet implemented.
 
 ## Medium Priority (Polish)
 
-### 4. "Recently completed" list
-**Current:** No way to see recent completions
-**Desired:** Show last 10-20 completed achievements
-
-**Implementation:**
-- Sort completed achievements by completion date (from API)
-- Add "Recently Completed" smart list in category panel
-- Show completion date in list
-
----
-
 ### 5. Expansion filter
 **Current:** No expansion filtering
 **Desired:** Filter by expansion (Classic, TBC, Wrath, etc.)
@@ -173,6 +162,7 @@ Currently only manifest uses React Query. Character lookups and help fetches sti
 
 ## Completed ✅
 
+- [x] "Recently completed" list (last 20 achievements with completion dates in sidebar)
 - [x] Category completion bars (recursive progress with bar + count + percentage)
 - [x] Points display in header and section (earned/total)
 - [x] "Near complete" filter (80%+ progress achievements)
