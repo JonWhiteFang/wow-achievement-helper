@@ -12,20 +12,6 @@ Remaining tasks and improvements not yet implemented.
 
 ## Medium Priority (Polish)
 
-### 4. Mobile responsive polish
-**Current:** 3-pane layout doesn't adapt well to mobile
-**Desired:** Responsive layout with slide-in panels
-
-**Implementation:**
-- Add CSS media queries for mobile breakpoints
-- Category panel: slide-in drawer on mobile (toggle with ☰ button)
-- Achievement drawer: full-screen overlay on mobile
-- Adjust header to stack/wrap on narrow screens
-
-**Files:** `apps/web/src/styles/theme.css`, `apps/web/src/App.tsx`
-
----
-
 ### 5. Keyboard navigation
 **Current:** Mouse-only interaction
 **Desired:** Full keyboard support
@@ -239,6 +225,7 @@ Currently only manifest uses React Query. Character lookups and help fetches sti
 
 - [x] Achievement icons from Blizzard CDN (list + drawer, with placeholder fallback). **Note:** Requires manifest rebuild after deploy via `/api/admin/build-manifest?reset=true`
 - [x] Curated strategies for 10 more achievements (Glory raids, Keystone Master, exploration, PvP)
+- [x] Mobile responsive layout (slide-in category drawer, full-screen achievement drawer)
 - [x] Realm selector dropdown (fetches EU realms from Blizzard API, cached in KV)
 - [x] Battle.net sign-in indicator (shows battletag when logged in)
 - [x] Character selector for logged-in users ("My Characters" button)

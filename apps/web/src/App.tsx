@@ -14,16 +14,28 @@ import { CharacterSelector } from "./components/CharacterSelector";
 type ViewMode = "single" | "merged";
 type SortMode = "name" | "points" | "completion";
 
+function useIsMobile() {
+  const [isMobile, setIsMobile] = useState(window.matchMedia("(max-width: 768px)").matches);
+  useEffect(() => {
+    const mq = window.matchMedia("(max-width: 768px)");
+    const handler = (e: MediaQueryListEvent) => setIsMobile(e.matches);
+    mq.addEventListener("change", handler);
+    return () => mq.removeEventListener("change", handler);
+  }, []);
+  return isMobile;
+}
+
 function AppContent() {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const { categoryId, achievementId } = useParams();
+  const isMobile = useIsMobile();
 
   const selectedCategory = categoryId ? parseInt(categoryId, 10) : null;
   const selectedAchievement = achievementId ? parseInt(achievementId, 10) : null;
 
   const [searchQuery, setSearchQuery] = useState("");
-  const [showCategories, setShowCategories] = useState(true);
+  const [showCategories, setShowCategories] = useState(!isMobile);
 
   const [charProgress, setCharProgress] = useState<CharacterProgress | null>(null);
   const [mergeResult, setMergeResult] = useState<MergeResult | null>(null);
@@ -39,7 +51,6 @@ function AppContent() {
   const [mergeSelection, setMergeSelection] = useState<{ realm: string; name: string }[]>([]);
   const [recentCategories, setRecentCategories] = useState<RecentCategory[]>([]);
 
-  // React Query for manifest
   const { data: manifest, isLoading: loading, error } = useQuery({
     queryKey: ["manifest"],
     queryFn: fetchManifest,
@@ -54,7 +65,6 @@ function AppContent() {
       if (status.sessionExpired) setSessionExpired(true);
     });
 
-    // Load character from URL param or storage
     const charParam = searchParams.get("character");
     if (charParam) {
       const [realm, name] = charParam.split("/");
@@ -69,6 +79,11 @@ function AppContent() {
 
     setRecentCategories(getRecentCategories());
   }, []);
+
+  // Close mobile drawer when switching to desktop
+  useEffect(() => {
+    if (!isMobile) setShowCategories(true);
+  }, [isMobile]);
 
   const loadCharacter = async (realm: string, name: string) => {
     setCharLoading(true);
@@ -121,7 +136,6 @@ function AppContent() {
     ? achievements.filter((a) => a.categoryId === selectedCategory)
     : achievements;
 
-  // Build breadcrumb path for selected category
   const getBreadcrumbs = (): { id: number; name: string }[] => {
     if (!selectedCategory) return [];
     const path: { id: number; name: string }[] = [];
@@ -143,6 +157,7 @@ function AppContent() {
   };
 
   const handleCategorySelect = (id: number | null) => {
+    if (isMobile) setShowCategories(false);
     if (id) {
       navigate(selectedAchievement ? `/category/${id}/achievement/${selectedAchievement}` : `/category/${id}`);
       const findCat = (cats: Category[]): Category | null => {
@@ -182,81 +197,111 @@ function AppContent() {
   if (loading) return <div style={{ padding: 32, color: "var(--muted)" }}>Loading achievements...</div>;
   if (error) return <div style={{ padding: 32, color: "var(--danger)" }}>Error: {(error as Error).message}</div>;
 
+  const categorySidebar = (
+    <>
+      {recentCategories.length > 0 && (
+        <div style={{ padding: "8px 12px", borderBottom: "1px solid var(--border)" }}>
+          <div style={{ fontSize: 11, color: "var(--muted)", marginBottom: 4 }}>Recent</div>
+          <div style={{ display: "flex", flexWrap: "wrap", gap: 4 }}>
+            {recentCategories.map((c) => (
+              <button key={c.id} className="btn btn-ghost" style={{ fontSize: 11, padding: "2px 6px" }} onClick={() => handleCategorySelect(c.id)}>{c.name}</button>
+            ))}
+          </div>
+        </div>
+      )}
+      <CategoryTree categories={categories} selectedId={selectedCategory} onSelect={handleCategorySelect} />
+    </>
+  );
+
   return (
     <div style={{ display: "flex", flexDirection: "column", height: "100vh" }}>
-      <header style={{ padding: "12px 16px", background: "var(--panel)", borderBottom: "1px solid var(--border)", display: "flex", gap: 12, alignItems: "center", flexWrap: "wrap" }}>
+      <header style={{ padding: isMobile ? "8px 12px" : "12px 16px", background: "var(--panel)", borderBottom: "1px solid var(--border)", display: "flex", gap: isMobile ? 8 : 12, alignItems: "center", flexWrap: "wrap" }}>
         <button className="btn btn-ghost" onClick={() => setShowCategories(!showCategories)} title="Toggle categories">☰</button>
-        <h1 style={{ margin: 0, fontSize: 18, color: "var(--accent)" }}>WoW Achievement Helper</h1>
-        <input
-          type="search"
-          placeholder="Search achievements..."
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          className="input"
-          style={{ width: 200 }}
-        />
+        <h1 style={{ margin: 0, fontSize: isMobile ? 16 : 18, color: "var(--accent)", flex: isMobile ? "1 1 auto" : "none" }}>WoW Achievements</h1>
+        {!isMobile && (
+          <input
+            type="search"
+            placeholder="Search achievements..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="input"
+            style={{ width: 200 }}
+          />
+        )}
         <CharacterLookup
           onLookup={loadCharacter}
           loading={charLoading}
           currentCharacter={viewMode === "single" ? charProgress?.character || null : null}
           onClear={handleClearCharacter}
         />
-        {auth.loggedIn && <button className="btn" onClick={() => setShowCharSelector(true)}>My Characters</button>}
+        {auth.loggedIn && <button className="btn" onClick={() => setShowCharSelector(true)}>{isMobile ? "Chars" : "My Characters"}</button>}
         {viewMode === "merged" && mergeResult && (
           <span className="badge badge-success">Merged ({mergeResult.sources.length})</span>
         )}
         {(charProgress || mergeResult) && (
           <>
-            <select className="select" value={filter} onChange={(e) => setFilter(e.target.value as typeof filter)}>
+            <select className="select" value={filter} onChange={(e) => setFilter(e.target.value as typeof filter)} style={{ minWidth: isMobile ? 80 : undefined }}>
               <option value="all">All</option>
-              <option value="completed">Completed</option>
-              <option value="incomplete">Incomplete</option>
+              <option value="completed">Done</option>
+              <option value="incomplete">Todo</option>
             </select>
-            <select className="select" value={sort} onChange={(e) => setSort(e.target.value as SortMode)}>
-              <option value="name">Sort: Name</option>
-              <option value="points">Sort: Points</option>
-              <option value="completion">Sort: Completion</option>
+            <select className="select" value={sort} onChange={(e) => setSort(e.target.value as SortMode)} style={{ minWidth: isMobile ? 80 : undefined }}>
+              <option value="name">Name</option>
+              <option value="points">Points</option>
+              <option value="completion">Status</option>
             </select>
           </>
-        )}
-        {charProgress && viewMode === "single" && (
-          <button className="btn" onClick={() => loadCharacter(charProgress.character.realm, charProgress.character.name)} disabled={charLoading}>Refresh</button>
-        )}
-        {mergeResult && viewMode === "merged" && (
-          <button className="btn" onClick={() => loadMerge(mergeSelection)} disabled={charLoading}>Refresh</button>
         )}
         <div style={{ marginLeft: "auto" }}>
           <AuthButton loggedIn={auth.loggedIn} battletag={auth.battletag} onLogout={() => setAuth({ loggedIn: false })} />
         </div>
       </header>
 
+      {isMobile && (
+        <div style={{ padding: "8px 12px", borderBottom: "1px solid var(--border)" }}>
+          <input
+            type="search"
+            placeholder="Search achievements..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="input"
+            style={{ width: "100%" }}
+          />
+        </div>
+      )}
+
       {sessionExpired && (
         <div style={{ padding: "8px 16px", background: "rgba(210,153,34,0.15)", color: "var(--warning)", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-          <span>Your session has expired. Please log in again to access your characters.</span>
+          <span>Session expired. Please log in again.</span>
           <button className="btn btn-ghost" onClick={() => setSessionExpired(false)} style={{ padding: "2px 8px" }}>×</button>
         </div>
       )}
       {charError && <div style={{ padding: "8px 16px", background: "rgba(248,81,73,0.15)", color: "var(--danger)" }}>{charError}</div>}
 
-      <div style={{ display: "flex", flex: 1, overflow: "hidden" }}>
-        {showCategories && (
-          <aside style={{ width: 240, background: "var(--panel)", borderRight: "1px solid var(--border)", overflow: "auto" }}>
-            {recentCategories.length > 0 && (
-              <div style={{ padding: "8px 12px", borderBottom: "1px solid var(--border)" }}>
-                <div style={{ fontSize: 11, color: "var(--muted)", marginBottom: 4 }}>Recent</div>
-                <div style={{ display: "flex", flexWrap: "wrap", gap: 4 }}>
-                  {recentCategories.map((c) => (
-                    <button key={c.id} className="btn btn-ghost" style={{ fontSize: 11, padding: "2px 6px" }} onClick={() => handleCategorySelect(c.id)}>{c.name}</button>
-                  ))}
-                </div>
-              </div>
-            )}
-            <CategoryTree categories={categories} selectedId={selectedCategory} onSelect={handleCategorySelect} />
-          </aside>
+      <div style={{ display: "flex", flex: 1, overflow: "hidden", position: "relative" }}>
+        {/* Mobile category drawer */}
+        {isMobile && showCategories && (
+          <div className="mobile-backdrop" onClick={() => setShowCategories(false)} />
         )}
+        {isMobile ? (
+          <aside className={`mobile-drawer ${showCategories ? "open" : ""}`}>
+            <div style={{ padding: "12px 16px", borderBottom: "1px solid var(--border)", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+              <span style={{ fontWeight: 600 }}>Categories</span>
+              <button className="btn btn-ghost" onClick={() => setShowCategories(false)}>×</button>
+            </div>
+            {categorySidebar}
+          </aside>
+        ) : (
+          showCategories && (
+            <aside style={{ width: 240, background: "var(--panel)", borderRight: "1px solid var(--border)", overflow: "auto" }}>
+              {categorySidebar}
+            </aside>
+          )
+        )}
+
         <main style={{ flex: 1, overflow: "hidden", display: "flex", flexDirection: "column" }}>
           {breadcrumbs.length > 0 && (
-            <div style={{ padding: "6px 16px", borderBottom: "1px solid var(--border)", fontSize: 12, display: "flex", alignItems: "center", gap: 4 }}>
+            <div style={{ padding: "6px 16px", borderBottom: "1px solid var(--border)", fontSize: 12, display: "flex", alignItems: "center", gap: 4, flexWrap: "wrap" }}>
               <button className="btn btn-ghost" style={{ padding: "2px 6px", fontSize: 12 }} onClick={() => handleCategorySelect(null)}>All</button>
               {breadcrumbs.map((b, i) => (
                 <span key={b.id} style={{ display: "flex", alignItems: "center", gap: 4 }}>
@@ -280,10 +325,18 @@ function AppContent() {
             />
           </div>
         </main>
+
+        {/* Achievement drawer - full screen on mobile */}
         {selectedAchievement && (
-          <aside style={{ width: 380, background: "var(--panel)", borderLeft: "1px solid var(--border)", overflow: "auto" }}>
-            <AchievementDrawer achievementId={selectedAchievement} onClose={() => handleAchievementSelect(null)} />
-          </aside>
+          isMobile ? (
+            <div className="mobile-fullscreen">
+              <AchievementDrawer achievementId={selectedAchievement} onClose={() => handleAchievementSelect(null)} />
+            </div>
+          ) : (
+            <aside style={{ width: 380, background: "var(--panel)", borderLeft: "1px solid var(--border)", overflow: "auto" }}>
+              <AchievementDrawer achievementId={selectedAchievement} onClose={() => handleAchievementSelect(null)} />
+            </aside>
+          )
         )}
       </div>
 
