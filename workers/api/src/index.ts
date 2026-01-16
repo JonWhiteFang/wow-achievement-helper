@@ -1,3 +1,4 @@
+import { withSentry } from "@sentry/cloudflare";
 import type { Env } from "./env";
 import { fetchCategories, fetchAchievement, fetchRealms } from "./blizzard/gameData";
 import { getManifest, buildManifestIncremental } from "./blizzard/manifest";
@@ -217,11 +218,17 @@ const worker = {
     return response;
   },
 
-  async scheduled(_event: ScheduledEvent, env: Env, _ctx: ExecutionContext): Promise<void> {
+  async scheduled(_controller: ScheduledController, env: Env, _ctx: ExecutionContext): Promise<void> {
     // Run single iteration of manifest build
     const result = await buildManifestIncremental(env);
     console.log(`Manifest build: ${result.progress}`);
   },
 };
 
-export default worker;
+export default withSentry(
+  (env: Env) => ({
+    dsn: env.SENTRY_DSN,
+    tracesSampleRate: 0.1,
+  }),
+  worker
+);
