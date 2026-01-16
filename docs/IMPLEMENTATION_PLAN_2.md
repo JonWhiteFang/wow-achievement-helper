@@ -211,7 +211,7 @@ A modern, Blizzard-adjacent dark UI with gold accents and subtle “panel” sur
 
 ---
 
-## Optional nice-to-haves (later)
+## Optional nice-to-haves (later) ✅
 
 - React Router deep links:
   - `/achievement/:id`, `/category/:id`, `?character=realm/name`
