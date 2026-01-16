@@ -18,18 +18,14 @@ Remaining tasks and improvements not yet implemented.
 
 ## Low Priority (Nice to Have)
 
-### 1. "What can I do now" smart filter
-**Current:** Shows all incomplete achievements
-**Desired:** Filter to achievements character can currently attempt
-
-**Implementation:**
-- Filter by character level requirements
-- Filter by faction (Alliance/Horde specific)
-- Exclude achievements requiring unavailable content
+*No low priority items remaining*
 
 ---
 
 ## Deferred (Complex/Out of Scope)
+
+### "What can I do now" smart filter
+Requires faction data from character profile API (extra call) and faction requirements on achievements (not in current manifest). Would need significant API changes.
 
 ### React Query for all API calls
 Currently only manifest uses React Query. Character lookups and help fetches still use raw fetch. Could be migrated for better caching/retry behavior.
