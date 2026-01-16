@@ -172,7 +172,7 @@ A modern, Blizzard-adjacent dark UI with gold accents and subtle “panel” sur
 
 ## Phase 3 — Help: make “Strategy” actually useful (P1)
 
-### 3.1 Curated strategy provider (first-class)
+### 3.1 Curated strategy provider (first-class) ✅
 **Tasks**
 - Add `workers/api/data/strategy/README.md` describing format
 - Add provider `curatedProvider` that:
@@ -184,7 +184,7 @@ A modern, Blizzard-adjacent dark UI with gold accents and subtle “panel” sur
 - Some achievements show real steps in Strategy tab.
 - Contribution path is clear (PR adds a file).
 
-### 3.2 Improve Wowhead comment scraping resilience (optional)
+### 3.2 Improve Wowhead comment scraping resilience (optional) ✅
 **Tasks**
 - Wrap parsing in stricter guards
 - Add “Source unavailable” error shaping (don’t hard-fail the whole help payload)
