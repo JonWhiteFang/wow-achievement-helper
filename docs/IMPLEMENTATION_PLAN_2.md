@@ -162,7 +162,7 @@ A modern, Blizzard-adjacent dark UI with gold accents and subtle “panel” sur
 **Acceptance**
 - Progress is readable at a glance.
 
-### 2.4 Category tree UX
+### 2.4 Category tree UX ✅
 **Tasks**
 - Expand/collapse nodes with chevrons
 - Add breadcrumb display (selected path)
