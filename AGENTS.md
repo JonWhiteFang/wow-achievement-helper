@@ -254,6 +254,15 @@ A task is “done” only when:
 - It does not weaken security
 - It includes brief “how to test” notes (PR description or final message)
 
+
+**Incomplete implementations:**
+If a feature cannot be fully implemented due to complexity, time constraints, or external blockers:
+- Add an entry to `docs/TODO.md` with:
+  - Clear description of what's missing
+  - Priority level (high/medium/low)
+  - Implementation notes and files to modify
+  - Reason it was deferred
+- Mark the partial implementation in code with `// TODO:` comments referencing the TODO.md item
 ---
 
 ## 11) Agent output format expectations
