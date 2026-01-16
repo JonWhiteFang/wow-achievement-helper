@@ -36,6 +36,20 @@ Before making changes, the agent must do a **30–90 second assessment**:
 
 2) Determine if any uncertainty blocks correct implementation.
 
+3) **Delegate to custom subagents proactively** (see `.kiro/agents/`):
+   - Frontend changes → `wow-web-agent`
+   - Worker/API changes → `wow-worker-agent`
+   - Doc updates after code changes → `wow-docs-agent`
+   - Adding achievement strategies → `wow-strategy-agent`
+   - Adding tests → `wow-test-agent`
+   - Multi-area tasks → spawn agents in parallel when work is independent
+
+Handle directly (don't delegate):
+- Quick questions/summaries
+- Git operations
+- Planning and coordination
+- Tasks requiring user back-and-forth
+
 ### Clarifying questions rule
 
 Ask clarifying questions **only when the task is genuinely ambiguous** and the ambiguity would cause incorrect behavior. If not ambiguous, proceed.
