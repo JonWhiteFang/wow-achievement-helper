@@ -40,18 +40,35 @@ Elements:
 
 ### 2) Achievements (Main Workspace)
 
+3-panel desktop layout with 3 view modes:
+
+**View Modes:**
+- **Single**: View one character's progress
+- **Merged**: Combined progress across selected characters
+- **Compare**: Side-by-side comparison of two characters
+
 3-panel desktop layout:
 
 **Top bar**
 
 - Character selector (guest: current char; logged-in: merged or single)
+- ⚔️ Compare button (when logged in, opens comparison mode)
 - Global search input (fuzzy search via Fuse.js)
 - Filter pills:
-  - All / Completed / Incomplete / Near Complete (80%+)
+  - All / Completed / Incomplete / Near Complete (80%+) / Pinned
+- Compare filter (when in compare mode):
+  - Only A / Only B / Both / Neither
 - Sort dropdown:
   - Name / Points / Completion
 - Expansion filter dropdown:
   - All / Classic / TBC / Wrath / Cata / MoP / WoD / Legion / BfA / Shadowlands / Dragonflight / War Within
+- Reward filter dropdown:
+  - All / Title / Mount / Pet / Toy / Transmog / Other
+- Account-wide only toggle
+- ☀️/🌙 Theme toggle (dark/light mode)
+- Export/share buttons:
+  - 📋 Copy share link
+  - 📥 Export to CSV
 - Points display: "X / Y pts" (earned / total for current view)
 - Battletag display (when logged in)
 - "My Characters" button (when logged in)
@@ -164,6 +181,9 @@ Local-only (localStorage):
 - Saved characters (guest)
 - Merge selection (logged-in)
 - Recent categories (last 5)
+- Pinned achievement IDs
+- Achievement notes (per achievement)
+- Theme preference (dark/light)
 
 ## Error States
 

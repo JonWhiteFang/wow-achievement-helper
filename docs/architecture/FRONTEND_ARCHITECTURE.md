@@ -16,15 +16,18 @@ apps/web/src/
 │   ├── CategoryTree.tsx        # Left panel category navigation
 │   ├── CharacterLookup.tsx     # Realm/character input form
 │   ├── CharacterSelector.tsx   # Modal for selecting characters to merge
-│   └── ErrorBoundary.tsx       # Error boundary wrapper
+│   ├── ErrorBoundary.tsx       # Error boundary wrapper
+│   ├── ExportButtons.tsx       # CSV export and share link buttons
+│   └── ProgressStats.tsx       # Progress statistics display
 ├── lib/
 │   ├── api.ts            # API client (all backend calls)
 │   ├── categoryStats.ts  # Category completion calculations
 │   ├── dates.ts          # Date formatting utilities
 │   ├── expansions.ts     # Expansion mapping for categories
+│   ├── pins.ts           # Pins and notes functionality
 │   ├── points.ts         # Points calculation utilities
 │   ├── search.ts         # Fuse.js search hook
-│   └── storage.ts        # localStorage helpers
+│   └── storage.ts        # localStorage helpers (includes theme functions)
 └── styles/
     ├── theme.css         # CSS variables (colors, spacing)
     └── components.css    # Component styles
@@ -43,10 +46,15 @@ The main application component containing:
 
 Key state:
 - `charProgress` / `mergeResult`: Character achievement data
-- `viewMode`: "single" or "merged"
-- `filter`: "all" | "completed" | "incomplete" | "near"
+- `viewMode`: "single" | "merged" | "compare" (character comparison mode)
+- `compareProgress` / `compareFilter`: Character comparison state and filters
+- `filter`: "all" | "completed" | "incomplete" | "near" | "pinned"
 - `sort`: "name" | "points" | "completion"
 - `expansion`: Expansion filter value
+- `rewardFilter`: Filter by reward type (title, mount, pet, toy, transmog, other)
+- `accountWideOnly`: Toggle for account-wide achievements only
+- `pinnedIds`: Set of pinned achievement IDs
+- `theme`: "light" | "dark" theme state
 - `auth`: Authentication status
 - `recentCategories`: Recently viewed categories
 
@@ -99,6 +107,21 @@ Modal for logged-in users:
 
 Simple login/logout button showing battletag when logged in.
 
+### `ExportButtons.tsx`
+
+Export and share functionality:
+- Copy share link to clipboard (with current character/filters)
+- Export achievements to CSV format
+- Toast notifications for user feedback
+
+### `ProgressStats.tsx`
+
+Statistics display component:
+- Completion percentage breakdown
+- Points earned vs total
+- Category-specific progress
+- Visual progress indicators
+
 ## State Management
 
 ### Server State (React Query)
@@ -129,6 +152,11 @@ Via `lib/storage.ts`:
 - `getSavedCharacter()` / `saveCharacter()`: Last looked-up character
 - `getMergeSelection()` / `saveMergeSelection()`: Selected characters for merge
 - `getRecentCategories()` / `addRecentCategory()`: Recent category history
+- `getTheme()` / `setTheme()`: Dark/light theme preference
+
+Via `lib/pins.ts`:
+- `getPins()` / `togglePin()`: Pinned achievement IDs
+- `getNotes()` / `saveNote()` / `getNote()`: Achievement notes
 
 ## Routing
 

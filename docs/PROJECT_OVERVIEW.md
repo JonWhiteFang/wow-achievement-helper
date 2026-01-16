@@ -37,12 +37,15 @@ Remaining polish items tracked in `TODO.md`.
 - ✅ Guest character lookup with progress overlay
 - ✅ Battle.net login with OAuth
 - ✅ Account-wide merge across multiple characters
+- ✅ Character comparison mode (compare two characters side-by-side)
 - ✅ Strategy tips and community comments
 
 ### Filtering & Sorting
-- ✅ Filter: All / Completed / Incomplete / Near Complete (80%+)
+- ✅ Filter: All / Completed / Incomplete / Near Complete (80%+) / Pinned
 - ✅ Sort: Name / Points / Completion
 - ✅ Expansion filter dropdown
+- ✅ Reward type filter (title, mount, pet, toy, transmog, other)
+- ✅ Account-wide only toggle
 
 ### UI Enhancements
 - ✅ Realm selector dropdown (fetches EU realms)
@@ -53,6 +56,10 @@ Remaining polish items tracked in `TODO.md`.
 - ✅ Breadcrumb navigation
 - ✅ Recent categories
 - ✅ Mobile responsive layout
+- ✅ Dark/light theme toggle
+- ✅ Pins and notes (localStorage persistence)
+- ✅ Export to CSV and share link functionality
+- ✅ Progress statistics display
 
 ### Technical
 - ✅ List virtualization (react-window)
@@ -60,6 +67,7 @@ Remaining polish items tracked in `TODO.md`.
 - ✅ Deep linking with React Router
 - ✅ Session expiry handling
 - ✅ Playwright smoke tests
+- ✅ Sentry integration for error tracking
 
 ## Key Product Constraints
 

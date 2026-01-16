@@ -117,7 +117,7 @@ Response 200:
     }
   ],
   "achievements": [
-    { "id": 12345, "name": "Achievement Name", "points": 10, "categoryId": 92, "icon": "achievement_icon", "isMeta": true, "childAchievementIds": [123, 456] }
+    { "id": 12345, "name": "Achievement Name", "points": 10, "categoryId": 92, "icon": "achievement_icon", "isMeta": true, "childAchievementIds": [123, 456], "rewardType": "mount" }
   ],
   "builtAt": "2026-01-14T00:00:00Z"
 }

@@ -230,9 +230,9 @@ Show strategy steps and top 5–10 community comments in achievement detail.
 - ✅ Breadcrumb navigation for categories
 - ✅ Recent categories (localStorage)
 - ✅ "Azeroth Dark" UI theme with CSS variables
-- ⏳ "Smart lists": pinned, near-complete (see TODO.md)
-- ⏳ Better filters: expansion, meta, rewards (see TODO.md)
-- ⏳ Mobile responsive refinements (see TODO.md)
+- ✅ "Smart lists": pinned, near-complete
+- ✅ Better filters: expansion, meta, rewards
+- ✅ Mobile responsive refinements
 
 ### Engineering improvements
 
@@ -241,7 +241,7 @@ Show strategy steps and top 5–10 community comments in achievement detail.
 - ✅ Basic request logging (Worker)
 - ✅ Error boundary (frontend)
 - ✅ Playwright smoke tests
-- ⏳ Sentry integration (prepared, see TODO.md)
+- ✅ Sentry integration
 
 ### Deliverables
 

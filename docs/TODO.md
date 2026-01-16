@@ -1,6 +1,6 @@
 # TODO.md — WoW Achievement Helper
 
-Remaining tasks and improvements not yet implemented.
+All major features have been implemented. This file tracks any remaining polish items or future enhancements.
 
 ---
 

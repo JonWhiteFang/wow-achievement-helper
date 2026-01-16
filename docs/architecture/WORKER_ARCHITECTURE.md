@@ -36,15 +36,19 @@ workers/api/src/
 ```typescript
 export default {
   async fetch(req: Request, env: Env): Promise<Response> {
-    return withCors(req, env, async () => {
-      // Route matching and handling
+    return withSentry(req, env, async () => {
+      return withCors(req, env, async () => {
+        // Route matching and handling
+      });
     });
   },
-  async scheduled(event: ScheduledEvent, env: Env, ctx: ExecutionContext) {
+  async scheduled(event: ScheduledController, env: Env, ctx: ExecutionContext) {
     // Manifest building cron job
   },
 };
 ```
+
+The `withSentry` wrapper from `@sentry/cloudflare` provides error tracking and performance monitoring.
 
 ### CORS Middleware
 
@@ -234,6 +238,13 @@ export type Env = {
   APP_ORIGIN: string;
   BNET_CLIENT_ID: string;
   BNET_CLIENT_SECRET: string;
+  BATTLE_NET_REGION: string;
+  BATTLE_NET_OAUTH_AUTHORIZE: string;
+  BATTLE_NET_OAUTH_TOKEN: string;
+  BLIZZARD_API_HOST: string;
+  PROFILE_API_HOST: string;
+  SESSION_SIGNING_KEY: string;
+  SENTRY_DSN: string;
 };
 ```
 
