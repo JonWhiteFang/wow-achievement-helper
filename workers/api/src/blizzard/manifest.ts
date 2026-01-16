@@ -7,6 +7,7 @@ export type AchievementSummary = {
   name: string;
   points: number;
   categoryId: number;
+  icon?: string;
 };
 
 export type Manifest = {
@@ -16,12 +17,12 @@ export type Manifest = {
 };
 
 type BuildState = {
-  phase: "index" | "categories" | "done";
+  phase: "index" | "categories" | "media" | "done";
   queue: number[];
   achievements: AchievementSummary[];
-  // Store flat category data, rebuild tree at end
   categoryData: Record<number, { id: number; name: string; parentId: number | null; childIds: number[] }>;
   rootIds: number[];
+  mediaQueue?: number[];
 };
 
 type BlizzardCategoryDetail = {
@@ -32,9 +33,13 @@ type BlizzardCategoryDetail = {
   parent_category?: { id: number };
 };
 
+type BlizzardMediaResponse = {
+  assets?: { key: string; value: string }[];
+};
+
 const MANIFEST_KEY = "manifest:v1";
 const BUILD_STATE_KEY = "manifest:build-state";
-const MANIFEST_TTL = 60 * 60 * 24; // 24h
+const MANIFEST_TTL = 60 * 60 * 24;
 const BATCH_SIZE = 40;
 
 export async function getManifest(env: Env): Promise<Manifest | null> {
@@ -55,7 +60,6 @@ export async function buildManifestIncremental(env: Env): Promise<{ done: boolea
     state = { phase: "index", queue: [], achievements: [], categoryData: {}, rootIds: [] };
   }
 
-  // Phase 1: Fetch category index
   if (state.phase === "index") {
     const res = await fetch(
       `${env.BLIZZARD_API_HOST}/data/wow/achievement-category/index?namespace=static-eu&locale=en_GB`,
@@ -77,49 +81,80 @@ export async function buildManifestIncremental(env: Env): Promise<{ done: boolea
     return { done: false, progress: `Indexed ${roots.length} root categories` };
   }
 
-  // Phase 2: Fetch category details in batches
   if (state.phase === "categories") {
     if (state.queue.length === 0) {
+      state.phase = "media";
+      state.mediaQueue = state.achievements.map((a) => a.id);
+      await env.SESSIONS.put(BUILD_STATE_KEY, JSON.stringify(state), { expirationTtl: 3600 });
+      return { done: false, progress: `Categories done, starting media fetch for ${state.achievements.length} achievements` };
+    }
+    
+    const batch = state.queue.splice(0, BATCH_SIZE);
+    const results = await Promise.all(
+      batch.map(async (id) => {
+        const res = await fetch(
+          `${env.BLIZZARD_API_HOST}/data/wow/achievement-category/${id}?namespace=static-eu&locale=en_GB`,
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+        if (!res.ok) return null;
+        return (await res.json()) as BlizzardCategoryDetail;
+      })
+    );
+
+    for (const detail of results) {
+      if (!detail) continue;
+      if (detail.achievements) {
+        for (const a of detail.achievements) {
+          state.achievements.push({ id: a.id, name: a.name, points: a.points || 0, categoryId: detail.id });
+        }
+      }
+      if (detail.subcategories) {
+        for (const sub of detail.subcategories) {
+          state.categoryData[sub.id] = { id: sub.id, name: sub.name, parentId: detail.id, childIds: [] };
+          state.categoryData[detail.id].childIds.push(sub.id);
+          state.queue.push(sub.id);
+        }
+      }
+    }
+
+    await env.SESSIONS.put(BUILD_STATE_KEY, JSON.stringify(state), { expirationTtl: 3600 });
+    return { done: false, progress: `Processed ${batch.length} categories, ${state.queue.length} remaining, ${state.achievements.length} achievements` };
+  }
+
+  if (state.phase === "media") {
+    if (!state.mediaQueue || state.mediaQueue.length === 0) {
       state.phase = "done";
     } else {
-      const batch = state.queue.splice(0, BATCH_SIZE);
+      const batch = state.mediaQueue.splice(0, BATCH_SIZE);
+      const mediaMap = new Map<number, string>();
+      
       const results = await Promise.all(
         batch.map(async (id) => {
           const res = await fetch(
-            `${env.BLIZZARD_API_HOST}/data/wow/achievement-category/${id}?namespace=static-eu&locale=en_GB`,
+            `${env.BLIZZARD_API_HOST}/data/wow/media/achievement/${id}?namespace=static-eu`,
             { headers: { Authorization: `Bearer ${token}` } }
           );
           if (!res.ok) return null;
-          return (await res.json()) as BlizzardCategoryDetail;
+          const data = (await res.json()) as BlizzardMediaResponse;
+          const iconAsset = data.assets?.find((a) => a.key === "icon");
+          return iconAsset ? { id, icon: iconAsset.value } : null;
         })
       );
 
-      for (const detail of results) {
-        if (!detail) continue;
+      for (const r of results) {
+        if (r) mediaMap.set(r.id, r.icon);
+      }
 
-        // Collect achievements
-        if (detail.achievements) {
-          for (const a of detail.achievements) {
-            state.achievements.push({ id: a.id, name: a.name, points: a.points || 0, categoryId: detail.id });
-          }
-        }
-
-        // Add subcategories
-        if (detail.subcategories) {
-          for (const sub of detail.subcategories) {
-            state.categoryData[sub.id] = { id: sub.id, name: sub.name, parentId: detail.id, childIds: [] };
-            state.categoryData[detail.id].childIds.push(sub.id);
-            state.queue.push(sub.id);
-          }
-        }
+      for (const a of state.achievements) {
+        const icon = mediaMap.get(a.id);
+        if (icon) a.icon = icon;
       }
 
       await env.SESSIONS.put(BUILD_STATE_KEY, JSON.stringify(state), { expirationTtl: 3600 });
-      return { done: false, progress: `Processed ${batch.length} categories, ${state.queue.length} remaining, ${state.achievements.length} achievements` };
+      return { done: false, progress: `Fetched ${batch.length} icons, ${state.mediaQueue.length} remaining` };
     }
   }
 
-  // Phase 3: Finalize - rebuild tree from flat data
   if (state.phase === "done") {
     const buildTree = (id: number): Category | null => {
       const data = state.categoryData[id];

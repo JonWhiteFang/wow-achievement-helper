@@ -8,6 +8,16 @@ type Props = {
 
 type Tab = "details" | "strategy" | "community";
 
+function AchievementIcon({ src, size = 56 }: { src?: string; size?: number }) {
+  const [failed, setFailed] = useState(false);
+  const style = { width: size, height: size, borderRadius: 6, background: "var(--panel-2)", flexShrink: 0 };
+  
+  if (!src || failed) {
+    return <div style={{ ...style, display: "flex", alignItems: "center", justifyContent: "center", color: "var(--muted)", fontSize: size * 0.5 }}>⭐</div>;
+  }
+  return <img src={src} alt="" style={{ ...style, objectFit: "cover" }} onError={() => setFailed(true)} />;
+}
+
 export function AchievementDrawer({ achievementId, onClose }: Props) {
   const [achievement, setAchievement] = useState<Achievement | null>(null);
   const [help, setHelp] = useState<HelpPayload | null>(null);
@@ -46,13 +56,16 @@ export function AchievementDrawer({ achievementId, onClose }: Props) {
   return (
     <div style={{ padding: 16, height: "100%", display: "flex", flexDirection: "column" }}>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 12 }}>
-        <div>
+        <div style={{ display: "flex", gap: 12, alignItems: "flex-start" }}>
           {loading && <p className="text-muted">Loading...</p>}
           {error && <p className="text-danger">{error}</p>}
           {achievement && (
             <>
-              <h2 style={{ margin: 0, fontSize: 18, color: "var(--text)" }}>{achievement.name}</h2>
-              <p style={{ margin: "4px 0 0", color: "var(--accent)" }}>{achievement.points} points</p>
+              <AchievementIcon src={achievement.icon} size={56} />
+              <div>
+                <h2 style={{ margin: 0, fontSize: 18, color: "var(--text)" }}>{achievement.name}</h2>
+                <p style={{ margin: "4px 0 0", color: "var(--accent)" }}>{achievement.points} points</p>
+              </div>
             </>
           )}
         </div>

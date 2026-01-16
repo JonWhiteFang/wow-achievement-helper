@@ -11,6 +11,7 @@ export type AchievementSummary = {
   name: string;
   points?: number;
   categoryId: number;
+  icon?: string;
 };
 
 export type Achievement = {
@@ -22,6 +23,7 @@ export type Achievement = {
   reward: { title: string | null; item: { id: number; name: string } | null };
   categoryId: number;
   criteria: { id: number; description: string; amount: number }[];
+  icon?: string;
 };
 
 export type CategoriesResponse = {

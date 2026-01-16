@@ -16,6 +16,7 @@ export type Achievement = {
   reward: { title: string | null; item: { id: number; name: string } | null };
   categoryId: number;
   criteria: { id: number; description: string; amount: number }[];
+  icon?: string;
 };
 
 type BlizzardCategory = {
@@ -119,14 +120,20 @@ export async function fetchRealms(env: Env): Promise<Realm[]> {
 
 export async function fetchAchievement(env: Env, id: number): Promise<Achievement> {
   const token = await getClientToken(env);
-  const res = await fetch(
-    `${env.BLIZZARD_API_HOST}/data/wow/achievement/${id}?namespace=static-eu&locale=en_GB`,
-    { headers: { Authorization: `Bearer ${token}` } }
-  );
+  const [achievementRes, mediaRes] = await Promise.all([
+    fetch(
+      `${env.BLIZZARD_API_HOST}/data/wow/achievement/${id}?namespace=static-eu&locale=en_GB`,
+      { headers: { Authorization: `Bearer ${token}` } }
+    ),
+    fetch(
+      `${env.BLIZZARD_API_HOST}/data/wow/media/achievement/${id}?namespace=static-eu`,
+      { headers: { Authorization: `Bearer ${token}` } }
+    ),
+  ]);
 
-  if (!res.ok) throw new Error(`Achievement fetch failed: ${res.status}`);
+  if (!achievementRes.ok) throw new Error(`Achievement fetch failed: ${achievementRes.status}`);
 
-  const data = (await res.json()) as {
+  const data = (await achievementRes.json()) as {
     id: number;
     name: string;
     description: string;
@@ -136,6 +143,12 @@ export async function fetchAchievement(env: Env, id: number): Promise<Achievemen
     category: { id: number };
     criteria?: { id: number; description: string; amount: number; child_criteria?: unknown[] };
   };
+
+  let icon: string | undefined;
+  if (mediaRes.ok) {
+    const mediaData = (await mediaRes.json()) as { assets?: { key: string; value: string }[] };
+    icon = mediaData.assets?.find((a) => a.key === "icon")?.value;
+  }
 
   const criteria: { id: number; description: string; amount: number }[] = [];
   if (data.criteria) {
@@ -157,5 +170,6 @@ export async function fetchAchievement(env: Env, id: number): Promise<Achievemen
     reward: { title: data.reward_description || null, item: null },
     categoryId: data.category.id,
     criteria,
+    icon,
   };
 }

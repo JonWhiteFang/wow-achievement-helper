@@ -13,6 +13,16 @@ type Props = {
 
 const ROW_HEIGHT = 44;
 
+function AchievementIcon({ src, size = 20 }: { src?: string; size?: number }) {
+  const [failed, setFailed] = useState(false);
+  const style = { width: size, height: size, borderRadius: 4, background: "var(--panel-2)", flexShrink: 0 };
+  
+  if (!src || failed) {
+    return <div style={{ ...style, display: "flex", alignItems: "center", justifyContent: "center", color: "var(--muted)", fontSize: size * 0.6 }}>⭐</div>;
+  }
+  return <img src={src} alt="" loading="lazy" style={{ ...style, objectFit: "cover" }} onError={() => setFailed(true)} />;
+}
+
 export function AchievementList({ achievements, onSelect, completedIds, progress, filter = "all", sort = "name" }: Props) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [height, setHeight] = useState(400);
@@ -57,7 +67,7 @@ export function AchievementList({ achievements, onSelect, completedIds, progress
           ...style,
           display: "flex",
           alignItems: "center",
-          gap: 12,
+          gap: 8,
           width: "100%",
           textAlign: "left",
           padding: "0 16px",
@@ -69,7 +79,8 @@ export function AchievementList({ achievements, onSelect, completedIds, progress
         }}
         onClick={() => onSelect(a.id)}
       >
-        <span style={{ width: 20, color: isCompleted ? "var(--success)" : "var(--muted)", fontSize: 16 }}>
+        <AchievementIcon src={a.icon} size={20} />
+        <span style={{ width: 16, color: isCompleted ? "var(--success)" : "var(--muted)", fontSize: 14 }}>
           {isCompleted ? "✓" : "○"}
         </span>
         <span style={{ flex: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{a.name}</span>

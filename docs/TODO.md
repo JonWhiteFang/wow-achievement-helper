@@ -27,20 +27,6 @@ Remaining tasks and improvements not yet implemented.
 
 ---
 
-### 3. Achievement icons from Blizzard CDN
-**Current:** No icons displayed
-**Desired:** Show achievement icons in list and drawer
-
-**Implementation:**
-- Blizzard CDN URL format: `https://render.worldofwarcraft.com/eu/icons/56/{icon}.jpg`
-- Add `icon` field to `AchievementSummary` type (already in Blizzard API response)
-- Include icon in manifest build
-- Display in `AchievementList.tsx` and `AchievementDrawer.tsx`
-
-**Files:** `workers/api/src/blizzard/manifest.ts`, `apps/web/src/components/AchievementList.tsx`, `apps/web/src/components/AchievementDrawer.tsx`
-
----
-
 ### 4. Mobile responsive polish
 **Current:** 3-pane layout doesn't adapt well to mobile
 **Desired:** Responsive layout with slide-in panels
@@ -266,6 +252,7 @@ Currently only manifest uses React Query. Character lookups and help fetches sti
 
 ## Completed ✅
 
+- [x] Achievement icons from Blizzard CDN (list + drawer, with placeholder fallback). **Note:** Requires manifest rebuild after deploy via `/api/admin/build-manifest?reset=true`
 - [x] Realm selector dropdown (fetches EU realms from Blizzard API, cached in KV)
 - [x] Battle.net sign-in indicator (shows battletag when logged in)
 - [x] Character selector for logged-in users ("My Characters" button)
