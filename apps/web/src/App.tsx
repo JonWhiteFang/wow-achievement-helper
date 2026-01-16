@@ -375,11 +375,21 @@ function AppContent() {
         {selectedAchievement && (
           isMobile ? (
             <div className="mobile-fullscreen">
-              <AchievementDrawer achievementId={selectedAchievement} onClose={() => handleAchievementSelect(null)} />
+              <AchievementDrawer 
+                achievementId={selectedAchievement} 
+                onClose={() => handleAchievementSelect(null)} 
+                completedIds={completedIds}
+                onSelectAchievement={handleAchievementSelect}
+              />
             </div>
           ) : (
             <aside style={{ width: 380, background: "var(--panel)", borderLeft: "1px solid var(--border)", overflow: "auto" }}>
-              <AchievementDrawer achievementId={selectedAchievement} onClose={() => handleAchievementSelect(null)} />
+              <AchievementDrawer 
+                achievementId={selectedAchievement} 
+                onClose={() => handleAchievementSelect(null)} 
+                completedIds={completedIds}
+                onSelectAchievement={handleAchievementSelect}
+              />
             </aside>
           )
         )}

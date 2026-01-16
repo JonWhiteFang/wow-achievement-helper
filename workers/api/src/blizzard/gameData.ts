@@ -17,6 +17,7 @@ export type Achievement = {
   categoryId: number;
   criteria: { id: number; description: string; amount: number }[];
   icon?: string;
+  childAchievements?: { id: number; name: string }[];
 };
 
 type BlizzardCategory = {
@@ -141,7 +142,7 @@ export async function fetchAchievement(env: Env, id: number): Promise<Achievemen
     is_account_wide: boolean;
     reward_description?: string;
     category: { id: number };
-    criteria?: { id: number; description: string; amount: number; child_criteria?: unknown[] };
+    criteria?: { id: number; description: string; amount: number; child_criteria?: { id: number; description?: string; amount?: number; linked_achievement?: { id: number; name: string } }[] };
   };
 
   let icon: string | undefined;
@@ -151,10 +152,16 @@ export async function fetchAchievement(env: Env, id: number): Promise<Achievemen
   }
 
   const criteria: { id: number; description: string; amount: number }[] = [];
+  const childAchievements: { id: number; name: string }[] = [];
+  
   if (data.criteria) {
     if (data.criteria.child_criteria && Array.isArray(data.criteria.child_criteria)) {
-      for (const c of data.criteria.child_criteria as { id: number; description?: string; amount?: number }[]) {
-        criteria.push({ id: c.id, description: c.description || "", amount: c.amount || 1 });
+      for (const c of data.criteria.child_criteria) {
+        if (c.linked_achievement) {
+          childAchievements.push({ id: c.linked_achievement.id, name: c.linked_achievement.name });
+        } else {
+          criteria.push({ id: c.id, description: c.description || "", amount: c.amount || 1 });
+        }
       }
     } else {
       criteria.push({ id: data.criteria.id, description: data.criteria.description || "", amount: data.criteria.amount || 1 });
@@ -171,5 +178,6 @@ export async function fetchAchievement(env: Env, id: number): Promise<Achievemen
     categoryId: data.category.id,
     criteria,
     icon,
+    childAchievements: childAchievements.length > 0 ? childAchievements : undefined,
   };
 }

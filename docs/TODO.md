@@ -12,17 +12,6 @@ Remaining tasks and improvements not yet implemented.
 
 ## Medium Priority (Polish)
 
-### 7. Meta achievement highlighting
-**Current:** Meta achievements look like regular achievements
-**Desired:** Visual distinction + show sub-achievement progress inline
-
-**Implementation:**
-- Detect meta achievements (have child achievement criteria)
-- Add visual badge/border for metas
-- Show "3/8 sub-achievements" progress
-
----
-
 ### 8. Reward filter
 **Current:** No reward filtering
 **Desired:** Filter by reward type (title, mount, pet, transmog)
@@ -139,6 +128,8 @@ Currently only manifest uses React Query. Character lookups and help fetches sti
 ---
 
 ## Completed ✅
+
+- [x] Meta achievement highlighting (visual badge + border, sub-achievement progress in list, clickable checklist in drawer)
 
 - [x] "Account-wide only" toggle (filter to show only account-wide achievements)
 - [x] Expansion filter (dropdown to filter by Classic, TBC, Wrath, etc.)

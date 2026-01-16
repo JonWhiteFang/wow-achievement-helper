@@ -117,7 +117,7 @@ Response 200:
     }
   ],
   "achievements": [
-    { "id": 12345, "name": "Achievement Name", "points": 10, "categoryId": 92, "icon": "achievement_icon" }
+    { "id": 12345, "name": "Achievement Name", "points": 10, "categoryId": 92, "icon": "achievement_icon", "isMeta": true, "childAchievementIds": [123, 456] }
   ],
   "builtAt": "2026-01-14T00:00:00Z"
 }
@@ -172,7 +172,11 @@ Response 200:
   "criteria": [
     { "id": 1, "description": "Kill X", "amount": 1 }
   ],
-  "icon": "achievement_icon"
+  "icon": "achievement_icon",
+  "childAchievements": [
+    { "id": 123, "name": "Child Achievement 1" },
+    { "id": 456, "name": "Child Achievement 2" }
+  ]
 }
 ```
 

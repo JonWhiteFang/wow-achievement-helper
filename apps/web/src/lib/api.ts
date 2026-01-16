@@ -13,6 +13,8 @@ export type AchievementSummary = {
   categoryId: number;
   icon?: string;
   isAccountWide?: boolean;
+  isMeta?: boolean;
+  childAchievementIds?: number[];
 };
 
 export type Achievement = {
@@ -25,6 +27,7 @@ export type Achievement = {
   categoryId: number;
   criteria: { id: number; description: string; amount: number }[];
   icon?: string;
+  childAchievements?: { id: number; name: string }[];
 };
 
 export type CategoriesResponse = {

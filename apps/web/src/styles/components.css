@@ -52,6 +52,7 @@
 }
 .badge-success { background: rgba(63,185,80,0.2); color: var(--success); }
 .badge-warning { background: rgba(210,153,34,0.2); color: var(--warning); }
+.badge-meta { background: rgba(255,215,0,0.2); color: var(--accent); }
 
 .modal-overlay {
   position: fixed;
@@ -94,3 +95,5 @@
 .text-success { color: var(--success); }
 .text-warning { color: var(--warning); }
 .text-danger { color: var(--danger); }
+
+.achievement-meta { border-left: 3px solid var(--accent); }

@@ -79,6 +79,12 @@ export function AchievementList({ achievements, onSelect, completedIds, progress
     const prog = progress?.[a.id];
     const pct = prog ? Math.round((prog.completedCriteria / prog.totalCriteria) * 100) : 0;
 
+    // For meta achievements, count completed children
+    const completedChildren = a.isMeta && a.childAchievementIds && completedIds 
+      ? a.childAchievementIds.filter(id => completedIds.has(id)).length 
+      : 0;
+    const totalChildren = a.childAchievementIds?.length || 0;
+
     return (
       <button
         style={{
@@ -95,6 +101,7 @@ export function AchievementList({ achievements, onSelect, completedIds, progress
           color: "var(--text)",
           cursor: "pointer",
         }}
+        className={a.isMeta ? "achievement-meta" : ""}
         onClick={() => onSelect(a.id)}
       >
         <AchievementIcon src={a.icon} size={20} />
@@ -102,10 +109,14 @@ export function AchievementList({ achievements, onSelect, completedIds, progress
           {isCompleted ? "✓" : "○"}
         </span>
         <span style={{ flex: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{a.name}</span>
+        {a.isMeta && <span className="badge badge-meta">META</span>}
         {showDates && a.completedAt && (
           <span style={{ fontSize: 11, color: "var(--muted)", whiteSpace: "nowrap" }}>{formatCompletionDate(a.completedAt)}</span>
         )}
-        {!isCompleted && prog && (
+        {!isCompleted && a.isMeta && totalChildren > 0 && (
+          <span style={{ fontSize: 11, color: "var(--muted)", whiteSpace: "nowrap" }}>{completedChildren}/{totalChildren}</span>
+        )}
+        {!isCompleted && !a.isMeta && prog && (
           <div style={{ width: 80, display: "flex", alignItems: "center", gap: 6 }}>
             <div style={{ flex: 1, height: 4, background: "var(--panel-2)", borderRadius: 2 }}>
               <div style={{ width: `${pct}%`, height: "100%", background: "var(--warning)", borderRadius: 2 }} />

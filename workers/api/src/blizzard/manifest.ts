@@ -9,6 +9,8 @@ export type AchievementSummary = {
   categoryId: number;
   icon?: string;
   isAccountWide?: boolean;
+  isMeta?: boolean;
+  childAchievementIds?: number[];
 };
 
 export type Manifest = {
@@ -128,7 +130,7 @@ export async function buildManifestIncremental(env: Env): Promise<{ done: boolea
       state.phase = "done";
     } else {
       const batch = state.mediaQueue.splice(0, MEDIA_BATCH_SIZE);
-      const achievementMap = new Map<number, { icon?: string; points?: number; isAccountWide?: boolean }>();
+      const achievementMap = new Map<number, { icon?: string; points?: number; isAccountWide?: boolean; isMeta?: boolean; childAchievementIds?: number[] }>();
       
       const results = await Promise.all(
         batch.map(async (id) => {
@@ -139,21 +141,32 @@ export async function buildManifestIncremental(env: Env): Promise<{ done: boolea
           let icon: string | undefined;
           let points: number | undefined;
           let isAccountWide: boolean | undefined;
+          let isMeta: boolean | undefined;
+          let childAchievementIds: number[] | undefined;
           if (mediaRes.ok) {
             const data = (await mediaRes.json()) as BlizzardMediaResponse;
             icon = data.assets?.find((a) => a.key === "icon")?.value;
           }
           if (detailRes.ok) {
-            const data = (await detailRes.json()) as { points?: number; is_account_wide?: boolean };
+            const data = (await detailRes.json()) as { points?: number; is_account_wide?: boolean; criteria?: { child_criteria?: { linked_achievement?: { id: number } }[] } };
             points = data.points;
             isAccountWide = data.is_account_wide;
+            if (data.criteria?.child_criteria) {
+              const linkedAchievements = data.criteria.child_criteria.filter(c => c.linked_achievement).map(c => c.linked_achievement!.id);
+              if (linkedAchievements.length > 0) {
+                isMeta = true;
+                childAchievementIds = linkedAchievements;
+              }
+            }
           }
-          return { id, icon, points, isAccountWide };
+          return { id, icon, points, isAccountWide, isMeta, childAchievementIds };
         })
       );
 
       for (const r of results) {
-        if (r.icon || r.points !== undefined || r.isAccountWide !== undefined) achievementMap.set(r.id, { icon: r.icon, points: r.points, isAccountWide: r.isAccountWide });
+        if (r.icon || r.points !== undefined || r.isAccountWide !== undefined || r.isMeta !== undefined || r.childAchievementIds !== undefined) {
+          achievementMap.set(r.id, { icon: r.icon, points: r.points, isAccountWide: r.isAccountWide, isMeta: r.isMeta, childAchievementIds: r.childAchievementIds });
+        }
       }
 
       for (const a of state.achievements) {
@@ -161,6 +174,8 @@ export async function buildManifestIncremental(env: Env): Promise<{ done: boolea
         if (data?.icon) a.icon = data.icon;
         if (data?.points !== undefined) a.points = data.points;
         if (data?.isAccountWide !== undefined) a.isAccountWide = data.isAccountWide;
+        if (data?.isMeta !== undefined) a.isMeta = data.isMeta;
+        if (data?.childAchievementIds !== undefined) a.childAchievementIds = data.childAchievementIds;
       }
 
       await env.SESSIONS.put(BUILD_STATE_KEY, JSON.stringify(state), { expirationTtl: 3600 });

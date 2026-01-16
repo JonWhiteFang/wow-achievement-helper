@@ -4,6 +4,8 @@ import { fetchAchievement, fetchHelp, type Achievement, type HelpPayload } from 
 type Props = {
   achievementId: number | null;
   onClose: () => void;
+  completedIds?: Set<number>;
+  onSelectAchievement?: (id: number) => void;
 };
 
 type Tab = "details" | "strategy" | "community";
@@ -18,7 +20,7 @@ function AchievementIcon({ src, size = 56 }: { src?: string; size?: number }) {
   return <img src={src} alt="" style={{ ...style, objectFit: "cover" }} onError={() => setFailed(true)} />;
 }
 
-export function AchievementDrawer({ achievementId, onClose }: Props) {
+export function AchievementDrawer({ achievementId, onClose, completedIds, onSelectAchievement }: Props) {
   const [achievement, setAchievement] = useState<Achievement | null>(null);
   const [help, setHelp] = useState<HelpPayload | null>(null);
   const [loading, setLoading] = useState(false);
@@ -87,6 +89,39 @@ export function AchievementDrawer({ achievementId, onClose }: Props) {
               <>
                 <p style={{ color: "var(--text)", margin: "0 0 12px" }}>{achievement.description}</p>
                 {achievement.isAccountWide && <p className="badge badge-success" style={{ marginBottom: 12 }}>Account-wide</p>}
+                {achievement.childAchievements && achievement.childAchievements.length > 0 && (
+                  <>
+                    <h4 style={{ margin: "0 0 8px", color: "var(--muted)" }}>Sub-achievements</h4>
+                    <div style={{ marginBottom: 16 }}>
+                      {achievement.childAchievements.map((child) => {
+                        const isCompleted = completedIds?.has(child.id);
+                        return (
+                          <button
+                            key={child.id}
+                            onClick={() => onSelectAchievement?.(child.id)}
+                            style={{
+                              display: "flex",
+                              alignItems: "center",
+                              gap: 8,
+                              width: "100%",
+                              padding: "6px 0",
+                              border: "none",
+                              background: "transparent",
+                              color: "var(--text)",
+                              cursor: onSelectAchievement ? "pointer" : "default",
+                              textAlign: "left",
+                            }}
+                          >
+                            <span style={{ color: isCompleted ? "var(--success)" : "var(--muted)", fontSize: 14 }}>
+                              {isCompleted ? "✓" : "○"}
+                            </span>
+                            <span>{child.name}</span>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </>
+                )}
                 {achievement.criteria.length > 0 && (
                   <>
                     <h4 style={{ margin: "0 0 8px", color: "var(--muted)" }}>Criteria</h4>
