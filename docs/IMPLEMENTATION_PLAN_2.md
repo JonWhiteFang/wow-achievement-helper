@@ -192,7 +192,7 @@ A modern, Blizzard-adjacent dark UI with gold accents and subtle “panel” sur
 
 ---
 
-## Phase 4 — Account-wide workflow polish (P1)
+## Phase 4 — Account-wide workflow polish (P1) ✅
 
 ### 4.1 “Merge all my characters” button (logged in)
 **Tasks**
@@ -201,7 +201,7 @@ A modern, Blizzard-adjacent dark UI with gold accents and subtle “panel” sur
   - add “Merge all” quick action
 - Persist merge selection in localStorage (already present) + show as chips in header
 
-### 4.2 Better refresh + token expiry handling
+### 4.2 Better refresh + token expiry handling ✅
 **Tasks**
 - Worker:
   - detect expired access token in session
