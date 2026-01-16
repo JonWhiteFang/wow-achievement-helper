@@ -62,7 +62,13 @@ describe("manifest meta achievement detection", () => {
   });
 
   it("handles achievements with no criteria", () => {
-    const mockAchievementData = {
+    const mockAchievementData: {
+      id: number;
+      name: string;
+      points: number;
+      is_account_wide: boolean;
+      criteria?: any;
+    } = {
       id: 200,
       name: "Simple Achievement",
       points: 5,

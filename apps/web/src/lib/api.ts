@@ -15,6 +15,7 @@ export type AchievementSummary = {
   isAccountWide?: boolean;
   isMeta?: boolean;
   childAchievementIds?: number[];
+  rewardType?: string;
 };
 
 export type Achievement = {

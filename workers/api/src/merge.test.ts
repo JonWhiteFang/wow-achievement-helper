@@ -46,14 +46,15 @@ describe("merge logic", () => {
   it("handles completedAt timestamps correctly", () => {
     const completedAtMap: Record<number, number> = {};
     const results = [
-      { completed: [1, 2], completedAt: { 1: 1000, 2: 2000 } },
-      { completed: [1, 3], completedAt: { 1: 1500, 3: 3000 } },
+      { completed: [1, 2], completedAt: { 1: 1000, 2: 2000 } as Record<number, number> },
+      { completed: [1, 3], completedAt: { 1: 1500, 3: 3000 } as Record<number, number> },
     ];
 
     for (const r of results) {
       for (const id of r.completed) {
-        if (r.completedAt[id] && (!completedAtMap[id] || r.completedAt[id] > completedAtMap[id])) {
-          completedAtMap[id] = r.completedAt[id];
+        const timestamp = r.completedAt[id];
+        if (timestamp && (!completedAtMap[id] || timestamp > completedAtMap[id])) {
+          completedAtMap[id] = timestamp;
         }
       }
     }

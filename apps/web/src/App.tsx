@@ -15,6 +15,7 @@ import { CharacterSelector } from "./components/CharacterSelector";
 
 type ViewMode = "single" | "merged";
 type SortMode = "name" | "points" | "completion";
+type RewardType = "all" | "title" | "mount" | "pet" | "toy" | "transmog" | "other";
 
 function useIsMobile() {
   const [isMobile, setIsMobile] = useState(window.matchMedia("(max-width: 768px)").matches);
@@ -48,6 +49,7 @@ function AppContent() {
   const [sort, setSort] = useState<SortMode>("name");
   const [expansion, setExpansion] = useState<Expansion | "all">("all");
   const [accountWideOnly, setAccountWideOnly] = useState(false);
+  const [rewardFilter, setRewardFilter] = useState<RewardType>("all");
 
   const [auth, setAuth] = useState<AuthStatus>({ loggedIn: false });
   const [sessionExpired, setSessionExpired] = useState(false);
@@ -163,6 +165,11 @@ function AppContent() {
   // Apply expansion filter
   if (expansion !== "all") {
     categoryFiltered = categoryFiltered.filter((a) => categoryExpansionMap.get(a.categoryId) === expansion);
+  }
+
+  // Apply reward filter
+  if (rewardFilter !== "all") {
+    categoryFiltered = categoryFiltered.filter((a) => a.rewardType === rewardFilter);
   }
 
   const getBreadcrumbs = (): { id: number; name: string }[] => {
@@ -290,6 +297,15 @@ function AppContent() {
         <select className="select" value={expansion} onChange={(e) => setExpansion(e.target.value as Expansion | "all")} style={{ minWidth: isMobile ? 70 : undefined }}>
           <option value="all">All Xpacs</option>
           {EXPANSIONS.map((e) => <option key={e} value={e}>{EXPANSION_LABELS[e]}</option>)}
+        </select>
+        <select className="select" value={rewardFilter} onChange={(e) => setRewardFilter(e.target.value as RewardType)} style={{ minWidth: isMobile ? 70 : undefined }}>
+          <option value="all">All Rewards</option>
+          <option value="title">Title</option>
+          <option value="mount">Mount</option>
+          <option value="pet">Pet</option>
+          <option value="toy">Toy</option>
+          <option value="transmog">Transmog</option>
+          <option value="other">Other</option>
         </select>
         <label style={{ display: "flex", alignItems: "center", gap: 4, fontSize: 12, cursor: "pointer" }}>
           <input type="checkbox" checked={accountWideOnly} onChange={(e) => setAccountWideOnly(e.target.checked)} />

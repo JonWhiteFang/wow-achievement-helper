@@ -12,14 +12,7 @@ Remaining tasks and improvements not yet implemented.
 
 ## Medium Priority (Polish)
 
-### 8. Reward filter
-**Current:** No reward filtering
-**Desired:** Filter by reward type (title, mount, pet, transmog)
-
-**Implementation:**
-- Parse reward field from achievement data
-- Add reward type filter pills
-- Popular for collectors
+*No medium priority items remaining*
 
 ---
 
@@ -129,6 +122,7 @@ Currently only manifest uses React Query. Character lookups and help fetches sti
 
 ## Completed ✅
 
+- [x] Reward filter (filter by title, mount, pet, toy, transmog rewards)
 - [x] Meta achievement highlighting (visual badge + border, sub-achievement progress in list, clickable checklist in drawer)
 
 - [x] "Account-wide only" toggle (filter to show only account-wide achievements)
