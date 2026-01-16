@@ -18,18 +18,7 @@ Remaining tasks and improvements not yet implemented.
 
 ## Low Priority (Nice to Have)
 
-### 1. Achievement comparison
-**Current:** Single character view only
-**Desired:** Compare progress between two characters side-by-side
-
-**Implementation:**
-- Add "Compare" mode
-- Load two characters' progress
-- Show diff view (what one has that other doesn't)
-
----
-
-### 2. "What can I do now" smart filter
+### 1. "What can I do now" smart filter
 **Current:** Shows all incomplete achievements
 **Desired:** Filter to achievements character can currently attempt
 
@@ -49,6 +38,7 @@ Currently only manifest uses React Query. Character lookups and help fetches sti
 
 ## Completed ✅
 
+- [x] Achievement comparison (compare mode with diff filter: only A, only B, both, neither)
 - [x] Sentry full integration (withSentry wrapper for worker, frontend already configured)
 - [x] Export/share progress (clipboard share + CSV export)
 - [x] Pins and notes persistence (localStorage with filter)

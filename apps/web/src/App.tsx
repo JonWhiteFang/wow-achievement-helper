@@ -16,9 +16,10 @@ import { CharacterLookup } from "./components/CharacterLookup";
 import { AuthButton } from "./components/AuthButton";
 import { CharacterSelector } from "./components/CharacterSelector";
 
-type ViewMode = "single" | "merged";
+type ViewMode = "single" | "merged" | "compare";
 type SortMode = "name" | "points" | "completion";
 type RewardType = "all" | "title" | "mount" | "pet" | "toy" | "transmog" | "other";
+type CompareFilter = "all" | "onlyA" | "onlyB" | "both" | "neither";
 
 function useIsMobile() {
   const [isMobile, setIsMobile] = useState(window.matchMedia("(max-width: 768px)").matches);
@@ -44,11 +45,13 @@ function AppContent() {
   const [showCategories, setShowCategories] = useState(!isMobile);
 
   const [charProgress, setCharProgress] = useState<CharacterProgress | null>(null);
+  const [compareProgress, setCompareProgress] = useState<CharacterProgress | null>(null);
   const [mergeResult, setMergeResult] = useState<MergeResult | null>(null);
   const [viewMode, setViewMode] = useState<ViewMode>("single");
   const [charLoading, setCharLoading] = useState(false);
   const [charError, setCharError] = useState<string | null>(null);
   const [filter, setFilter] = useState<"all" | "completed" | "incomplete" | "near" | "pinned">("all");
+  const [compareFilter, setCompareFilter] = useState<CompareFilter>("all");
   const [sort, setSort] = useState<SortMode>("name");
   const [expansion, setExpansion] = useState<Expansion | "all">("all");
   const [accountWideOnly, setAccountWideOnly] = useState(false);
@@ -57,6 +60,7 @@ function AppContent() {
   const [auth, setAuth] = useState<AuthStatus>({ loggedIn: false });
   const [sessionExpired, setSessionExpired] = useState(false);
   const [showCharSelector, setShowCharSelector] = useState(false);
+  const [showCompareSelector, setShowCompareSelector] = useState(false);
   const [mergeSelection, setMergeSelection] = useState<{ realm: string; name: string }[]>([]);
   const [recentCategories, setRecentCategories] = useState<RecentCategory[]>([]);
   const [theme, setThemeState] = useState<"dark" | "light">("dark");
@@ -106,11 +110,27 @@ function AppContent() {
     setCharLoading(true);
     setCharError(null);
     setViewMode("single");
+    setCompareProgress(null);
     try {
       const data = await fetchCharacterAchievements(realm, name);
       setCharProgress(data);
       saveCharacter({ realm: data.character.realm, name: data.character.name });
       setSearchParams({ character: `${data.character.realm}/${data.character.name}` });
+    } catch (e) {
+      setCharError((e as Error).message);
+    } finally {
+      setCharLoading(false);
+    }
+  };
+
+  const loadCompareCharacter = async (realm: string, name: string) => {
+    setCharLoading(true);
+    setCharError(null);
+    try {
+      const data = await fetchCharacterAchievements(realm, name);
+      setCompareProgress(data);
+      setViewMode("compare");
+      setShowCompareSelector(false);
     } catch (e) {
       setCharError((e as Error).message);
     } finally {
@@ -138,21 +158,30 @@ function AppContent() {
 
   const handleClearCharacter = () => {
     setCharProgress(null);
+    setCompareProgress(null);
     setMergeResult(null);
     setCharError(null);
     clearSavedCharacter();
     clearMergeSelection();
     setMergeSelection([]);
     setFilter("all");
+    setCompareFilter("all");
     setViewMode("single");
     searchParams.delete("character");
     setSearchParams(searchParams);
+  };
+
+  const exitCompareMode = () => {
+    setCompareProgress(null);
+    setViewMode("single");
+    setCompareFilter("all");
   };
 
   const activeData = viewMode === "merged" && mergeResult ? mergeResult.merged : charProgress;
   const completedIds = activeData ? new Set(activeData.completed) : undefined;
   const completedAt = activeData?.completedAt;
   const progress = activeData?.progress;
+  const compareCompletedIds = compareProgress ? new Set(compareProgress.completed) : undefined;
 
   const categoryExpansionMap = useMemo(() => buildCategoryExpansionMap(categories), [categories]);
 
@@ -181,6 +210,19 @@ function AppContent() {
   // Apply reward filter
   if (rewardFilter !== "all") {
     categoryFiltered = categoryFiltered.filter((a) => a.rewardType === rewardFilter);
+  }
+
+  // Apply compare filter
+  if (viewMode === "compare" && completedIds && compareCompletedIds && compareFilter !== "all") {
+    categoryFiltered = categoryFiltered.filter((a) => {
+      const hasA = completedIds.has(a.id);
+      const hasB = compareCompletedIds.has(a.id);
+      if (compareFilter === "onlyA") return hasA && !hasB;
+      if (compareFilter === "onlyB") return hasB && !hasA;
+      if (compareFilter === "both") return hasA && hasB;
+      if (compareFilter === "neither") return !hasA && !hasB;
+      return true;
+    });
   }
 
   const getBreadcrumbs = (): { id: number; name: string }[] => {
@@ -287,6 +329,17 @@ function AppContent() {
           onClear={handleClearCharacter}
         />
         {auth.loggedIn && <button className="btn" onClick={() => setShowCharSelector(true)}>{isMobile ? "Chars" : "My Characters"}</button>}
+        {charProgress && viewMode !== "compare" && (
+          <button className="btn" onClick={() => setShowCompareSelector(true)} title="Compare with another character">⚔️ Compare</button>
+        )}
+        {viewMode === "compare" && compareProgress && (
+          <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
+            <span className="badge" style={{ background: "rgba(88,166,255,0.2)", color: "#58a6ff" }}>
+              vs {compareProgress.character.name}
+            </span>
+            <button className="btn btn-ghost" onClick={exitCompareMode} style={{ padding: "2px 6px" }}>×</button>
+          </div>
+        )}
         {viewMode === "merged" && mergeResult && (
           <span className="badge badge-success">Merged ({mergeResult.sources.length})</span>
         )}
@@ -297,13 +350,24 @@ function AppContent() {
         )}
         {(charProgress || mergeResult) && (
           <>
-            <select className="select" value={filter} onChange={(e) => setFilter(e.target.value as typeof filter)} style={{ minWidth: isMobile ? 80 : undefined }}>
-              <option value="all">All</option>
-              <option value="completed">Done</option>
-              <option value="incomplete">Todo</option>
-              <option value="near">{isMobile ? "80%+" : "Near 80%+"}</option>
-              <option value="pinned">Pinned</option>
-            </select>
+            {viewMode !== "compare" && (
+              <select className="select" value={filter} onChange={(e) => setFilter(e.target.value as typeof filter)} style={{ minWidth: isMobile ? 80 : undefined }}>
+                <option value="all">All</option>
+                <option value="completed">Done</option>
+                <option value="incomplete">Todo</option>
+                <option value="near">{isMobile ? "80%+" : "Near 80%+"}</option>
+                <option value="pinned">Pinned</option>
+              </select>
+            )}
+            {viewMode === "compare" && (
+              <select className="select" value={compareFilter} onChange={(e) => setCompareFilter(e.target.value as CompareFilter)} style={{ minWidth: isMobile ? 80 : undefined }}>
+                <option value="all">All</option>
+                <option value="onlyA">Only {charProgress?.character.name}</option>
+                <option value="onlyB">Only {compareProgress?.character.name}</option>
+                <option value="both">Both have</option>
+                <option value="neither">Neither has</option>
+              </select>
+            )}
             <select className="select" value={sort} onChange={(e) => setSort(e.target.value as SortMode)} style={{ minWidth: isMobile ? 80 : undefined }}>
               <option value="name">Name</option>
               <option value="points">Points</option>
@@ -404,8 +468,9 @@ function AppContent() {
               achievements={searchResults}
               onSelect={handleAchievementSelect}
               completedIds={completedIds}
+              compareCompletedIds={viewMode === "compare" ? compareCompletedIds : undefined}
               progress={progress}
-              filter={filter}
+              filter={viewMode === "compare" ? "all" : filter}
               sort={sort}
               showDates={selectedCategory === RECENT_CATEGORY_ID}
               accountWideOnly={accountWideOnly}
@@ -450,6 +515,26 @@ function AppContent() {
           onClose={() => setShowCharSelector(false)}
           initialSelection={mergeSelection}
         />
+      )}
+
+      {showCompareSelector && (
+        <div className="modal-backdrop" onClick={() => setShowCompareSelector(false)}>
+          <div className="modal" onClick={(e) => e.stopPropagation()} style={{ maxWidth: 400 }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
+              <h3 style={{ margin: 0 }}>Compare with...</h3>
+              <button className="btn btn-ghost" onClick={() => setShowCompareSelector(false)}>×</button>
+            </div>
+            <p style={{ color: "var(--muted)", fontSize: 13, marginBottom: 16 }}>
+              Select a character to compare against {charProgress?.character.name}
+            </p>
+            <CharacterLookup
+              onLookup={loadCompareCharacter}
+              loading={charLoading}
+              currentCharacter={null}
+              onClear={() => {}}
+            />
+          </div>
+        </div>
       )}
     </div>
   );

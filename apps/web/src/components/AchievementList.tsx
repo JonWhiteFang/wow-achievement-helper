@@ -9,6 +9,7 @@ type Props = {
   achievements: AchievementWithDate[];
   onSelect: (id: number) => void;
   completedIds?: Set<number>;
+  compareCompletedIds?: Set<number>;
   progress?: Record<number, { completedCriteria: number; totalCriteria: number }>;
   filter?: "all" | "completed" | "incomplete" | "near" | "pinned";
   sort?: "name" | "points" | "completion";
@@ -30,7 +31,7 @@ function AchievementIcon({ src, size = 20 }: { src?: string; size?: number }) {
   return <img src={src} alt="" loading="lazy" style={{ ...style, objectFit: "cover" }} onError={() => setFailed(true)} />;
 }
 
-export function AchievementList({ achievements, onSelect, completedIds, progress, filter = "all", sort = "name", showDates, accountWideOnly, pinnedIds, onTogglePin }: Props) {
+export function AchievementList({ achievements, onSelect, completedIds, compareCompletedIds, progress, filter = "all", sort = "name", showDates, accountWideOnly, pinnedIds, onTogglePin }: Props) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [height, setHeight] = useState(400);
 
@@ -80,6 +81,7 @@ export function AchievementList({ achievements, onSelect, completedIds, progress
   const Row = ({ index, style }: { index: number; style: React.CSSProperties }) => {
     const a = sorted[index];
     const isCompleted = completedIds?.has(a.id);
+    const isCompareCompleted = compareCompletedIds?.has(a.id);
     const isPinned = pinnedIds?.has(a.id);
     const prog = progress?.[a.id];
     const pct = prog ? Math.round((prog.completedCriteria / prog.totalCriteria) * 100) : 0;
@@ -110,9 +112,16 @@ export function AchievementList({ achievements, onSelect, completedIds, progress
         onClick={() => onSelect(a.id)}
       >
         <AchievementIcon src={a.icon} size={20} />
-        <span style={{ width: 16, color: isCompleted ? "var(--success)" : "var(--muted)", fontSize: 14 }}>
-          {isCompleted ? "✓" : "○"}
-        </span>
+        {compareCompletedIds ? (
+          <span style={{ display: "flex", gap: 2, fontSize: 12 }}>
+            <span style={{ color: isCompleted ? "var(--success)" : "var(--muted)" }} title="Character A">{isCompleted ? "✓" : "○"}</span>
+            <span style={{ color: isCompareCompleted ? "#58a6ff" : "var(--muted)" }} title="Character B">{isCompareCompleted ? "✓" : "○"}</span>
+          </span>
+        ) : (
+          <span style={{ width: 16, color: isCompleted ? "var(--success)" : "var(--muted)", fontSize: 14 }}>
+            {isCompleted ? "✓" : "○"}
+          </span>
+        )}
         {isPinned && <span style={{ fontSize: 12 }}>📌</span>}
         <span style={{ flex: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{a.name}</span>
         {a.isMeta && <span className="badge badge-meta">META</span>}
