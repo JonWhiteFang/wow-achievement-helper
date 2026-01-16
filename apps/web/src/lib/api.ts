@@ -46,6 +46,7 @@ export type CharacterProgress = {
 export type AuthStatus = {
   loggedIn: boolean;
   battletag?: string | null;
+  sessionExpired?: boolean;
 };
 
 export type WowCharacter = {
@@ -101,7 +102,11 @@ export function getLoginUrl(): string {
 
 export async function fetchAuthStatus(): Promise<AuthStatus> {
   const res = await fetch(`${API_BASE}/auth/me`, { credentials: "include" });
-  if (!res.ok) return { loggedIn: false };
+  if (!res.ok) {
+    const data = await res.json().catch(() => ({})) as { error?: string };
+    if (data.error === "SESSION_EXPIRED") return { loggedIn: false, sessionExpired: true };
+    return { loggedIn: false };
+  }
   return res.json();
 }
 

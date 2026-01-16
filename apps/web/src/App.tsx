@@ -31,6 +31,7 @@ export default function App() {
   const [sort, setSort] = useState<SortMode>("name");
 
   const [auth, setAuth] = useState<AuthStatus>({ loggedIn: false });
+  const [sessionExpired, setSessionExpired] = useState(false);
   const [showCharSelector, setShowCharSelector] = useState(false);
   const [mergeSelection, setMergeSelection] = useState<{ realm: string; name: string }[]>([]);
   const [recentCategories, setRecentCategories] = useState<RecentCategory[]>([]);
@@ -44,7 +45,10 @@ export default function App() {
       .catch((e) => setError(e.message))
       .finally(() => setLoading(false));
 
-    fetchAuthStatus().then(setAuth);
+    fetchAuthStatus().then((status) => {
+      setAuth(status);
+      if (status.sessionExpired) setSessionExpired(true);
+    });
 
     const saved = getSavedCharacter();
     if (saved) loadCharacter(saved.realm, saved.name);
@@ -204,6 +208,12 @@ export default function App() {
         </div>
       </header>
 
+      {sessionExpired && (
+        <div style={{ padding: "8px 16px", background: "rgba(210,153,34,0.15)", color: "var(--warning)", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+          <span>Your session has expired. Please log in again to access your characters.</span>
+          <button className="btn btn-ghost" onClick={() => setSessionExpired(false)} style={{ padding: "2px 8px" }}>×</button>
+        </div>
+      )}
       {charError && <div style={{ padding: "8px 16px", background: "rgba(248,81,73,0.15)", color: "var(--danger)" }}>{charError}</div>}
 
       <div style={{ display: "flex", flex: 1, overflow: "hidden" }}>

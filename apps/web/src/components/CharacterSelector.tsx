@@ -8,12 +8,15 @@ type Props = {
   initialSelection?: { realm: string; name: string }[];
 };
 
+const MAX_LEVEL = 80; // Current WoW max level
+
 export function CharacterSelector({ onSelect, onMerge, onClose, initialSelection = [] }: Props) {
   const [characters, setCharacters] = useState<WowCharacter[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selected, setSelected] = useState<Set<string>>(new Set(initialSelection.map((c) => `${c.realm}/${c.name.toLowerCase()}`)));
   const [mode, setMode] = useState<"single" | "merge">(initialSelection.length > 0 ? "merge" : "single");
+  const [maxLevelOnly, setMaxLevelOnly] = useState(false);
 
   useEffect(() => {
     fetchMyCharacters()
@@ -22,6 +25,9 @@ export function CharacterSelector({ onSelect, onMerge, onClose, initialSelection
       .finally(() => setLoading(false));
   }, []);
 
+  const filteredCharacters = maxLevelOnly ? characters.filter((c) => c.level >= MAX_LEVEL) : characters;
+  const maxLevelChars = characters.filter((c) => c.level >= MAX_LEVEL);
+
   const toggleSelection = (c: WowCharacter) => {
     const next = new Set(selected);
     if (next.has(c.id)) next.delete(c.id);
@@ -29,8 +35,22 @@ export function CharacterSelector({ onSelect, onMerge, onClose, initialSelection
     setSelected(next);
   };
 
+  const selectAllMaxLevel = () => {
+    setSelected(new Set(maxLevelChars.map((c) => c.id)));
+  };
+
+  const clearSelection = () => setSelected(new Set());
+
   const handleMerge = () => {
     const chars = characters.filter((c) => selected.has(c.id)).map((c) => ({ realm: c.realm, name: c.name }));
+    if (chars.length > 0) {
+      onMerge(chars);
+      onClose();
+    }
+  };
+
+  const handleMergeAll = () => {
+    const chars = maxLevelChars.map((c) => ({ realm: c.realm, name: c.name }));
     if (chars.length > 0) {
       onMerge(chars);
       onClose();
@@ -45,9 +65,27 @@ export function CharacterSelector({ onSelect, onMerge, onClose, initialSelection
           <button className="btn btn-ghost" onClick={onClose} style={{ fontSize: 18 }}>×</button>
         </div>
 
-        <div style={{ display: "flex", gap: 8, marginBottom: 16 }}>
+        <div style={{ display: "flex", gap: 8, marginBottom: 12 }}>
           <button className={`btn ${mode === "single" ? "btn-primary" : ""}`} onClick={() => setMode("single")}>Single</button>
           <button className={`btn ${mode === "merge" ? "btn-primary" : ""}`} onClick={() => setMode("merge")}>Merge</button>
+          {maxLevelChars.length > 1 && (
+            <button className="btn btn-success" onClick={handleMergeAll} style={{ marginLeft: "auto" }}>
+              Merge All ({maxLevelChars.length})
+            </button>
+          )}
+        </div>
+
+        <div style={{ display: "flex", gap: 12, marginBottom: 12, alignItems: "center" }}>
+          <label style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 13, cursor: "pointer" }}>
+            <input type="checkbox" checked={maxLevelOnly} onChange={(e) => setMaxLevelOnly(e.target.checked)} />
+            Max level only ({MAX_LEVEL}+)
+          </label>
+          {mode === "merge" && (
+            <>
+              <button className="btn btn-ghost" style={{ fontSize: 12, padding: "2px 8px" }} onClick={selectAllMaxLevel}>Select all max</button>
+              <button className="btn btn-ghost" style={{ fontSize: 12, padding: "2px 8px" }} onClick={clearSelection}>Clear</button>
+            </>
+          )}
         </div>
 
         {loading && <p className="text-muted">Loading characters...</p>}
@@ -55,7 +93,7 @@ export function CharacterSelector({ onSelect, onMerge, onClose, initialSelection
         {!loading && !error && characters.length === 0 && <p className="text-muted">No characters found</p>}
 
         <div style={{ maxHeight: 300, overflow: "auto" }}>
-          {characters.map((c) => (
+          {filteredCharacters.map((c) => (
             <button
               key={c.id}
               onClick={() => mode === "single" ? (onSelect(c.realm, c.name), onClose()) : toggleSelection(c)}

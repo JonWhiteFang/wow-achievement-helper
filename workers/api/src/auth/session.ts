@@ -55,6 +55,10 @@ export async function getSession(env: Env, sessionId: string): Promise<SessionDa
   return raw ? JSON.parse(raw) : null;
 }
 
+export async function updateSession(env: Env, sessionId: string, data: SessionData): Promise<void> {
+  await env.SESSIONS.put(`session:${sessionId}`, JSON.stringify(data), { expirationTtl: SESSION_TTL });
+}
+
 export async function deleteSession(env: Env, sessionId: string): Promise<void> {
   await env.SESSIONS.delete(`session:${sessionId}`);
 }

@@ -9,6 +9,7 @@ import {
   deleteSession,
   getSessionIdFromCookie,
   sessionCookie,
+  updateSession,
   type SessionData,
 } from "./auth/session";
 
@@ -114,7 +115,53 @@ export async function handleMe(req: Request, env: Env): Promise<Response> {
     return Response.json({ loggedIn: false });
   }
 
+  // Check if token is expired
+  if (Date.now() > session.expiresAt) {
+    // Try to refresh if we have a refresh token
+    if (session.refreshToken) {
+      const refreshed = await refreshAccessToken(env, sessionId, session);
+      if (refreshed) {
+        return Response.json({ loggedIn: true, battletag: refreshed.battletag || null });
+      }
+    }
+    // Token expired and can't refresh
+    await deleteSession(env, sessionId);
+    return Response.json({ error: "SESSION_EXPIRED", message: "Session expired, please log in again" }, { status: 401 });
+  }
+
   return Response.json({ loggedIn: true, battletag: session.battletag || null });
+}
+
+async function refreshAccessToken(env: Env, sessionId: string, session: SessionData): Promise<SessionData | null> {
+  if (!session.refreshToken) return null;
+
+  try {
+    const res = await fetch(env.BATTLE_NET_OAUTH_TOKEN, {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: new URLSearchParams({
+        grant_type: "refresh_token",
+        refresh_token: session.refreshToken,
+        client_id: env.BNET_CLIENT_ID,
+        client_secret: env.BNET_CLIENT_SECRET,
+      }),
+    });
+
+    if (!res.ok) return null;
+
+    const tokens = (await res.json()) as { access_token: string; refresh_token?: string; expires_in: number };
+    const updated: SessionData = {
+      ...session,
+      accessToken: tokens.access_token,
+      refreshToken: tokens.refresh_token || session.refreshToken,
+      expiresAt: Date.now() + tokens.expires_in * 1000,
+    };
+
+    await updateSession(env, sessionId, updated);
+    return updated;
+  } catch {
+    return null;
+  }
 }
 
 export async function handleLogout(req: Request, env: Env): Promise<Response> {
