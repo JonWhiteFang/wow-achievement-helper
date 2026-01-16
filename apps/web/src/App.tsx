@@ -4,6 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { fetchManifest, fetchCharacterAchievements, fetchAuthStatus, mergeCharacters, type Category, type CharacterProgress, type AuthStatus, type MergeResult } from "./lib/api";
 import { getSavedCharacter, saveCharacter, clearSavedCharacter, getMergeSelection, saveMergeSelection, clearMergeSelection, getRecentCategories, addRecentCategory, type RecentCategory } from "./lib/storage";
 import { useSearch } from "./lib/search";
+import { calculatePoints, formatPoints } from "./lib/points";
 import { CategoryTree } from "./components/CategoryTree";
 import { AchievementList } from "./components/AchievementList";
 import { AchievementDrawer } from "./components/AchievementDrawer";
@@ -194,6 +195,9 @@ function AppContent() {
   const completedIds = activeData ? new Set(activeData.completed) : undefined;
   const progress = activeData?.progress;
 
+  const totalPoints = calculatePoints(achievements, completedIds);
+  const sectionPoints = calculatePoints(searchResults, completedIds);
+
   if (loading) return <div style={{ padding: 32, color: "var(--muted)" }}>Loading achievements...</div>;
   if (error) return <div style={{ padding: 32, color: "var(--danger)" }}>Error: {(error as Error).message}</div>;
 
@@ -237,6 +241,11 @@ function AppContent() {
         {auth.loggedIn && <button className="btn" onClick={() => setShowCharSelector(true)}>{isMobile ? "Chars" : "My Characters"}</button>}
         {viewMode === "merged" && mergeResult && (
           <span className="badge badge-success">Merged ({mergeResult.sources.length})</span>
+        )}
+        {completedIds && (
+          <span className="badge" style={{ background: "rgba(201,162,39,0.2)", color: "var(--accent)" }}>
+            {formatPoints(totalPoints.earned)} / {formatPoints(totalPoints.total)} pts
+          </span>
         )}
         {(charProgress || mergeResult) && (
           <>
@@ -313,7 +322,7 @@ function AppContent() {
             </div>
           )}
           <div style={{ padding: "8px 16px", borderBottom: "1px solid var(--border)", color: "var(--muted)", fontSize: 13 }}>
-            {searchResults.length} achievements {selectedCategory && "in category"}
+            {searchResults.length} achievements{completedIds && ` (${formatPoints(sectionPoints.earned)} / ${formatPoints(sectionPoints.total)} pts)`}
           </div>
           <div style={{ flex: 1, overflow: "hidden" }}>
             <AchievementList

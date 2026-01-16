@@ -12,17 +12,6 @@ Remaining tasks and improvements not yet implemented.
 
 ## Medium Priority (Polish)
 
-### 2. Points display in header
-**Current:** No points summary
-**Desired:** Show total points earned vs possible (e.g., "12,450 / 28,000 pts")
-
-**Implementation:**
-- Calculate total points from manifest
-- Calculate earned points from character progress
-- Display in header next to character name
-
----
-
 ### 3. Category completion bars
 **Current:** Categories show count only
 **Desired:** Visual progress bars on category tree nodes
@@ -195,6 +184,7 @@ Currently only manifest uses React Query. Character lookups and help fetches sti
 
 ## Completed ✅
 
+- [x] Points display in header and section (earned/total)
 - [x] "Near complete" filter (80%+ progress achievements)
 - [x] Achievement icons from Blizzard CDN (list + drawer, with placeholder fallback). **Note:** Requires manifest rebuild after deploy via `/api/admin/build-manifest?reset=true`
 - [x] Curated strategies for 10 more achievements (Glory raids, Keystone Master, exploration, PvP)
