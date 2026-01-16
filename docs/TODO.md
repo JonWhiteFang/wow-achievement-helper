@@ -12,17 +12,6 @@ Remaining tasks and improvements not yet implemented.
 
 ## Medium Priority (Polish)
 
-### 5. Expansion filter
-**Current:** No expansion filtering
-**Desired:** Filter by expansion (Classic, TBC, Wrath, etc.)
-
-**Implementation:**
-- Map category IDs to expansions
-- Add expansion dropdown filter
-- Filter achievement list by selected expansion
-
----
-
 ### 6. "Account-wide only" toggle
 **Current:** Shows all achievements
 **Desired:** Filter to show only account-wide achievements
@@ -162,6 +151,7 @@ Currently only manifest uses React Query. Character lookups and help fetches sti
 
 ## Completed ✅
 
+- [x] Expansion filter (dropdown to filter by Classic, TBC, Wrath, etc.)
 - [x] "Recently completed" list (last 20 achievements with completion dates in sidebar)
 - [x] Category completion bars (recursive progress with bar + count + percentage)
 - [x] Points display in header and section (earned/total)

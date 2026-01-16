@@ -1,10 +1,11 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { Routes, Route, useParams, useNavigate, useSearchParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { fetchManifest, fetchCharacterAchievements, fetchAuthStatus, mergeCharacters, type Category, type CharacterProgress, type AuthStatus, type MergeResult } from "./lib/api";
 import { getSavedCharacter, saveCharacter, clearSavedCharacter, getMergeSelection, saveMergeSelection, clearMergeSelection, getRecentCategories, addRecentCategory, type RecentCategory } from "./lib/storage";
 import { useSearch } from "./lib/search";
 import { calculatePoints, formatPoints } from "./lib/points";
+import { buildCategoryExpansionMap, EXPANSIONS, EXPANSION_LABELS, type Expansion } from "./lib/expansions";
 import { CategoryTree, RECENT_CATEGORY_ID } from "./components/CategoryTree";
 import { AchievementList } from "./components/AchievementList";
 import { AchievementDrawer } from "./components/AchievementDrawer";
@@ -45,6 +46,7 @@ function AppContent() {
   const [charError, setCharError] = useState<string | null>(null);
   const [filter, setFilter] = useState<"all" | "completed" | "incomplete" | "near">("all");
   const [sort, setSort] = useState<SortMode>("name");
+  const [expansion, setExpansion] = useState<Expansion | "all">("all");
 
   const [auth, setAuth] = useState<AuthStatus>({ loggedIn: false });
   const [sessionExpired, setSessionExpired] = useState(false);
@@ -138,6 +140,8 @@ function AppContent() {
   const completedAt = activeData?.completedAt;
   const progress = activeData?.progress;
 
+  const categoryExpansionMap = useMemo(() => buildCategoryExpansionMap(categories), [categories]);
+
   // Get recent achievements (last 20 by completion date)
   const getRecentAchievements = () => {
     if (!completedAt || !completedIds) return [];
@@ -149,11 +153,16 @@ function AppContent() {
     return withDates;
   };
 
-  const categoryFiltered = selectedCategory === RECENT_CATEGORY_ID
+  let categoryFiltered = selectedCategory === RECENT_CATEGORY_ID
     ? getRecentAchievements()
     : selectedCategory
       ? achievements.filter((a) => a.categoryId === selectedCategory)
       : achievements;
+
+  // Apply expansion filter
+  if (expansion !== "all") {
+    categoryFiltered = categoryFiltered.filter((a) => categoryExpansionMap.get(a.categoryId) === expansion);
+  }
 
   const getBreadcrumbs = (): { id: number; name: string }[] => {
     if (!selectedCategory) return [];
@@ -277,6 +286,10 @@ function AppContent() {
             </select>
           </>
         )}
+        <select className="select" value={expansion} onChange={(e) => setExpansion(e.target.value as Expansion | "all")} style={{ minWidth: isMobile ? 70 : undefined }}>
+          <option value="all">All Xpacs</option>
+          {EXPANSIONS.map((e) => <option key={e} value={e}>{EXPANSION_LABELS[e]}</option>)}
+        </select>
         <div style={{ marginLeft: "auto" }}>
           <AuthButton loggedIn={auth.loggedIn} battletag={auth.battletag} onLogout={() => setAuth({ loggedIn: false })} />
         </div>
