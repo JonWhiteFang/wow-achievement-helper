@@ -23,6 +23,10 @@ function json(data: unknown, status = 200, cacheSeconds = 0): Response {
 }
 
 function err(code: string, message: string, status: number): Response {
+  // Log errors for monitoring (can be picked up by Cloudflare analytics or external logging)
+  if (status >= 500) {
+    console.error(`[ERROR] ${code}: ${message}`);
+  }
   return json({ error: code, message }, status);
 }
 
@@ -66,7 +70,7 @@ const CACHE_1H = 3600;
 const CACHE_5M = 300;
 const CACHE_12H = 43200;
 
-export default {
+const worker = {
   async fetch(req: Request, env: Env): Promise<Response> {
     const start = Date.now();
     const response = await withCors(req, env, async () => {
@@ -210,3 +214,5 @@ export default {
     console.log(`Manifest build: ${result.progress}`);
   },
 };
+
+export default worker;

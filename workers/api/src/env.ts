@@ -9,4 +9,5 @@ export type Env = {
   BNET_CLIENT_ID: string;
   BNET_CLIENT_SECRET: string;
   SESSION_SIGNING_KEY: string;
+  SENTRY_DSN?: string;
 };

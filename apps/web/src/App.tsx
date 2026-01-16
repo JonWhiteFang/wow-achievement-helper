@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
-import { fetchManifest, fetchCharacterAchievements, fetchAuthStatus, mergeCharacters, type Category, type AchievementSummary, type CharacterProgress, type AuthStatus, type MergeResult } from "./lib/api";
+import { Routes, Route, useParams, useNavigate, useSearchParams } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
+import { fetchManifest, fetchCharacterAchievements, fetchAuthStatus, mergeCharacters, type Category, type CharacterProgress, type AuthStatus, type MergeResult } from "./lib/api";
 import { getSavedCharacter, saveCharacter, clearSavedCharacter, getMergeSelection, saveMergeSelection, clearMergeSelection, getRecentCategories, addRecentCategory, type RecentCategory } from "./lib/storage";
 import { useSearch } from "./lib/search";
 import { CategoryTree } from "./components/CategoryTree";
@@ -12,14 +14,15 @@ import { CharacterSelector } from "./components/CharacterSelector";
 type ViewMode = "single" | "merged";
 type SortMode = "name" | "points" | "completion";
 
-export default function App() {
-  const [categories, setCategories] = useState<Category[]>([]);
-  const [achievements, setAchievements] = useState<AchievementSummary[]>([]);
-  const [selectedCategory, setSelectedCategory] = useState<number | null>(null);
-  const [selectedAchievement, setSelectedAchievement] = useState<number | null>(null);
+function AppContent() {
+  const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const { categoryId, achievementId } = useParams();
+
+  const selectedCategory = categoryId ? parseInt(categoryId, 10) : null;
+  const selectedAchievement = achievementId ? parseInt(achievementId, 10) : null;
+
   const [searchQuery, setSearchQuery] = useState("");
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
   const [showCategories, setShowCategories] = useState(true);
 
   const [charProgress, setCharProgress] = useState<CharacterProgress | null>(null);
@@ -36,22 +39,30 @@ export default function App() {
   const [mergeSelection, setMergeSelection] = useState<{ realm: string; name: string }[]>([]);
   const [recentCategories, setRecentCategories] = useState<RecentCategory[]>([]);
 
-  useEffect(() => {
-    fetchManifest()
-      .then((data) => {
-        setCategories(data.categories);
-        setAchievements(data.achievements);
-      })
-      .catch((e) => setError(e.message))
-      .finally(() => setLoading(false));
+  // React Query for manifest
+  const { data: manifest, isLoading: loading, error } = useQuery({
+    queryKey: ["manifest"],
+    queryFn: fetchManifest,
+  });
 
+  const categories = manifest?.categories ?? [];
+  const achievements = manifest?.achievements ?? [];
+
+  useEffect(() => {
     fetchAuthStatus().then((status) => {
       setAuth(status);
       if (status.sessionExpired) setSessionExpired(true);
     });
 
-    const saved = getSavedCharacter();
-    if (saved) loadCharacter(saved.realm, saved.name);
+    // Load character from URL param or storage
+    const charParam = searchParams.get("character");
+    if (charParam) {
+      const [realm, name] = charParam.split("/");
+      if (realm && name) loadCharacter(realm, name);
+    } else {
+      const saved = getSavedCharacter();
+      if (saved) loadCharacter(saved.realm, saved.name);
+    }
 
     const savedMerge = getMergeSelection();
     if (savedMerge.length > 0) setMergeSelection(savedMerge);
@@ -67,6 +78,7 @@ export default function App() {
       const data = await fetchCharacterAchievements(realm, name);
       setCharProgress(data);
       saveCharacter({ realm: data.character.realm, name: data.character.name });
+      setSearchParams({ character: `${data.character.realm}/${data.character.name}` });
     } catch (e) {
       setCharError((e as Error).message);
     } finally {
@@ -83,6 +95,8 @@ export default function App() {
     try {
       const data = await mergeCharacters(characters);
       setMergeResult(data);
+      searchParams.delete("character");
+      setSearchParams(searchParams);
     } catch (e) {
       setCharError((e as Error).message);
     } finally {
@@ -99,6 +113,8 @@ export default function App() {
     setMergeSelection([]);
     setFilter("all");
     setViewMode("single");
+    searchParams.delete("character");
+    setSearchParams(searchParams);
   };
 
   const categoryFiltered = selectedCategory
@@ -127,11 +143,8 @@ export default function App() {
   };
 
   const handleCategorySelect = (id: number | null) => {
-    setSelectedCategory(id);
     if (id) {
-      const breadcrumbs = getBreadcrumbs();
-      const cat = breadcrumbs.length > 0 ? breadcrumbs[breadcrumbs.length - 1] : null;
-      // Find category name if not in breadcrumbs yet (selection just changed)
+      navigate(selectedAchievement ? `/category/${id}/achievement/${selectedAchievement}` : `/category/${id}`);
       const findCat = (cats: Category[]): Category | null => {
         for (const c of cats) {
           if (c.id === id) return c;
@@ -142,23 +155,32 @@ export default function App() {
         }
         return null;
       };
-      const found = cat || findCat(categories);
+      const found = findCat(categories);
       if (found) {
         addRecentCategory({ id: found.id, name: found.name });
         setRecentCategories(getRecentCategories());
       }
+    } else {
+      navigate(selectedAchievement ? `/achievement/${selectedAchievement}` : "/");
+    }
+  };
+
+  const handleAchievementSelect = (id: number | null) => {
+    if (id) {
+      navigate(selectedCategory ? `/category/${selectedCategory}/achievement/${id}` : `/achievement/${id}`);
+    } else {
+      navigate(selectedCategory ? `/category/${selectedCategory}` : "/");
     }
   };
 
   const breadcrumbs = getBreadcrumbs();
-
   const searchResults = useSearch(categoryFiltered, searchQuery);
   const activeData = viewMode === "merged" && mergeResult ? mergeResult.merged : charProgress;
   const completedIds = activeData ? new Set(activeData.completed) : undefined;
   const progress = activeData?.progress;
 
   if (loading) return <div style={{ padding: 32, color: "var(--muted)" }}>Loading achievements...</div>;
-  if (error) return <div style={{ padding: 32, color: "var(--danger)" }}>Error: {error}</div>;
+  if (error) return <div style={{ padding: 32, color: "var(--danger)" }}>Error: {(error as Error).message}</div>;
 
   return (
     <div style={{ display: "flex", flexDirection: "column", height: "100vh" }}>
@@ -250,7 +272,7 @@ export default function App() {
           <div style={{ flex: 1, overflow: "hidden" }}>
             <AchievementList
               achievements={searchResults}
-              onSelect={setSelectedAchievement}
+              onSelect={handleAchievementSelect}
               completedIds={completedIds}
               progress={progress}
               filter={filter}
@@ -260,7 +282,7 @@ export default function App() {
         </main>
         {selectedAchievement && (
           <aside style={{ width: 380, background: "var(--panel)", borderLeft: "1px solid var(--border)", overflow: "auto" }}>
-            <AchievementDrawer achievementId={selectedAchievement} onClose={() => setSelectedAchievement(null)} />
+            <AchievementDrawer achievementId={selectedAchievement} onClose={() => handleAchievementSelect(null)} />
           </aside>
         )}
       </div>
@@ -274,5 +296,16 @@ export default function App() {
         />
       )}
     </div>
+  );
+}
+
+export default function App() {
+  return (
+    <Routes>
+      <Route path="/" element={<AppContent />} />
+      <Route path="/category/:categoryId" element={<AppContent />} />
+      <Route path="/achievement/:achievementId" element={<AppContent />} />
+      <Route path="/category/:categoryId/achievement/:achievementId" element={<AppContent />} />
+    </Routes>
   );
 }
