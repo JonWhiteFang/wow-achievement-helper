@@ -57,3 +57,19 @@ export function addRecentCategory(cat: RecentCategory): void {
   recent.unshift(cat);
   localStorage.setItem(RECENT_CATEGORIES_KEY, JSON.stringify(recent.slice(0, 5)));
 }
+
+const THEME_KEY = "wow-ach-theme";
+
+export function getTheme(): "dark" | "light" {
+  try {
+    const theme = localStorage.getItem(THEME_KEY);
+    return theme === "light" ? "light" : "dark";
+  } catch {
+    return "dark";
+  }
+}
+
+export function setTheme(theme: "dark" | "light"): void {
+  localStorage.setItem(THEME_KEY, theme);
+  document.documentElement.dataset.theme = theme;
+}

@@ -2,7 +2,7 @@ import { useEffect, useState, useMemo } from "react";
 import { Routes, Route, useParams, useNavigate, useSearchParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { fetchManifest, fetchCharacterAchievements, fetchAuthStatus, mergeCharacters, type Category, type CharacterProgress, type AuthStatus, type MergeResult } from "./lib/api";
-import { getSavedCharacter, saveCharacter, clearSavedCharacter, getMergeSelection, saveMergeSelection, clearMergeSelection, getRecentCategories, addRecentCategory, type RecentCategory } from "./lib/storage";
+import { getSavedCharacter, saveCharacter, clearSavedCharacter, getMergeSelection, saveMergeSelection, clearMergeSelection, getRecentCategories, addRecentCategory, getTheme, setTheme, type RecentCategory } from "./lib/storage";
 import { useSearch } from "./lib/search";
 import { calculatePoints, formatPoints } from "./lib/points";
 import { buildCategoryExpansionMap, EXPANSIONS, EXPANSION_LABELS, type Expansion } from "./lib/expansions";
@@ -57,6 +57,7 @@ function AppContent() {
   const [showCharSelector, setShowCharSelector] = useState(false);
   const [mergeSelection, setMergeSelection] = useState<{ realm: string; name: string }[]>([]);
   const [recentCategories, setRecentCategories] = useState<RecentCategory[]>([]);
+  const [theme, setThemeState] = useState<"dark" | "light">("dark");
 
   const { data: manifest, isLoading: loading, error } = useQuery({
     queryKey: ["manifest"],
@@ -85,6 +86,10 @@ function AppContent() {
     if (savedMerge.length > 0) setMergeSelection(savedMerge);
 
     setRecentCategories(getRecentCategories());
+
+    const savedTheme = getTheme();
+    setThemeState(savedTheme);
+    document.documentElement.dataset.theme = savedTheme;
   }, []);
 
   // Close mobile drawer when switching to desktop
@@ -317,7 +322,13 @@ function AppContent() {
           <input type="checkbox" checked={accountWideOnly} onChange={(e) => setAccountWideOnly(e.target.checked)} />
           {isMobile ? "Acct" : "Account-wide"}
         </label>
-        <div style={{ marginLeft: "auto" }}>
+        <div style={{ marginLeft: "auto", display: "flex", alignItems: "center", gap: 8 }}>
+          <button
+            className="btn btn-ghost"
+            onClick={() => { const newTheme = theme === "dark" ? "light" : "dark"; setThemeState(newTheme); setTheme(newTheme); }}
+            title={theme === "dark" ? "Switch to light theme" : "Switch to dark theme"}
+            style={{ padding: "4px 8px" }}
+          >{theme === "dark" ? "☀️" : "🌙"}</button>
           <AuthButton loggedIn={auth.loggedIn} battletag={auth.battletag} onLogout={() => setAuth({ loggedIn: false })} />
         </div>
       </header>

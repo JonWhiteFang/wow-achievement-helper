@@ -13,6 +13,21 @@
   --link: #58a6ff;
 }
 
+[data-theme="light"] {
+  --bg: #ffffff;
+  --panel: #f6f8fa;
+  --panel-2: #eaeef2;
+  --border: #d0d7de;
+  --text: #1f2328;
+  --muted: #656d76;
+  --accent: #9a7b0a;
+  --accent-2: #7d640a;
+  --success: #1a7f37;
+  --warning: #9a6700;
+  --danger: #cf222e;
+  --link: #0969da;
+}
+
 *, *::before, *::after { box-sizing: border-box; }
 
 html, body, #root {
