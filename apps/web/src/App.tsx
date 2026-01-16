@@ -3,6 +3,7 @@ import { Routes, Route, useParams, useNavigate, useSearchParams } from "react-ro
 import { useQuery } from "@tanstack/react-query";
 import { fetchManifest, fetchCharacterAchievements, fetchAuthStatus, mergeCharacters, type Category, type CharacterProgress, type AuthStatus, type MergeResult } from "./lib/api";
 import { getSavedCharacter, saveCharacter, clearSavedCharacter, getMergeSelection, saveMergeSelection, clearMergeSelection, getRecentCategories, addRecentCategory, getTheme, setTheme, type RecentCategory } from "./lib/storage";
+import { getPins, togglePin } from "./lib/pins";
 import { useSearch } from "./lib/search";
 import { calculatePoints, formatPoints } from "./lib/points";
 import { buildCategoryExpansionMap, EXPANSIONS, EXPANSION_LABELS, type Expansion } from "./lib/expansions";
@@ -47,7 +48,7 @@ function AppContent() {
   const [viewMode, setViewMode] = useState<ViewMode>("single");
   const [charLoading, setCharLoading] = useState(false);
   const [charError, setCharError] = useState<string | null>(null);
-  const [filter, setFilter] = useState<"all" | "completed" | "incomplete" | "near">("all");
+  const [filter, setFilter] = useState<"all" | "completed" | "incomplete" | "near" | "pinned">("all");
   const [sort, setSort] = useState<SortMode>("name");
   const [expansion, setExpansion] = useState<Expansion | "all">("all");
   const [accountWideOnly, setAccountWideOnly] = useState(false);
@@ -59,6 +60,7 @@ function AppContent() {
   const [mergeSelection, setMergeSelection] = useState<{ realm: string; name: string }[]>([]);
   const [recentCategories, setRecentCategories] = useState<RecentCategory[]>([]);
   const [theme, setThemeState] = useState<"dark" | "light">("dark");
+  const [pinnedIds, setPinnedIds] = useState<Set<number>>(new Set());
 
   const { data: manifest, isLoading: loading, error } = useQuery({
     queryKey: ["manifest"],
@@ -91,6 +93,8 @@ function AppContent() {
     const savedTheme = getTheme();
     setThemeState(savedTheme);
     document.documentElement.dataset.theme = savedTheme;
+
+    setPinnedIds(getPins());
   }, []);
 
   // Close mobile drawer when switching to desktop
@@ -298,6 +302,7 @@ function AppContent() {
               <option value="completed">Done</option>
               <option value="incomplete">Todo</option>
               <option value="near">{isMobile ? "80%+" : "Near 80%+"}</option>
+              <option value="pinned">Pinned</option>
             </select>
             <select className="select" value={sort} onChange={(e) => setSort(e.target.value as SortMode)} style={{ minWidth: isMobile ? 80 : undefined }}>
               <option value="name">Name</option>
@@ -404,6 +409,8 @@ function AppContent() {
               sort={sort}
               showDates={selectedCategory === RECENT_CATEGORY_ID}
               accountWideOnly={accountWideOnly}
+              pinnedIds={pinnedIds}
+              onTogglePin={(id) => setPinnedIds(togglePin(id))}
             />
           </div>
         </main>
@@ -417,6 +424,8 @@ function AppContent() {
                 onClose={() => handleAchievementSelect(null)} 
                 completedIds={completedIds}
                 onSelectAchievement={handleAchievementSelect}
+                isPinned={pinnedIds.has(selectedAchievement)}
+                onTogglePin={() => setPinnedIds(togglePin(selectedAchievement))}
               />
             </div>
           ) : (
@@ -426,6 +435,8 @@ function AppContent() {
                 onClose={() => handleAchievementSelect(null)} 
                 completedIds={completedIds}
                 onSelectAchievement={handleAchievementSelect}
+                isPinned={pinnedIds.has(selectedAchievement)}
+                onTogglePin={() => setPinnedIds(togglePin(selectedAchievement))}
               />
             </aside>
           )

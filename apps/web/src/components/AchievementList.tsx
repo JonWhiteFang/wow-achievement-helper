@@ -10,10 +10,12 @@ type Props = {
   onSelect: (id: number) => void;
   completedIds?: Set<number>;
   progress?: Record<number, { completedCriteria: number; totalCriteria: number }>;
-  filter?: "all" | "completed" | "incomplete" | "near";
+  filter?: "all" | "completed" | "incomplete" | "near" | "pinned";
   sort?: "name" | "points" | "completion";
   showDates?: boolean;
   accountWideOnly?: boolean;
+  pinnedIds?: Set<number>;
+  onTogglePin?: (id: number) => void;
 };
 
 const ROW_HEIGHT = 44;
@@ -28,7 +30,7 @@ function AchievementIcon({ src, size = 20 }: { src?: string; size?: number }) {
   return <img src={src} alt="" loading="lazy" style={{ ...style, objectFit: "cover" }} onError={() => setFailed(true)} />;
 }
 
-export function AchievementList({ achievements, onSelect, completedIds, progress, filter = "all", sort = "name", showDates, accountWideOnly }: Props) {
+export function AchievementList({ achievements, onSelect, completedIds, progress, filter = "all", sort = "name", showDates, accountWideOnly, pinnedIds, onTogglePin }: Props) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [height, setHeight] = useState(400);
 
@@ -56,6 +58,8 @@ export function AchievementList({ achievements, onSelect, completedIds, progress
         const p = progress[a.id];
         return p && p.totalCriteria > 0 && p.completedCriteria / p.totalCriteria >= 0.8;
       });
+    } else if (filter === "pinned" && pinnedIds) {
+      filtered = filtered.filter((a) => pinnedIds.has(a.id));
     }
   }
 
@@ -76,6 +80,7 @@ export function AchievementList({ achievements, onSelect, completedIds, progress
   const Row = ({ index, style }: { index: number; style: React.CSSProperties }) => {
     const a = sorted[index];
     const isCompleted = completedIds?.has(a.id);
+    const isPinned = pinnedIds?.has(a.id);
     const prog = progress?.[a.id];
     const pct = prog ? Math.round((prog.completedCriteria / prog.totalCriteria) * 100) : 0;
 
@@ -108,6 +113,7 @@ export function AchievementList({ achievements, onSelect, completedIds, progress
         <span style={{ width: 16, color: isCompleted ? "var(--success)" : "var(--muted)", fontSize: 14 }}>
           {isCompleted ? "✓" : "○"}
         </span>
+        {isPinned && <span style={{ fontSize: 12 }}>📌</span>}
         <span style={{ flex: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{a.name}</span>
         {a.isMeta && <span className="badge badge-meta">META</span>}
         {showDates && a.completedAt && (

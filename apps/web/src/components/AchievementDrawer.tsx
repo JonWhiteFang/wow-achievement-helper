@@ -1,11 +1,14 @@
 import { useEffect, useState } from "react";
 import { fetchAchievement, fetchHelp, type Achievement, type HelpPayload } from "../lib/api";
+import { getNote, saveNote } from "../lib/pins";
 
 type Props = {
   achievementId: number | null;
   onClose: () => void;
   completedIds?: Set<number>;
   onSelectAchievement?: (id: number) => void;
+  isPinned?: boolean;
+  onTogglePin?: () => void;
 };
 
 type Tab = "details" | "strategy" | "community";
@@ -20,23 +23,26 @@ function AchievementIcon({ src, size = 56 }: { src?: string; size?: number }) {
   return <img src={src} alt="" style={{ ...style, objectFit: "cover" }} onError={() => setFailed(true)} />;
 }
 
-export function AchievementDrawer({ achievementId, onClose, completedIds, onSelectAchievement }: Props) {
+export function AchievementDrawer({ achievementId, onClose, completedIds, onSelectAchievement, isPinned, onTogglePin }: Props) {
   const [achievement, setAchievement] = useState<Achievement | null>(null);
   const [help, setHelp] = useState<HelpPayload | null>(null);
   const [loading, setLoading] = useState(false);
   const [helpLoading, setHelpLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [tab, setTab] = useState<Tab>("details");
+  const [note, setNote] = useState("");
 
   useEffect(() => {
     if (!achievementId) {
       setAchievement(null);
       setHelp(null);
+      setNote("");
       return;
     }
     setLoading(true);
     setError(null);
     setTab("details");
+    setNote(getNote(achievementId));
     fetchAchievement(achievementId)
       .then(setAchievement)
       .catch((e) => setError(e.message))
@@ -71,6 +77,7 @@ export function AchievementDrawer({ achievementId, onClose, completedIds, onSele
             </>
           )}
         </div>
+        {onTogglePin && <button className="btn btn-ghost" onClick={onTogglePin} title={isPinned ? "Unpin" : "Pin"} style={{ padding: "4px 8px" }}>{isPinned ? "📌" : "📍"}</button>}
         <button className="btn btn-ghost" onClick={onClose} style={{ fontSize: 18, padding: "4px 8px" }}>×</button>
       </div>
 
@@ -130,6 +137,17 @@ export function AchievementDrawer({ achievementId, onClose, completedIds, onSele
                     </ul>
                   </>
                 )}
+                <div style={{ marginTop: 16 }}>
+                  <h4 style={{ margin: "0 0 8px", color: "var(--muted)" }}>Notes</h4>
+                  <textarea
+                    value={note}
+                    onChange={(e) => setNote(e.target.value)}
+                    onBlur={() => achievementId && saveNote(achievementId, note)}
+                    placeholder="Add personal notes..."
+                    className="input"
+                    style={{ width: "100%", minHeight: 60, resize: "vertical" }}
+                  />
+                </div>
               </>
             )}
 
