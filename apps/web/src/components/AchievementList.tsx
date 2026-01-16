@@ -7,7 +7,7 @@ type Props = {
   onSelect: (id: number) => void;
   completedIds?: Set<number>;
   progress?: Record<number, { completedCriteria: number; totalCriteria: number }>;
-  filter?: "all" | "completed" | "incomplete";
+  filter?: "all" | "completed" | "incomplete" | "near";
   sort?: "name" | "points" | "completion";
 };
 
@@ -38,7 +38,17 @@ export function AchievementList({ achievements, onSelect, completedIds, progress
 
   let filtered = achievements;
   if (completedIds && filter !== "all") {
-    filtered = filtered.filter((a) => (filter === "completed" ? completedIds.has(a.id) : !completedIds.has(a.id)));
+    if (filter === "completed") {
+      filtered = filtered.filter((a) => completedIds.has(a.id));
+    } else if (filter === "incomplete") {
+      filtered = filtered.filter((a) => !completedIds.has(a.id));
+    } else if (filter === "near" && progress) {
+      filtered = filtered.filter((a) => {
+        if (completedIds.has(a.id)) return false;
+        const p = progress[a.id];
+        return p && p.totalCriteria > 0 && p.completedCriteria / p.totalCriteria >= 0.8;
+      });
+    }
   }
 
   const sorted = [...filtered].sort((a, b) => {

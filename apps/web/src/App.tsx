@@ -42,7 +42,7 @@ function AppContent() {
   const [viewMode, setViewMode] = useState<ViewMode>("single");
   const [charLoading, setCharLoading] = useState(false);
   const [charError, setCharError] = useState<string | null>(null);
-  const [filter, setFilter] = useState<"all" | "completed" | "incomplete">("all");
+  const [filter, setFilter] = useState<"all" | "completed" | "incomplete" | "near">("all");
   const [sort, setSort] = useState<SortMode>("name");
 
   const [auth, setAuth] = useState<AuthStatus>({ loggedIn: false });
@@ -244,6 +244,7 @@ function AppContent() {
               <option value="all">All</option>
               <option value="completed">Done</option>
               <option value="incomplete">Todo</option>
+              <option value="near">{isMobile ? "80%+" : "Near 80%+"}</option>
             </select>
             <select className="select" value={sort} onChange={(e) => setSort(e.target.value as SortMode)} style={{ minWidth: isMobile ? 80 : undefined }}>
               <option value="name">Name</option>

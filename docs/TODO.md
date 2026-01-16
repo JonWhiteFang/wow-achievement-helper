@@ -12,35 +12,7 @@ Remaining tasks and improvements not yet implemented.
 
 ## Medium Priority (Polish)
 
-### 5. Keyboard navigation
-**Current:** Mouse-only interaction
-**Desired:** Full keyboard support
-
-**Implementation:**
-- Arrow keys to navigate achievement list
-- Enter to open drawer
-- Escape to close drawer
-- Tab navigation through UI elements
-- Focus indicators on interactive elements
-
-**Files:** `apps/web/src/components/AchievementList.tsx`, `apps/web/src/App.tsx`
-
----
-
-## Medium Priority (Polish)
-
-### 6. "Near complete" filter
-**Current:** Only completed/incomplete filter
-**Desired:** Filter showing achievements at 80%+ progress
-
-**Implementation:**
-- Add filter option "Near Complete"
-- Calculate progress percentage from criteria
-- Show achievements close to completion
-
----
-
-### 7. Points display in header
+### 2. Points display in header
 **Current:** No points summary
 **Desired:** Show total points earned vs possible (e.g., "12,450 / 28,000 pts")
 
@@ -51,7 +23,7 @@ Remaining tasks and improvements not yet implemented.
 
 ---
 
-### 8. Category completion bars
+### 3. Category completion bars
 **Current:** Categories show count only
 **Desired:** Visual progress bars on category tree nodes
 
@@ -62,7 +34,7 @@ Remaining tasks and improvements not yet implemented.
 
 ---
 
-### 9. "Recently completed" list
+### 4. "Recently completed" list
 **Current:** No way to see recent completions
 **Desired:** Show last 10-20 completed achievements
 
@@ -73,7 +45,7 @@ Remaining tasks and improvements not yet implemented.
 
 ---
 
-### 10. Expansion filter
+### 5. Expansion filter
 **Current:** No expansion filtering
 **Desired:** Filter by expansion (Classic, TBC, Wrath, etc.)
 
@@ -84,7 +56,7 @@ Remaining tasks and improvements not yet implemented.
 
 ---
 
-### 11. "Account-wide only" toggle
+### 6. "Account-wide only" toggle
 **Current:** Shows all achievements
 **Desired:** Filter to show only account-wide achievements
 
@@ -95,7 +67,7 @@ Remaining tasks and improvements not yet implemented.
 
 ---
 
-### 12. Meta achievement highlighting
+### 7. Meta achievement highlighting
 **Current:** Meta achievements look like regular achievements
 **Desired:** Visual distinction + show sub-achievement progress inline
 
@@ -106,7 +78,7 @@ Remaining tasks and improvements not yet implemented.
 
 ---
 
-### 13. Reward filter
+### 8. Reward filter
 **Current:** No reward filtering
 **Desired:** Filter by reward type (title, mount, pet, transmog)
 
@@ -119,7 +91,7 @@ Remaining tasks and improvements not yet implemented.
 
 ## Low Priority (Nice to Have)
 
-### 6. Sentry full integration
+### 1. Sentry full integration
 **Current:** Prepared but not fully wired up
 **Desired:** Full error tracking in production
 
@@ -133,7 +105,7 @@ Remaining tasks and improvements not yet implemented.
 
 ---
 
-### 7. Export/share progress
+### 2. Export/share progress
 **Current:** No way to share or export
 **Desired:** Share link or export to CSV
 
@@ -144,7 +116,7 @@ Remaining tasks and improvements not yet implemented.
 
 ---
 
-### 8. Pins and notes persistence
+### 3. Pins and notes persistence
 **Current:** Mentioned in AGENTS.md but not implemented
 **Desired:** Pin achievements, add personal notes
 
@@ -156,7 +128,7 @@ Remaining tasks and improvements not yet implemented.
 
 ---
 
-### 9. Progress statistics
+### 4. Progress statistics
 **Current:** Just shows count
 **Desired:** Show completion percentage, points earned
 
@@ -167,7 +139,7 @@ Remaining tasks and improvements not yet implemented.
 
 ---
 
-### 14. Dark/light theme toggle
+### 5. Dark/light theme toggle
 **Current:** Dark theme only ("Azeroth Dark")
 **Desired:** Optional light theme
 
@@ -178,7 +150,7 @@ Remaining tasks and improvements not yet implemented.
 
 ---
 
-### 15. Achievement comparison
+### 6. Achievement comparison
 **Current:** Single character view only
 **Desired:** Compare progress between two characters side-by-side
 
@@ -189,7 +161,7 @@ Remaining tasks and improvements not yet implemented.
 
 ---
 
-### 16. "What can I do now" smart filter
+### 7. "What can I do now" smart filter
 **Current:** Shows all incomplete achievements
 **Desired:** Filter to achievements character can currently attempt
 
@@ -200,7 +172,7 @@ Remaining tasks and improvements not yet implemented.
 
 ---
 
-### 17. Wowhead link on each row
+### 8. Wowhead link on each row
 **Current:** Wowhead link only in drawer
 **Desired:** Quick external link icon on list rows
 
@@ -223,6 +195,7 @@ Currently only manifest uses React Query. Character lookups and help fetches sti
 
 ## Completed ✅
 
+- [x] "Near complete" filter (80%+ progress achievements)
 - [x] Achievement icons from Blizzard CDN (list + drawer, with placeholder fallback). **Note:** Requires manifest rebuild after deploy via `/api/admin/build-manifest?reset=true`
 - [x] Curated strategies for 10 more achievements (Glory raids, Keystone Master, exploration, PvP)
 - [x] Mobile responsive layout (slide-in category drawer, full-screen achievement drawer)
