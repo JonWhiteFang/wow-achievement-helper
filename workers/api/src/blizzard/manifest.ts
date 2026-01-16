@@ -126,32 +126,40 @@ export async function buildManifestIncremental(env: Env): Promise<{ done: boolea
       state.phase = "done";
     } else {
       const batch = state.mediaQueue.splice(0, BATCH_SIZE);
-      const mediaMap = new Map<number, string>();
+      const achievementMap = new Map<number, { icon?: string; points?: number }>();
       
       const results = await Promise.all(
         batch.map(async (id) => {
-          const res = await fetch(
-            `${env.BLIZZARD_API_HOST}/data/wow/media/achievement/${id}?namespace=static-eu`,
-            { headers: { Authorization: `Bearer ${token}` } }
-          );
-          if (!res.ok) return null;
-          const data = (await res.json()) as BlizzardMediaResponse;
-          const iconAsset = data.assets?.find((a) => a.key === "icon");
-          return iconAsset ? { id, icon: iconAsset.value } : null;
+          const [mediaRes, detailRes] = await Promise.all([
+            fetch(`${env.BLIZZARD_API_HOST}/data/wow/media/achievement/${id}?namespace=static-eu`, { headers: { Authorization: `Bearer ${token}` } }),
+            fetch(`${env.BLIZZARD_API_HOST}/data/wow/achievement/${id}?namespace=static-eu&locale=en_GB`, { headers: { Authorization: `Bearer ${token}` } }),
+          ]);
+          let icon: string | undefined;
+          let points: number | undefined;
+          if (mediaRes.ok) {
+            const data = (await mediaRes.json()) as BlizzardMediaResponse;
+            icon = data.assets?.find((a) => a.key === "icon")?.value;
+          }
+          if (detailRes.ok) {
+            const data = (await detailRes.json()) as { points?: number };
+            points = data.points;
+          }
+          return { id, icon, points };
         })
       );
 
       for (const r of results) {
-        if (r) mediaMap.set(r.id, r.icon);
+        if (r.icon || r.points !== undefined) achievementMap.set(r.id, { icon: r.icon, points: r.points });
       }
 
       for (const a of state.achievements) {
-        const icon = mediaMap.get(a.id);
-        if (icon) a.icon = icon;
+        const data = achievementMap.get(a.id);
+        if (data?.icon) a.icon = data.icon;
+        if (data?.points !== undefined) a.points = data.points;
       }
 
       await env.SESSIONS.put(BUILD_STATE_KEY, JSON.stringify(state), { expirationTtl: 3600 });
-      return { done: false, progress: `Fetched ${batch.length} icons, ${state.mediaQueue.length} remaining` };
+      return { done: false, progress: `Fetched ${batch.length} details, ${state.mediaQueue.length} remaining` };
     }
   }
 
