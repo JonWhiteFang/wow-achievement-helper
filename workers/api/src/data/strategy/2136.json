@@ -1,0 +1,31 @@
+{
+  "id": 2136,
+  "name": "Glory of the Raider (10 player)",
+  "strategy": [
+    {
+      "title": "Overview",
+      "steps": [
+        "Complete all raid achievements in Naxxramas, Eye of Eternity, and Obsidian Sanctum on 10-player",
+        "Most achievements are soloable at max level",
+        "Rewards: Plagued Proto-Drake mount"
+      ]
+    },
+    {
+      "title": "Naxxramas Tips",
+      "steps": [
+        "The Immortal requires no raid member deaths - go slow and use self-heals",
+        "Arachnophobia: Kill Maexxna within 20 min of pulling Anub'Rekhan - rush spider wing",
+        "Make Quick Werk of Him: High DPS check, save cooldowns for Patchwerk",
+        "Safety Dance: Stay out of green zones on Heigan - learn the pattern"
+      ]
+    },
+    {
+      "title": "Obsidian Sanctum",
+      "steps": [
+        "Twilight Zone: Kill Sartharion with all 3 drakes alive",
+        "At max level, nuke boss before adds overwhelm you",
+        "Use defensive cooldowns when drakes land"
+      ]
+    }
+  ]
+}

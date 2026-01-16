@@ -1,0 +1,31 @@
+{
+  "id": 12401,
+  "name": "Glory of the Ulduar Raider",
+  "strategy": [
+    {
+      "title": "Overview",
+      "steps": [
+        "Complete all hard mode achievements in Ulduar",
+        "Rewards: Ironbound Proto-Drake mount",
+        "Some achievements require specific mechanics, not just DPS"
+      ]
+    },
+    {
+      "title": "Key Achievements",
+      "steps": [
+        "Orbit-uary: Kill Flame Leviathan with all 4 towers active - high damage, burst quickly",
+        "Firefighter: Activate Mimiron hard mode by pressing the red button - complex fight",
+        "One Light in the Darkness: Kill Yogg-Saron with only 1 Keeper assisting",
+        "I Love the Smell of Saronite: Kill 8 Saronite Vapors within 3 seconds on Vezax"
+      ]
+    },
+    {
+      "title": "Tips",
+      "steps": [
+        "Bring a friend for achievements requiring specific positioning",
+        "Watch video guides for Firefighter - many overlapping mechanics",
+        "Yogg-Saron portals still require entering even at max level"
+      ]
+    }
+  ]
+}

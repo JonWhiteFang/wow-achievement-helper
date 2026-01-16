@@ -1,0 +1,32 @@
+{
+  "id": 2257,
+  "name": "Frostbitten",
+  "strategy": [
+    {
+      "title": "Overview",
+      "steps": [
+        "Kill all 23 rare spawns in Northrend zones",
+        "Similar to Bloody Rare but in Northrend",
+        "Time-Lost Proto-Drake is NOT part of this achievement"
+      ]
+    },
+    {
+      "title": "Recommended Addons",
+      "steps": [
+        "SilverDragon or NPCScan - alerts when rare is nearby",
+        "HandyNotes + RareScanner - shows spawn points on map",
+        "TomTom - waypoint navigation to spawn locations"
+      ]
+    },
+    {
+      "title": "Efficient Hunting",
+      "steps": [
+        "Make a circuit through all Northrend zones",
+        "Storm Peaks and Icecrown have multiple rares each",
+        "Use group finder to hop servers for more chances",
+        "Vyragosa shares spawn with Time-Lost - if you see her, kill for achievement",
+        "Some rares are in caves or phased areas - check Wowhead comments"
+      ]
+    }
+  ]
+}

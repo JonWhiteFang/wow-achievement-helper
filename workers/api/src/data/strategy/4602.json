@@ -1,0 +1,31 @@
+{
+  "id": 4602,
+  "name": "Glory of the Icecrown Raider (10 player)",
+  "strategy": [
+    {
+      "title": "Overview",
+      "steps": [
+        "Complete all raid achievements in Icecrown Citadel on 10-player",
+        "Rewards: Bloodbathed Frostbrood Vanquisher mount",
+        "Several achievements require precise execution even at max level"
+      ]
+    },
+    {
+      "title": "Tricky Achievements",
+      "steps": [
+        "Been Waiting a Long Time for This: Let Lich King stack Necrotic Plague to 30 - takes patience",
+        "All You Can Eat: Keep Sindragosa's Mystic Buffet below 5 stacks - hide behind ice tombs",
+        "Portal Jockey: Enter every portal during Valithria Dreamwalker - need a healer",
+        "Neck-Deep in Vile: Kill 4 Vile Spirits in 5 seconds on Lich King"
+      ]
+    },
+    {
+      "title": "Tips",
+      "steps": [
+        "Bring a healer friend for Valithria - she must be healed to full",
+        "For Lich King achievements, control your DPS to extend the fight",
+        "Full Heroic clear also required for the meta"
+      ]
+    }
+  ]
+}

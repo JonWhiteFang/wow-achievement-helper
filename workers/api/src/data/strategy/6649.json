@@ -1,0 +1,33 @@
+{
+  "id": 6649,
+  "name": "Keystone Master",
+  "strategy": [
+    {
+      "title": "How M+ Scoring Works",
+      "steps": [
+        "Each dungeon awards score based on key level and time",
+        "Timing the key gives full score; depleting gives reduced score",
+        "You need 2000+ total rating for Keystone Master",
+        "Both Fortified and Tyrannical weeks count - do each dungeon on both"
+      ]
+    },
+    {
+      "title": "Efficient Path to 2000",
+      "steps": [
+        "Aim for +15 timed on all dungeons on both affix weeks",
+        "Start with dungeons you know well, build confidence",
+        "A +15 timed gives roughly 125 points per dungeon per affix",
+        "8 dungeons x 2 affixes x 125 = 2000 rating"
+      ]
+    },
+    {
+      "title": "Tips for Timing Keys",
+      "steps": [
+        "Learn dungeon routes - use Mythic Dungeon Tools addon",
+        "Communicate kicks and stops with your group",
+        "Bring consumables: food, flasks, potions, health stones",
+        "Use Raider.IO addon to find experienced groups"
+      ]
+    }
+  ]
+}

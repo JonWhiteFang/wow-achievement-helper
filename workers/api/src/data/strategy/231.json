@@ -1,0 +1,41 @@
+{
+  "id": 231,
+  "name": "Battlemaster",
+  "strategy": [
+    {
+      "title": "Overview",
+      "steps": [
+        "Complete all meta achievements for classic battlegrounds",
+        "Includes: Alterac Valley, Arathi Basin, Eye of the Storm, Warsong Gulch",
+        "One of the longest PvP grinds in the game"
+      ]
+    },
+    {
+      "title": "Approach",
+      "steps": [
+        "Focus on one battleground at a time",
+        "Read each sub-achievement carefully - some have specific requirements",
+        "Some achievements need coordination (premade groups help)",
+        "Track your progress in the achievement panel"
+      ]
+    },
+    {
+      "title": "Difficult Achievements",
+      "steps": [
+        "Warsong Gulch Perfection: Win 3-0 without dying",
+        "We Had It All Along: Win AB by 10 points or less",
+        "The Grim Reaper: Get 30 HKs in a single AV",
+        "Stormtrooper: Kill 5 flag carriers in a single EotS"
+      ]
+    },
+    {
+      "title": "Tips",
+      "steps": [
+        "Join a PvP guild or community for premade groups",
+        "Some achievements are easier during BG bonus weekends",
+        "Certain achievements may require specific specs or classes",
+        "Be patient - this takes months of dedicated PvP"
+      ]
+    }
+  ]
+}

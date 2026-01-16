@@ -1,0 +1,32 @@
+{
+  "id": 1312,
+  "name": "Bloody Rare",
+  "strategy": [
+    {
+      "title": "Overview",
+      "steps": [
+        "Kill all 20 rare spawns in Outland zones",
+        "Rares have long respawn timers (6-24 hours typically)",
+        "Can take days or weeks of camping"
+      ]
+    },
+    {
+      "title": "Recommended Addons",
+      "steps": [
+        "SilverDragon or NPCScan - alerts when rare is nearby",
+        "HandyNotes + RareScanner - shows spawn points on map",
+        "TomTom - waypoint navigation to spawn locations"
+      ]
+    },
+    {
+      "title": "Efficient Hunting",
+      "steps": [
+        "Make a circuit through all Outland zones",
+        "Check each spawn point, then move to next zone",
+        "Use group finder to hop servers for more chances",
+        "Early morning server time often has less competition",
+        "Some rares path around - check the full route"
+      ]
+    }
+  ]
+}

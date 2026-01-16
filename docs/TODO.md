@@ -12,21 +12,6 @@ Remaining tasks and improvements not yet implemented.
 
 ## Medium Priority (Polish)
 
-### 2. Add more curated strategies
-**Current:** Only 3 example achievements have curated strategies (7520, 2144, 40393)
-**Desired:** Cover popular/difficult achievements
-
-**Suggested achievements to add:**
-- Glory of the Raider achievements
-- Keystone Master achievements  
-- What a Long, Strange Trip meta sub-achievements
-- Exploration achievements with tricky locations
-- PvP achievements with specific strategies
-
-**Files:** `workers/api/src/data/strategy/*.json`
-
----
-
 ### 4. Mobile responsive polish
 **Current:** 3-pane layout doesn't adapt well to mobile
 **Desired:** Responsive layout with slide-in panels
@@ -253,6 +238,7 @@ Currently only manifest uses React Query. Character lookups and help fetches sti
 ## Completed ✅
 
 - [x] Achievement icons from Blizzard CDN (list + drawer, with placeholder fallback). **Note:** Requires manifest rebuild after deploy via `/api/admin/build-manifest?reset=true`
+- [x] Curated strategies for 10 more achievements (Glory raids, Keystone Master, exploration, PvP)
 - [x] Realm selector dropdown (fetches EU realms from Blizzard API, cached in KV)
 - [x] Battle.net sign-in indicator (shows battletag when logged in)
 - [x] Character selector for logged-in users ("My Characters" button)

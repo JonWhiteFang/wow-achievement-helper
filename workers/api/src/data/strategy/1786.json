@@ -1,0 +1,32 @@
+{
+  "id": 1786,
+  "name": "School of Hard Knocks",
+  "strategy": [
+    {
+      "title": "Important Note",
+      "steps": [
+        "This achievement is NO LONGER required for the meta achievement",
+        "You can get What a Long Strange Trip without this",
+        "Only attempt if you want the achievement itself"
+      ]
+    },
+    {
+      "title": "Requirements (with orphan out)",
+      "steps": [
+        "Arathi Basin: Assault a flag (right-click to start capture)",
+        "Alterac Valley: Assault a tower (right-click the flag inside)",
+        "Warsong Gulch: Return a dropped enemy flag",
+        "Eye of the Storm: Capture the center flag"
+      ]
+    },
+    {
+      "title": "Tips",
+      "steps": [
+        "Queue during Children's Week when others are also trying",
+        "Communicate in BG chat - many will help each other",
+        "WSG is hardest - need enemy to drop flag near you",
+        "EotS - go mid immediately at start, grab flag first"
+      ]
+    }
+  ]
+}

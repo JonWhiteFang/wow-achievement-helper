@@ -1,0 +1,32 @@
+{
+  "id": 972,
+  "name": "Sinister Calling",
+  "strategy": [
+    {
+      "title": "Requirements",
+      "steps": [
+        "Obtain a Sinister Squashling pet",
+        "Obtain a Hallowed Helm",
+        "Both are Hallow's End holiday items"
+      ]
+    },
+    {
+      "title": "How to Obtain",
+      "steps": [
+        "Kill the Headless Horseman daily in Scarlet Monastery (queue via Dungeon Finder)",
+        "Both items can drop from his loot bag",
+        "Also available from Tricky Treat bags (trick or treat at innkeepers)",
+        "Can take multiple years if unlucky - keep trying daily"
+      ]
+    },
+    {
+      "title": "Tips",
+      "steps": [
+        "Run on all your alts daily for more chances",
+        "Headless Horseman is available at level 10+",
+        "Event runs late October each year",
+        "The mount (Horseman's Reins) is separate and very rare"
+      ]
+    }
+  ]
+}

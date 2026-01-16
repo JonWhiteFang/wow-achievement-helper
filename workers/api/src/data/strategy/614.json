@@ -1,0 +1,33 @@
+{
+  "id": 614,
+  "name": "Khan",
+  "strategy": [
+    {
+      "title": "Requirements",
+      "steps": [
+        "Win 100 battles in Alterac Valley",
+        "Win 100 battles in Arathi Basin",
+        "Win 100 battles in Eye of the Storm",
+        "Win 100 battles in Warsong Gulch"
+      ]
+    },
+    {
+      "title": "Efficient Grinding",
+      "steps": [
+        "Focus on one battleground at a time",
+        "Queue during that BG's bonus weekend for faster queues",
+        "Play during peak hours for shorter queue times",
+        "Join as a group for better coordination and win rate"
+      ]
+    },
+    {
+      "title": "Tips",
+      "steps": [
+        "AV is often fastest due to PvE objectives",
+        "AB and EotS reward map control - stick with your team",
+        "WSG can be slow if games stall - bring a flag carrier class",
+        "Track progress with /statistics or achievement panel"
+      ]
+    }
+  ]
+}
