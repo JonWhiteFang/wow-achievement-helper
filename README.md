@@ -2,14 +2,14 @@
 
 A World of Warcraft achievement browser and tracker for EU Retail.
 
-## Features (planned)
+## Features
 
-- Browse achievement catalogue by category
-- Search achievements
-- View completion status for any public character
-- Login with Battle.net to see your own characters
-- Merge view across multiple characters for account-wide progress
-- Strategy tips and community comments
+- ✅ Browse achievement catalogue by category (deep nested tree)
+- ✅ Fuzzy search achievements
+- ✅ View completion status for any public character
+- ✅ Login with Battle.net to see your own characters
+- ✅ Merge view across multiple characters for account-wide progress
+- ✅ Strategy tips and community comments
 
 ## Tech Stack
 
@@ -27,6 +27,12 @@ npm run dev:web
 
 # Run worker (http://localhost:8787)
 npm run dev:worker
+
+# Run tests
+npm run test
+
+# Typecheck
+npm run typecheck
 ```
 
 ## Links
@@ -36,4 +42,10 @@ npm run dev:worker
 
 ## Docs
 
-See `/docs` for architecture, API spec, and implementation plan.
+See `/docs` for architecture, API spec, and implementation plan:
+
+- `API_SPEC.md` — endpoint shapes and error conventions
+- `ARCHITECTURE.md` — flows, caching, security model
+- `UX_SPEC.md` — UI behaviors and layout
+- `IMPLEMENTATION_PLAN.md` — milestones (all complete)
+- `TODO.md` — remaining polish items

@@ -9,6 +9,20 @@ EU-only: All Blizzard calls MUST use EU region endpoints/namespaces.
 
 ---
 
+## Health Check
+
+### `GET /healthz`
+
+Simple health check endpoint.
+
+Response 200:
+
+```json
+{ "ok": true }
+```
+
+---
+
 ## Auth Endpoints
 
 ### `GET /auth/login`
@@ -74,9 +88,47 @@ Response 200:
 
 ## Blizzard Game Data Endpoints
 
+### `GET /api/manifest`
+
+Returns the full achievement catalogue in a single request: nested category tree + all achievement summaries.
+
+This is the **preferred endpoint** for initial data loading. Built incrementally via scheduled worker and cached in KV.
+
+Caching:
+
+- KV: 24h
+- Response: 1h + SWR
+
+Response 200:
+
+```json
+{
+  "categories": [
+    {
+      "id": 92,
+      "name": "General",
+      "children": [{ "id": 96, "name": "Quests", "children": [] }]
+    }
+  ],
+  "achievements": [
+    { "id": 12345, "name": "Achievement Name", "points": 10, "categoryId": 92 }
+  ],
+  "builtAt": "2026-01-14T00:00:00Z"
+}
+```
+
+Response 503 (manifest still building):
+
+```json
+{
+  "error": "NOT_READY",
+  "message": "Manifest is being built, please try again later"
+}
+```
+
 ### `GET /api/categories`
 
-Returns the full achievement category tree (or sufficient to build it).
+Legacy endpoint. Returns the category tree (proxies manifest data).
 
 Caching:
 
@@ -93,6 +145,7 @@ Response 200 (example shape):
       "children": [{ "id": 96, "name": "Quests", "children": [] }]
     }
   ],
+  "achievements": [...],
   "generatedAt": "2026-01-14T00:00:00Z"
 }
 ```
@@ -296,6 +349,39 @@ Common error codes:
 - `UNAUTHENTICATED`
 - `NOT_PUBLIC`
 - `NOT_FOUND`
+- `NOT_READY`
 - `RATE_LIMITED`
 - `UPSTREAM_ERROR`
+- `BLIZZARD_ERROR`
+- `BUILD_ERROR`
 - `INVALID_INPUT`
+
+---
+
+## Admin Endpoints
+
+### `POST /api/admin/build-manifest`
+
+Triggers one iteration of the incremental manifest build. Call repeatedly until `done: true`.
+
+Query params:
+
+- `?reset=true` — clears build state and cached manifest
+
+Response 200:
+
+```json
+{
+  "done": false,
+  "progress": "Building category 15 of 120"
+}
+```
+
+Response 200 (complete):
+
+```json
+{
+  "done": true,
+  "progress": "Complete"
+}
+```

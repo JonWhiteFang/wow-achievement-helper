@@ -15,6 +15,7 @@
 - Aggregates help content (strategy + community tips) from providers
 - Applies caching + normalization
 - Sets session cookies (HTTPOnly)
+- Runs scheduled tasks (manifest building)
 
 ## Token Modes
 
@@ -71,6 +72,13 @@ Worker responsibilities:
 
 ## Caching Strategy
 
+### Manifest (full catalogue)
+
+- Built incrementally via scheduled worker or admin endpoint
+- Stored in KV with 24h TTL
+- Response cache: 1h + SWR
+- Single request loads entire category tree + achievement index
+
 ### Blizzard Game Data (slow-changing)
 
 - Cache aggressively (24h–7d)
@@ -78,14 +86,22 @@ Worker responsibilities:
 
 ### Blizzard Profile (character achievements)
 
-- Cache short (30s–5m depending on endpoint)
-- Provide “Refresh” button in UI for user-triggered refetch
+- Cache short (5m)
+- Provide "Refresh" button in UI for user-triggered refetch
 
 ### Help Providers (strategy/community)
 
-- Cache per achievement (6–24h)
-- Provide “Refresh help” button
+- Cache per achievement (12h)
+- Provide "Refresh help" button
 - Always include source deep links
+
+## Scheduled Worker
+
+The Worker exports a `scheduled` handler that runs periodically (configured via `wrangler.toml` cron triggers):
+
+- Runs one iteration of incremental manifest build
+- Builds category tree and achievement index in batches to avoid timeout
+- Progress stored in KV between invocations
 
 ## Security Model
 
@@ -96,3 +112,22 @@ Worker responsibilities:
 - Strict CORS to allow only GitHub Pages origin
 - Sanitize all third-party content; do not render untrusted HTML without sanitization
 - Limit logged-in scopes to minimum required
+
+## Frontend Architecture
+
+### State Management
+
+- React Query for server state (manifest, help content)
+- Local state for UI (selected category, drawer open/close)
+- localStorage for persistence (saved characters, merge selections, recent categories)
+
+### Routing
+
+- React Router with hash routing for GitHub Pages compatibility
+- Routes: `/#/`, `/#/achievement/:id`, `/#/category/:id`
+
+### Performance
+
+- List virtualization with react-window
+- Fuzzy search with Fuse.js (client-side, no server round-trips)
+- Manifest loaded once, cached via React Query
