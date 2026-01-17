@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { fetchAchievement, fetchHelp, type Achievement, type HelpPayload } from "../lib/api";
 import { getNote, saveNote } from "../lib/pins";
+import { AchievementDrawerSkeleton } from "./Skeleton";
 
 type Props = {
   achievementId: number | null;
@@ -56,11 +57,19 @@ export function AchievementDrawer({ achievementId, onClose, completedIds, onSele
 
   const errorMessage = error instanceof Error ? error.message : error ? String(error) : null;
 
+  if (loading) {
+    return (
+      <div style={{ position: "relative" }}>
+        <button className="btn btn-ghost" onClick={onClose} style={{ position: "absolute", top: 16, right: 16, fontSize: 18, padding: "4px 8px" }}>×</button>
+        <AchievementDrawerSkeleton />
+      </div>
+    );
+  }
+
   return (
     <div style={{ padding: 16, height: "100%", display: "flex", flexDirection: "column" }}>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 12 }}>
         <div style={{ display: "flex", gap: 12, alignItems: "flex-start" }}>
-          {loading && <p className="text-muted">Loading...</p>}
           {errorMessage && <p className="text-danger">{errorMessage}</p>}
           {achievement && (
             <>
