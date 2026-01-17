@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { fetchAchievement, fetchHelp, type Achievement, type HelpPayload } from "../lib/api";
 import { getNote, saveNote } from "../lib/pins";
 
@@ -24,49 +25,43 @@ function AchievementIcon({ src, size = 56 }: { src?: string; size?: number }) {
 }
 
 export function AchievementDrawer({ achievementId, onClose, completedIds, onSelectAchievement, isPinned, onTogglePin }: Props) {
-  const [achievement, setAchievement] = useState<Achievement | null>(null);
-  const [help, setHelp] = useState<HelpPayload | null>(null);
-  const [loading, setLoading] = useState(false);
-  const [helpLoading, setHelpLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
   const [tab, setTab] = useState<Tab>("details");
   const [note, setNote] = useState("");
 
+  const { data: achievement, isLoading: loading, error } = useQuery<Achievement>({
+    queryKey: ["achievement", achievementId],
+    queryFn: () => fetchAchievement(achievementId!),
+    enabled: !!achievementId,
+    staleTime: 24 * 60 * 60 * 1000, // 24 hours
+  });
+
+  const needsHelp = (tab === "strategy" || tab === "community") && !!achievementId;
+  const { data: help, isLoading: helpLoading } = useQuery<HelpPayload>({
+    queryKey: ["help", achievementId],
+    queryFn: () => fetchHelp(achievementId!, 10),
+    enabled: needsHelp,
+    staleTime: 12 * 60 * 60 * 1000, // 12 hours
+  });
+
   useEffect(() => {
-    if (!achievementId) {
-      setAchievement(null);
-      setHelp(null);
+    if (achievementId) {
+      setTab("details");
+      setNote(getNote(achievementId));
+    } else {
       setNote("");
-      return;
     }
-    setLoading(true);
-    setError(null);
-    setTab("details");
-    setNote(getNote(achievementId));
-    fetchAchievement(achievementId)
-      .then(setAchievement)
-      .catch((e) => setError(e.message))
-      .finally(() => setLoading(false));
   }, [achievementId]);
 
-  useEffect(() => {
-    if ((tab === "strategy" || tab === "community") && achievementId && help?.achievementId !== achievementId) {
-      setHelpLoading(true);
-      fetchHelp(achievementId)
-        .then(setHelp)
-        .catch(() => setHelp({ achievementId, strategy: [], comments: [], sources: [] }))
-        .finally(() => setHelpLoading(false));
-    }
-  }, [tab, achievementId]);
-
   if (!achievementId) return null;
+
+  const errorMessage = error instanceof Error ? error.message : error ? String(error) : null;
 
   return (
     <div style={{ padding: 16, height: "100%", display: "flex", flexDirection: "column" }}>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 12 }}>
         <div style={{ display: "flex", gap: 12, alignItems: "flex-start" }}>
           {loading && <p className="text-muted">Loading...</p>}
-          {error && <p className="text-danger">{error}</p>}
+          {errorMessage && <p className="text-danger">{errorMessage}</p>}
           {achievement && (
             <>
               <AchievementIcon src={achievement.icon} size={56} />
