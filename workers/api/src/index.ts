@@ -218,7 +218,7 @@ const worker = {
     return response;
   },
 
-  async scheduled(_controller: ScheduledController, env: Env, _ctx: ExecutionContext): Promise<void> {
+  async scheduled(_controller: ScheduledController, env: Env): Promise<void> {
     // Run single iteration of manifest build
     const result = await buildManifestIncremental(env);
     console.log(`Manifest build: ${result.progress}`);

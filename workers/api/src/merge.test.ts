@@ -1,5 +1,4 @@
 import { describe, it, expect } from "vitest";
-import type { MergeRequest } from "./merge";
 
 // Test the merge logic directly (without network calls)
 describe("merge logic", () => {
@@ -104,7 +103,7 @@ describe("input validation", () => {
 
 describe("error handling", () => {
   it("handles no data scenario", () => {
-    const results: any[] = [];
+    const results: unknown[] = [];
     
     expect(() => {
       if (results.length === 0) {

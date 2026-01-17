@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { buildCategoryExpansionMap, type Expansion } from "./expansions";
+import { buildCategoryExpansionMap } from "./expansions";
 import type { Category } from "./api";
 
 describe("buildCategoryExpansionMap", () => {

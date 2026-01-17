@@ -29,7 +29,7 @@ export const wowheadProvider: HelpProvider = {
         comments,
         sources: [{ name: "Wowhead", url }],
       };
-    } catch (err) {
+    } catch {
       // Return empty comments with source link on any error (timeout, network, parse)
       return { comments: [], sources: [{ name: "Wowhead", url }] };
     }
@@ -41,9 +41,9 @@ function extractComments(html: string, top: number): HelpPayload["comments"] {
 
   try {
     // Look for comment data in the page - Wowhead embeds comments in JavaScript
-    const commentPattern = /\"body\"\s*:\s*\"([^\"]*(?:\\.[^\"]*)*)\"/g;
-    const userPattern = /\"user\"\s*:\s*\"([^\"]+)\"/g;
-    const ratingPattern = /\"rating\"\s*:\s*(-?\d+)/g;
+    const commentPattern = /"body"\s*:\s*"([^"]*(?:\\.[^"]*)*)"/g;
+    const userPattern = /"user"\s*:\s*"([^"]+)"/g;
+    const ratingPattern = /"rating"\s*:\s*(-?\d+)/g;
 
     const bodies: string[] = [];
     const users: string[] = [];

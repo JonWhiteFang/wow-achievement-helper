@@ -87,9 +87,6 @@ test.describe("Meta Achievement Highlighting", () => {
       const subButtonCount = await subAchievementButton.count();
       
       if (subButtonCount > 0) {
-        // Get the text before clicking
-        const subAchievementName = await subAchievementButton.textContent();
-        
         // Click the sub-achievement
         await subAchievementButton.click();
 

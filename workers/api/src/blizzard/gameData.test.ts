@@ -80,7 +80,7 @@ describe("fetchAchievement childAchievements parsing", () => {
   });
 
   it("handles achievements with no child_criteria", () => {
-    const mockData = {
+    const mockData: { criteria: { id: number; description: string; amount: number; child_criteria?: unknown[] } } = {
       criteria: {
         id: 1,
         description: "Single criterion",
@@ -92,7 +92,7 @@ describe("fetchAchievement childAchievements parsing", () => {
     const criteria: { id: number; description: string; amount: number }[] = [];
 
     if (mockData.criteria) {
-      if ((mockData.criteria as any).child_criteria) {
+      if (mockData.criteria.child_criteria) {
         // Has child_criteria
       } else {
         criteria.push({
