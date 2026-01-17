@@ -1,5 +1,5 @@
 import { FixedSizeList as List } from "react-window";
-import { useRef, useEffect, useState } from "react";
+import { useRef, useEffect, useState, useCallback } from "react";
 import type { AchievementSummary } from "../lib/api";
 import { formatCompletionDate } from "../lib/dates";
 
@@ -33,7 +33,9 @@ function AchievementIcon({ src, size = 20 }: { src?: string; size?: number }) {
 
 export function AchievementList({ achievements, onSelect, completedIds, compareCompletedIds, progress, filter = "all", sort = "name", showDates, accountWideOnly, pinnedIds, onTogglePin }: Props) {
   const containerRef = useRef<HTMLDivElement>(null);
+  const listRef = useRef<List>(null);
   const [height, setHeight] = useState(400);
+  const [focusedIndex, setFocusedIndex] = useState(-1);
 
   useEffect(() => {
     const update = () => {
@@ -74,6 +76,49 @@ export function AchievementList({ achievements, onSelect, completedIds, compareC
     return a.name.localeCompare(b.name);
   });
 
+  // Reset focus when list changes
+  useEffect(() => {
+    setFocusedIndex(-1);
+  }, [achievements, filter, sort, accountWideOnly]);
+
+  const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
+    if (sorted.length === 0) return;
+
+    switch (e.key) {
+      case "ArrowDown":
+        e.preventDefault();
+        setFocusedIndex((prev) => {
+          const next = prev < sorted.length - 1 ? prev + 1 : prev;
+          listRef.current?.scrollToItem(next, "smart");
+          return next;
+        });
+        break;
+      case "ArrowUp":
+        e.preventDefault();
+        setFocusedIndex((prev) => {
+          const next = prev > 0 ? prev - 1 : 0;
+          listRef.current?.scrollToItem(next, "smart");
+          return next;
+        });
+        break;
+      case "Enter":
+        if (focusedIndex >= 0 && focusedIndex < sorted.length) {
+          onSelect(sorted[focusedIndex].id);
+        }
+        break;
+      case "Home":
+        e.preventDefault();
+        setFocusedIndex(0);
+        listRef.current?.scrollToItem(0);
+        break;
+      case "End":
+        e.preventDefault();
+        setFocusedIndex(sorted.length - 1);
+        listRef.current?.scrollToItem(sorted.length - 1);
+        break;
+    }
+  }, [sorted, focusedIndex, onSelect]);
+
   if (sorted.length === 0) {
     return <div style={{ padding: 16, color: "var(--muted)" }}>No achievements found</div>;
   }
@@ -83,6 +128,7 @@ export function AchievementList({ achievements, onSelect, completedIds, compareC
     const isCompleted = completedIds?.has(a.id);
     const isCompareCompleted = compareCompletedIds?.has(a.id);
     const isPinned = pinnedIds?.has(a.id);
+    const isFocused = index === focusedIndex;
     const prog = progress?.[a.id];
     const pct = prog ? Math.round((prog.completedCriteria / prog.totalCriteria) * 100) : 0;
 
@@ -104,12 +150,16 @@ export function AchievementList({ achievements, onSelect, completedIds, compareC
           padding: "0 16px",
           border: "none",
           borderBottom: "1px solid var(--border)",
-          background: "transparent",
+          background: isFocused ? "var(--panel-2)" : "transparent",
           color: "var(--text)",
           cursor: "pointer",
+          outline: isFocused ? "2px solid var(--accent)" : "none",
+          outlineOffset: -2,
         }}
         className={a.isMeta ? "achievement-meta" : ""}
         onClick={() => onSelect(a.id)}
+        onMouseEnter={() => setFocusedIndex(index)}
+        tabIndex={-1}
       >
         <AchievementIcon src={a.icon} size={20} />
         {compareCompletedIds ? (
@@ -153,8 +203,16 @@ export function AchievementList({ achievements, onSelect, completedIds, compareC
   };
 
   return (
-    <div ref={containerRef} style={{ height: "100%" }}>
-      <List height={height} itemCount={sorted.length} itemSize={ROW_HEIGHT} width="100%">
+    <div 
+      ref={containerRef} 
+      style={{ height: "100%" }} 
+      tabIndex={0} 
+      onKeyDown={handleKeyDown}
+      onFocus={() => { if (focusedIndex < 0 && sorted.length > 0) setFocusedIndex(0); }}
+      role="listbox"
+      aria-label="Achievement list"
+    >
+      <List ref={listRef} height={height} itemCount={sorted.length} itemSize={ROW_HEIGHT} width="100%">
         {Row}
       </List>
     </div>
