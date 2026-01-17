@@ -40,6 +40,8 @@ type Props = {
   onShowCompareSelector: () => void;
   onExitCompareMode: () => void;
   onToggleCategories: () => void;
+  // Search
+  isSearching?: boolean;
   // Auth/theme
   auth: AuthStatus;
   onLogout: () => void;
@@ -53,6 +55,7 @@ export function Header({
   filter, onFilterChange, compareFilter, onCompareFilterChange, sort, onSortChange,
   expansion, onExpansionChange, rewardFilter, onRewardFilterChange, accountWideOnly, onAccountWideOnlyChange,
   onCharacterLookup, onClearCharacter, onShowCharSelector, onShowCompareSelector, onExitCompareMode, onToggleCategories,
+  isSearching,
   auth, onLogout, theme, onToggleTheme,
 }: Props) {
   const hasProgress = charProgress || mergeResult;
@@ -63,14 +66,19 @@ export function Header({
       <h1 style={{ margin: 0, fontSize: isMobile ? 16 : 18, color: "var(--accent)", flex: isMobile ? "1 1 auto" : "none" }}>WoW Achievements</h1>
       
       {!isMobile && (
-        <input
-          type="search"
-          placeholder="Search achievements..."
-          value={searchQuery}
-          onChange={(e) => onSearchChange(e.target.value)}
-          className="input"
-          style={{ width: 200 }}
-        />
+        <div style={{ position: "relative" }}>
+          <input
+            type="search"
+            placeholder="Search achievements..."
+            value={searchQuery}
+            onChange={(e) => onSearchChange(e.target.value)}
+            className="input"
+            style={{ width: 200, paddingRight: isSearching ? 28 : undefined }}
+          />
+          {isSearching && (
+            <span style={{ position: "absolute", right: 8, top: "50%", transform: "translateY(-50%)", color: "var(--muted)", fontSize: 12 }}>...</span>
+          )}
+        </div>
       )}
       
       <CharacterLookup
@@ -168,17 +176,20 @@ export function Header({
   );
 }
 
-export function MobileSearchBar({ searchQuery, onSearchChange }: { searchQuery: string; onSearchChange: (q: string) => void }) {
+export function MobileSearchBar({ searchQuery, onSearchChange, isSearching }: { searchQuery: string; onSearchChange: (q: string) => void; isSearching?: boolean }) {
   return (
-    <div style={{ padding: "8px 12px", borderBottom: "1px solid var(--border)" }}>
+    <div style={{ padding: "8px 12px", borderBottom: "1px solid var(--border)", position: "relative" }}>
       <input
         type="search"
         placeholder="Search achievements..."
         value={searchQuery}
         onChange={(e) => onSearchChange(e.target.value)}
         className="input"
-        style={{ width: "100%" }}
+        style={{ width: "100%", paddingRight: isSearching ? 28 : undefined }}
       />
+      {isSearching && (
+        <span style={{ position: "absolute", right: 20, top: "50%", transform: "translateY(-50%)", color: "var(--muted)", fontSize: 12 }}>...</span>
+      )}
     </div>
   );
 }

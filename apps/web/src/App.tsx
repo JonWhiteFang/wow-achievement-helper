@@ -144,7 +144,7 @@ function AppContent() {
     filters.resetFilters();
   };
 
-  const searchResults = useSearch(categoryFiltered, searchQuery);
+  const { results: searchResults, isSearching } = useSearch(categoryFiltered, searchQuery);
   const totalPoints = calculatePoints(achievements, completedIds);
   const sectionPoints = calculatePoints(searchResults, completedIds);
 
@@ -201,13 +201,14 @@ function AppContent() {
         onShowCompareSelector={() => setShowCompareSelector(true)}
         onExitCompareMode={character.exitCompareMode}
         onToggleCategories={() => setShowCategories(!showCategories)}
+        isSearching={isSearching}
         auth={appState.auth}
         onLogout={appState.handleLogout}
         theme={appState.theme}
         onToggleTheme={appState.toggleTheme}
       />
 
-      {isMobile && <MobileSearchBar searchQuery={searchQuery} onSearchChange={setSearchQuery} />}
+      {isMobile && <MobileSearchBar searchQuery={searchQuery} onSearchChange={setSearchQuery} isSearching={isSearching} />}
 
       {appState.sessionExpired && (
         <div style={{ padding: "8px 16px", background: "rgba(210,153,34,0.15)", color: "var(--warning)", display: "flex", justifyContent: "space-between", alignItems: "center" }}>

@@ -1,5 +1,5 @@
 import Fuse from "fuse.js";
-import { useMemo } from "react";
+import { useMemo, useState, useEffect } from "react";
 import type { AchievementSummary } from "./api";
 
 const fuseOptions = {
@@ -8,11 +8,28 @@ const fuseOptions = {
   ignoreLocation: true,
 };
 
-export function useSearch(achievements: AchievementSummary[], query: string): AchievementSummary[] {
-  const fuse = useMemo(() => new Fuse(achievements, fuseOptions), [achievements]);
+const DEBOUNCE_MS = 300;
 
-  return useMemo(() => {
-    if (!query.trim()) return achievements;
-    return fuse.search(query).map((r) => r.item);
-  }, [fuse, query, achievements]);
+export function useSearch(achievements: AchievementSummary[], query: string): { results: AchievementSummary[]; isSearching: boolean } {
+  const fuse = useMemo(() => new Fuse(achievements, fuseOptions), [achievements]);
+  const [debouncedQuery, setDebouncedQuery] = useState(query);
+  const [isSearching, setIsSearching] = useState(false);
+
+  useEffect(() => {
+    if (query !== debouncedQuery) {
+      setIsSearching(true);
+      const timer = setTimeout(() => {
+        setDebouncedQuery(query);
+        setIsSearching(false);
+      }, DEBOUNCE_MS);
+      return () => clearTimeout(timer);
+    }
+  }, [query, debouncedQuery]);
+
+  const results = useMemo(() => {
+    if (!debouncedQuery.trim()) return achievements;
+    return fuse.search(debouncedQuery).map((r) => r.item);
+  }, [fuse, debouncedQuery, achievements]);
+
+  return { results, isSearching };
 }
