@@ -31,7 +31,7 @@ function AchievementIcon({ src, size = 20 }: { src?: string; size?: number }) {
   return <img src={src} alt="" loading="lazy" style={{ ...style, objectFit: "cover" }} onError={() => setFailed(true)} />;
 }
 
-export function AchievementList({ achievements, onSelect, completedIds, compareCompletedIds, progress, filter = "all", sort = "name", showDates, accountWideOnly, pinnedIds, onTogglePin }: Props) {
+export function AchievementList({ achievements, onSelect, completedIds, compareCompletedIds, progress, filter = "all", sort = "name", showDates, accountWideOnly, pinnedIds }: Props) {
   const containerRef = useRef<HTMLDivElement>(null);
   const listRef = useRef<List>(null);
   const [height, setHeight] = useState(400);

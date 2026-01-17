@@ -1,4 +1,4 @@
-import type { Category, AchievementSummary } from "../lib/api";
+import type { AchievementSummary } from "../lib/api";
 import type { ViewMode, FilterMode, SortMode } from "../hooks";
 import { formatPoints } from "../lib/points";
 import { AchievementList } from "./AchievementList";

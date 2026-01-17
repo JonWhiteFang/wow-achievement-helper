@@ -1,6 +1,6 @@
 import type { Category, AchievementSummary } from "../lib/api";
 import type { RecentCategory } from "../lib/storage";
-import { CategoryTree, RECENT_CATEGORY_ID } from "./CategoryTree";
+import { CategoryTree } from "./CategoryTree";
 import { ProgressStats } from "./ProgressStats";
 
 type Props = {
