@@ -12,6 +12,7 @@ import { MainContent } from "./components/MainContent";
 import { AchievementDrawer } from "./components/AchievementDrawer";
 import { CharacterLookup } from "./components/CharacterLookup";
 import { CharacterSelector } from "./components/CharacterSelector";
+import { AchievementListSkeleton } from "./components/Skeleton";
 import { RECENT_CATEGORY_ID } from "./components/CategoryTree";
 
 function useIsMobile() {
@@ -147,7 +148,14 @@ function AppContent() {
   const totalPoints = calculatePoints(achievements, completedIds);
   const sectionPoints = calculatePoints(searchResults, completedIds);
 
-  if (loading) return <div style={{ padding: 32, color: "var(--muted)" }}>Loading achievements...</div>;
+  if (loading) return (
+    <div style={{ display: "flex", flexDirection: "column", height: "100vh" }}>
+      <header style={{ padding: "12px 16px", background: "var(--panel)", borderBottom: "1px solid var(--border)" }}>
+        <h1 style={{ margin: 0, fontSize: 18, color: "var(--accent)" }}>WoW Achievements</h1>
+      </header>
+      <AchievementListSkeleton count={12} />
+    </div>
+  );
   if (error) return <div style={{ padding: 32, color: "var(--danger)" }}>Error: {(error as Error).message}</div>;
 
   const sidebarProps = {
